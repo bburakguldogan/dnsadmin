@@ -522,7 +522,6 @@ async function fetchNodes() {
           </div>
         </div>
       `;
-      `;
     }).join('');
 
     // Attach copy actions
@@ -644,7 +643,6 @@ async function fetchServers() {
             </div>
           </div>
         </div>
-      `;
       `;
     }).join('');
 
