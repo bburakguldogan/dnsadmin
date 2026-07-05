@@ -111,15 +111,28 @@ else
 fi
 
 install_nodejs() {
+  NEED_INSTALL=0
   if ! command -v node &>/dev/null; then
-    echo "Installing Node.js & npm..."
+    NEED_INSTALL=1
+  else
+    # Check current Node version
+    CURRENT_VERSION=$(node -v | cut -d'v' -f2 | cut -d'.' -f1)
+    if [ "$CURRENT_VERSION" -lt 18 ]; then
+      echo "Found outdated Node.js version: v$CURRENT_VERSION. Upgrading to Node.js v20..."
+      NEED_INSTALL=1
+    fi
+  fi
+
+  if [ "$NEED_INSTALL" -eq 1 ]; then
+    echo "Installing modern Node.js & npm..."
     if [ "$PKG_MAN" == "apt" ]; then
-      apt-get update
-      apt-get install -y nodejs npm
+      curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
+      apt-get install -y nodejs
     elif [ "$PKG_MAN" == "dnf" ] || [ "$PKG_MAN" == "yum" ]; then
-      $PKG_MAN install -y nodejs npm
+      curl -fsSL https://rpm.nodesource.com/setup_20.x | bash -
+      $PKG_MAN install -y nodejs
     else
-      echo "Error: Node.js is not installed. Please install Node.js manually."
+      echo "Error: Node.js is outdated (< v18). Please upgrade Node.js manually."
       exit 1
     fi
   fi
@@ -221,8 +234,15 @@ if [ "$ROLE" == "controller" ]; then
   cd "$INSTALL_DIR" || exit 1
   npm install --omit=dev
 
-  # Locate node path
-  NODE_PATH=$(which node)
+  # Locate node path (check standard paths and EasyApache paths for cPanel)
+  NODE_PATH=$(which node 2>/dev/null || echo "/usr/bin/node")
+  for ea_node in /opt/cpanel/ea-nodejs20/bin/node /opt/cpanel/ea-nodejs18/bin/node /opt/cpanel/ea-nodejs16/bin/node; do
+    if [ -x "$ea_node" ]; then
+      NODE_PATH="$ea_node"
+      echo "Found EasyApache Node.js binary at $NODE_PATH"
+      break
+    fi
+  done
 
   # Create systemd service
   echo "Creating systemd service daemon..."
@@ -330,8 +350,15 @@ elif [ "$ROLE" == "node" ]; then
   cd "$INSTALL_DIR" || exit 1
   npm install --omit=dev
 
-  # Locate node path
-  NODE_PATH=$(which node)
+  # Locate node path (check standard paths and EasyApache paths for cPanel)
+  NODE_PATH=$(which node 2>/dev/null || echo "/usr/bin/node")
+  for ea_node in /opt/cpanel/ea-nodejs20/bin/node /opt/cpanel/ea-nodejs18/bin/node /opt/cpanel/ea-nodejs16/bin/node; do
+    if [ -x "$ea_node" ]; then
+      NODE_PATH="$ea_node"
+      echo "Found EasyApache Node.js binary at $NODE_PATH"
+      break
+    fi
+  done
 
   # Create systemd service
   cat <<EOF > /etc/systemd/system/dnsadmin-node-agent.service

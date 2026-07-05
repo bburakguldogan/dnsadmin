@@ -67,9 +67,20 @@ install_package() {
   fi
 }
 
-# 1. Install Node.js & curl
+# 1. Install/Upgrade Node.js & curl
+NEED_INSTALL=0
 if ! command -v node &>/dev/null; then
-  echo "Installing Node.js..."
+  NEED_INSTALL=1
+else
+  CURRENT_VERSION=$(node -v | cut -d'v' -f2 | cut -d'.' -f1)
+  if [ "$CURRENT_VERSION" -lt 18 ]; then
+    echo "Found outdated Node.js version: v$CURRENT_VERSION. Upgrading to Node.js v20..."
+    NEED_INSTALL=1
+  fi
+fi
+
+if [ "$NEED_INSTALL" -eq 1 ]; then
+  echo "Installing modern Node.js..."
   if [ "$PKG_MAN" == "apt" ]; then
     curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
     apt-get install -y nodejs
@@ -153,7 +164,14 @@ chmod 770 "$ZONES_DIR"
 
 # 5. Create Systemd Service Unit
 echo "Creating systemd daemon service..."
-NODE_PATH=$(which node)
+NODE_PATH=$(which node 2>/dev/null || echo "/usr/bin/node")
+for ea_node in /opt/cpanel/ea-nodejs20/bin/node /opt/cpanel/ea-nodejs18/bin/node /opt/cpanel/ea-nodejs16/bin/node; do
+  if [ -x "$ea_node" ]; then
+    NODE_PATH="$ea_node"
+    echo "Found EasyApache Node.js binary at $NODE_PATH"
+    break
+  fi
+done
 
 cat <<EOF > /etc/systemd/system/dnsadmin-node-agent.service
 [Unit]
