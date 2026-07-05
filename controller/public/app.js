@@ -365,7 +365,7 @@ async function fetchStats() {
               <td>${s.zone_count || 0}</td>
               <td>${s.type.toUpperCase()} | named</td>
               <td><span class="label label-${s.rbl_status === 'Clean' ? 'success' : 'danger'}">${s.rbl_status || 'Clean'}</span></td>
-              <td>${s.cluster_name || 'Nixpal'}</td>
+              <td>${s.group_name || 'Default'}</td>
             </tr>
           `;
         }).join('');
@@ -400,7 +400,7 @@ async function fetchStats() {
               <td>${statusDot} ${lastSeenStr}</td>
               <td>${data.counts.zones || 0}</td>
               <td><span class="label label-${n.rbl_status === 'Clean' ? 'success' : 'danger'}">${n.rbl_status || 'Clean'}</span></td>
-              <td>${n.cluster_name || 'Nixpal'}</td>
+              <td>${n.group_name || 'Default'}</td>
             </tr>
           `;
         }).join('');
