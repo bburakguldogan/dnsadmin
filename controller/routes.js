@@ -299,10 +299,24 @@ router.post('/zones', authenticateToken, async (req, res) => {
       );
     }
 
+    // Determine primary nameserver for SOA (MNAME)
+    let primaryNs = `ns1.${domain}.`;
+    if (nodes && nodes.length > 0) {
+      primaryNs = nodes[0].name;
+      if (!primaryNs.endsWith('.')) primaryNs += '.';
+    }
+
+    // Determine hostmaster email (RNAME)
+    const adminUser = await query.get("SELECT email FROM users WHERE username = 'admin' LIMIT 1");
+    let hostmaster = `admin.${domain}.`;
+    if (adminUser && adminUser.email) {
+      hostmaster = adminUser.email.replace('@', '.') + '.';
+    }
+
     // Default SOA
     await query.run(
       'INSERT INTO records (zone_id, name, type, content, ttl) VALUES (?, ?, ?, ?, ?)',
-      [result.id, domain, 'SOA', `ns1.dnsadmin.io. admin.dnsadmin.io. ${2026070401} 86400 7200 3600000 86400`, ttl || 3600]
+      [result.id, domain, 'SOA', `${primaryNs} ${hostmaster} ${2026070401} 86400 7200 3600000 86400`, ttl || 3600]
     );
 
     await pushZoneToNodes(domain);
