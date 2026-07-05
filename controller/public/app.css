@@ -398,3 +398,33 @@ body {
 .list-group-item-text {
   color: var(--text-muted);
 }
+
+/* ==========================================
+   Login & Force Password Views Styling Overrides
+   ========================================== */
+#login-container, #force-password-container {
+  padding-top: 100px;
+}
+
+.login-container-box {
+  background-color: var(--box-bg) !important;
+  border: 1px solid var(--box-border);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+  border-radius: 4px;
+  overflow: hidden;
+  transition: all 0.2s ease;
+}
+
+.login-container-box label {
+  color: var(--text-main) !important;
+}
+
+.login-container-box p {
+  color: var(--text-muted) !important;
+}
+
+.login-container-box input {
+  background-color: var(--input-bg) !important;
+  border-color: var(--input-border) !important;
+  color: var(--text-main) !important;
+}
