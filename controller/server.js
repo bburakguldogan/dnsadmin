@@ -5,7 +5,7 @@ import crypto from 'crypto';
 import { fileURLToPath } from 'url';
 import bcrypt from 'bcryptjs';
 import { initDb, query } from './db.js';
-import routes from './routes.js';
+import routes, { pushZoneToSingleNode } from './routes.js';
 import { startNotifyListener } from './notify_listener.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -55,6 +55,41 @@ setInterval(async () => {
     console.error('[Health Monitor Error]', err.message);
   }
 }, 30000);
+
+// Periodic Out-of-Sync Zone Pusher (runs every 60 seconds)
+setInterval(async () => {
+  try {
+    const zones = await query.all('SELECT * FROM zones');
+    const nodes = await query.all('SELECT * FROM nodes');
+    if (zones.length === 0 || nodes.length === 0) return;
+
+    for (const zone of zones) {
+      for (const node of nodes) {
+        // Find the latest sync log for this zone and node
+        const lastLog = await query.get(`
+          SELECT * FROM sync_logs 
+          WHERE node_id = ? AND zone = ? 
+          ORDER BY id DESC LIMIT 1
+        `, [node.id, zone.domain]);
+
+        // Needs sync if:
+        // 1. There is no log entry
+        // 2. The latest log has a failed sync action
+        // 3. The latest sync log doesn't contain the current serial number of the zone
+        const needsSync = !lastLog || 
+                          lastLog.action === 'sync_failed' || 
+                          !lastLog.message.includes(`serial ${zone.serial}`);
+
+        if (needsSync) {
+          console.log(`[Sync Worker] Zone ${zone.domain} is out of sync on Node ${node.name}. Syncing...`);
+          await pushZoneToSingleNode(zone.domain, node);
+        }
+      }
+    }
+  } catch (err) {
+    console.error('[Sync Worker Error]', err.message);
+  }
+}, 60000);
 
 // RBL BLACKLIST CHECKER
 import dns from 'dns/promises';

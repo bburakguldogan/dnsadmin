@@ -67,10 +67,7 @@ async function authenticateAgent(req, res, next) {
 }
 
 // Helper: Push zone updates to all DNS nodes
-export async function pushZoneToNodes(domain, isDelete = false) {
-  const nodes = await query.all('SELECT * FROM nodes');
-  if (nodes.length === 0) return;
-
+export async function pushZoneToSingleNode(domain, node, isDelete = false) {
   let zoneText = '';
   let serial = 1;
 
@@ -82,44 +79,51 @@ export async function pushZoneToNodes(domain, isDelete = false) {
     zoneText = generateZoneFile(domain, records, serial);
   }
 
+  try {
+    const controllerUrl = `${node.url}/api/v1/zone`;
+    const response = await fetch(controllerUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-DNSAdmin-Token': node.token
+      },
+      body: JSON.stringify({
+        domain,
+        action: isDelete ? 'delete' : 'update',
+        zone_text: zoneText,
+        serial
+      }),
+      // Timeout of 5 seconds
+      signal: AbortSignal.timeout(5000)
+    });
+
+    if (response.ok) {
+      await query.run(
+        'INSERT INTO sync_logs (node_id, zone, action, message) VALUES (?, ?, ?, ?)',
+        [node.id, domain, 'sync_success', `Synced successfully with serial ${serial}`]
+      );
+      await query.run('UPDATE nodes SET status = "online", last_seen = NOW() WHERE id = ?', [node.id]);
+    } else {
+      const body = await response.text();
+      throw new Error(body || `HTTP status ${response.status}`);
+    }
+  } catch (err) {
+    await query.run(
+      'INSERT INTO sync_logs (node_id, zone, action, message) VALUES (?, ?, ?, ?)',
+      [node.id, domain, 'sync_failed', `Sync failed: ${err.message}`]
+    );
+    await query.run('UPDATE nodes SET status = "error", last_seen = NOW() WHERE id = ?', [node.id]);
+  }
+}
+
+export async function pushZoneToNodes(domain, isDelete = false) {
+  const nodes = await query.all('SELECT * FROM nodes');
+  if (nodes.length === 0) return;
+
   for (const node of nodes) {
     // Fire and forget or handle asynchronously to not block API response
     (async () => {
-      try {
-        const controllerUrl = `${node.url}/api/v1/zone`;
-        const response = await fetch(controllerUrl, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-DNSAdmin-Token': node.token
-          },
-          body: JSON.stringify({
-            domain,
-            action: isDelete ? 'delete' : 'update',
-            zone_text: zoneText,
-            serial
-          }),
-          // Timeout of 5 seconds
-          signal: AbortSignal.timeout(5000)
-        });
-
-        if (response.ok) {
-          await query.run(
-            'INSERT INTO sync_logs (node_id, zone, action, message) VALUES (?, ?, ?, ?)',
-            [node.id, domain, 'sync_success', `Synced successfully with serial ${serial}`]
-          );
-          await query.run('UPDATE nodes SET status = "online", last_seen = NOW() WHERE id = ?', [node.id]);
-        } else {
-          const body = await response.text();
-          throw new Error(body || `HTTP status ${response.status}`);
-        }
-      } catch (err) {
-        await query.run(
-          'INSERT INTO sync_logs (node_id, zone, action, message) VALUES (?, ?, ?, ?)',
-          [node.id, domain, 'sync_failed', `Sync failed: ${err.message}`]
-        );
-        await query.run('UPDATE nodes SET status = "error", last_seen = NOW() WHERE id = ?', [node.id]);
-      }
+      await pushZoneToSingleNode(domain, node, isDelete);
     })();
   }
 }
