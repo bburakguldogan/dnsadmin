@@ -472,6 +472,12 @@ EOF
       systemctl enable nginx &>/dev/null
       systemctl start nginx &>/dev/null
 
+      # Allow Nginx reverse proxy connections under SELinux (common on CentOS/AlmaLinux)
+      if command -v getenforce &>/dev/null && [ "$(getenforce)" != "Disabled" ]; then
+        echo "Configuring SELinux policy to allow Nginx network connections..."
+        setsebool -P httpd_can_network_connect 1 &>/dev/null
+      fi
+
       # Disable conflicting Apache
       systemctl stop apache2 2>/dev/null || systemctl stop httpd 2>/dev/null
       systemctl disable apache2 2>/dev/null || systemctl disable httpd 2>/dev/null
