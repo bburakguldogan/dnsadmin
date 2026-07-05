@@ -46,7 +46,7 @@ HOOK_DEST="/usr/local/bin/dnsadmin-plesk-hook.sh"
 RAW_BASE_URL="https://raw.githubusercontent.com/bburakguldogan/dnsadmin/main"
 
 echo "Downloading Plesk event handler..."
-curl -sS -o "$HOOK_DEST" "$RAW_BASE_URL/integrations/plesk-hook.sh"
+curl -sS -o "$HOOK_DEST" "$RAW_BASE_URL/integrations/plesk-hook.sh?v=\$(date +%s)"
 
 if [ ! -f "$HOOK_DEST" ] || [ ! -s "$HOOK_DEST" ]; then
   echo "Error: Failed to download Plesk hook script."
