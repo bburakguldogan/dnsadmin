@@ -218,6 +218,7 @@ if [ "$ROLE" == "controller" ]; then
   # Execute commands as root via socket authentication
   mysql -u root -e "CREATE DATABASE IF NOT EXISTS dnsadmin;"
   mysql -u root -e "CREATE USER IF NOT EXISTS 'dnsadmin'@'localhost' IDENTIFIED BY '${DB_PASS}';"
+  mysql -u root -e "ALTER USER 'dnsadmin'@'localhost' IDENTIFIED BY '${DB_PASS}';"
   mysql -u root -e "GRANT ALL PRIVILEGES ON dnsadmin.* TO 'dnsadmin'@'localhost';"
   mysql -u root -e "FLUSH PRIVILEGES;"
 
