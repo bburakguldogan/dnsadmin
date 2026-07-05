@@ -125,7 +125,10 @@ install_nodejs() {
 
   if [ "$NEED_INSTALL" -eq 1 ]; then
     echo "Installing modern Node.js & npm..."
-    if [ "$PKG_MAN" == "apt" ]; then
+    if [ -d "/usr/local/cpanel" ] && { [ "$PKG_MAN" == "dnf" ] || [ "$PKG_MAN" == "yum" ]; }; then
+      echo "cPanel environment detected. Installing EasyApache Node.js packages..."
+      $PKG_MAN install -y ea-nodejs20 || $PKG_MAN install -y ea-nodejs18
+    elif [ "$PKG_MAN" == "apt" ]; then
       curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
       apt-get install -y nodejs
     elif [ "$PKG_MAN" == "dnf" ] || [ "$PKG_MAN" == "yum" ]; then
@@ -229,10 +232,20 @@ if [ "$ROLE" == "controller" ]; then
   echo "Copying Controller codebase..."
   cp -r "$SRC_DIR/controller/"* "$INSTALL_DIR/"
 
+  # Locate npm path (check standard paths and EasyApache paths for cPanel)
+  NPM_PATH=$(which npm 2>/dev/null || echo "npm")
+  for ea_npm in /opt/cpanel/ea-nodejs20/bin/npm /opt/cpanel/ea-nodejs18/bin/npm /opt/cpanel/ea-nodejs16/bin/npm; do
+    if [ -x "$ea_npm" ]; then
+      NPM_PATH="$ea_npm"
+      echo "Found EasyApache npm binary at $NPM_PATH"
+      break
+    fi
+  done
+
   # Install npm packages
   echo "Installing dependencies..."
   cd "$INSTALL_DIR" || exit 1
-  npm install --omit=dev
+  $NPM_PATH install --omit=dev
 
   # Locate node path (check standard paths and EasyApache paths for cPanel)
   NODE_PATH=$(which node 2>/dev/null || echo "/usr/bin/node")
@@ -273,12 +286,27 @@ EOF
   # Reload systemd and start
   systemctl daemon-reload
   systemctl enable dnsadmin-controller
+  
+  # Start the controller service and wait for it to generate the default credentials file
+  echo "Starting DNSAdmin Controller and initializing database..."
   systemctl start dnsadmin-controller
+  sleep 4
+
+  # Fetch server IP dynamically
+  SERVER_IP=$(curl -s --max-time 3 icanhazip.com || curl -s --max-time 3 ipinfo.io/ip || hostname -I | awk '{print $1}' || echo "your-ip")
+  SERVER_IP=$(echo "$SERVER_IP" | xargs) # Trim whitespace
+
+  ADMIN_PASS="[Check $INSTALL_DIR/admin_credentials.txt]"
+  if [ -f "$INSTALL_DIR/admin_credentials.txt" ]; then
+    ADMIN_PASS=$(grep "Password:" "$INSTALL_DIR/admin_credentials.txt" | cut -d' ' -f2)
+  fi
 
   echo "=================================================="
   echo " DNSAdmin Controller successfully installed!"
-  echo " Web URL: http://your-ip:$CTRL_PORT"
+  echo " Web URL: http://$SERVER_IP:$CTRL_PORT"
   echo " UDP DNS NOTIFY port: $CTRL_NOTIFY_PORT"
+  echo " Admin Username: admin"
+  echo " Admin Password: $ADMIN_PASS"
   echo " Database Name: dnsadmin"
   echo " Database User: dnsadmin"
   echo " Database Pass: $DB_PASS"
