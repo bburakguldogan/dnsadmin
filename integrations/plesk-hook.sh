@@ -33,7 +33,9 @@ log "Processing zone $DOMAIN triggered by Plesk..."
 
 # Locate BIND zone file in Plesk
 ZONE_FILE=""
-for path in "/var/named/run-root/var/named/chroot/var/named/${DOMAIN}" \
+for path in "/var/named/run-root/var/${DOMAIN}" \
+            "/var/named/run-root/var/named/${DOMAIN}" \
+            "/var/named/chroot/var/${DOMAIN}" \
             "/var/named/chroot/var/named/${DOMAIN}" \
             "/var/named/${DOMAIN}" \
             "/var/named/${DOMAIN}.db"; do
