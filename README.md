@@ -4,37 +4,65 @@ DNSAdmin is a secure, light-weight, centralized DNS management panel designed fo
 
 ---
 
-## 🚀 Key Features
+## 🇹🇷 Türkçe Kurulum Kılavuzu (Turkish Installation Guide)
 
-*   **Centralized DNS Management:** Sync and delete zones across multiple ad-hoc DNS nodes.
-*   **MySQL Backend Support:** Swapped SQLite with a high-performance, connection-pooled MySQL/MariaDB database.
-*   **Light-weight Dedicated Installers:** One-click curl installation scripts for nodes and hooks.
-*   **Aesthetic Admin Panel:** Clean Bootstrap 3 AdminLTE dashboard with a persistent Light/Dark theme.
-*   **OS Resource Metrics:** Real CPU and RAM utilization statistics (parsed directly from Linux `procfs` files on 60-second heartbeat loops).
-*   **Strict Security Policies:** Forces password change on first login, generates secure random administrative passwords, and implements secure API routing constraints.
-*   **Integrations:** Zero-dependency Bash hook scripts for cPanel, Plesk, and DirectAdmin.
+Bu proje, hosting sunucularınızdaki (cPanel, Plesk, DirectAdmin) DNS kayıtlarını merkezi bir panel üzerinden kendi bağımsız BIND 9 DNS sunucularınıza (ns1, ns2) anlık olarak senkronize eder.
+
+### 1. Ana Yönetim Paneli Kurulumu (Master Controller)
+Yönetim panelini kurmak istediğiniz temiz bir **Debian/Ubuntu** veya **RHEL/CentOS/AlmaLinux** sunucusunda aşağıdaki komutu çalıştırmanız yeterlidir. Komut otomatik olarak Node.js, MariaDB (MySQL) kuracak, güvenli şifrelerinizi üretecek ve servisi aktif edecektir:
+
+```bash
+curl -sS https://raw.githubusercontent.com/bburakguldogan/dnsadmin/main/install.sh | bash -s -- --role controller --port 5380 --notify-port 53
+```
+
+*   **İlk Giriş Şifresi:** Kurulum tamamlandığında, sistem otomatik olarak rastgele 16 karakterli bir şifre üretir ve bunu `/opt/dnsadmin-controller/admin_credentials.txt` dosyasına kaydeder.
+*   **Zorunlu Şifre Değişimi:** Arayüze ilk giriş yaptığınızda güvenlik gereği e-posta adresinizi girmek ve şifrenizi güncellemek zorundasınız. Bu işlemi yapmadan panele erişemezsiniz.
 
 ---
 
-## 🛠️ System Architecture
+### 2. DNS Sunucu Düğümleri Kurulumu (ns1 / ns2 Node Agent)
+DNS sunucusu (ad sunucusu) olarak kullanacağınız makinede aşağıdaki komutu çalıştırarak BIND 9 kurulumunu ve otomatik ajan servisini yapılandırın:
 
-```mermaid
-graph TD
-    CP[cPanel Server] -->|Bash Hook / HTTPS| MC[DNSAdmin Controller]
-    PL[Plesk Server] -->|Bash Hook / HTTPS| MC
-    DA[DirectAdmin Server] -->|Bash Hook / HTTPS| MC
-    MC -->|API / Sync| N1[Nameserver Agent 1]
-    MC -->|API / Sync| N2[Nameserver Agent 2]
-    N1 -->|BIND9| DNS1((DNS Query))
-    N2 -->|BIND9| DNS2((DNS Query))
+```bash
+curl -sS https://raw.githubusercontent.com/bburakguldogan/dnsadmin/main/install-node.sh | bash -s -- \
+  --controller-url http://<kontrol-paneli-ip-adresiniz>:5380 \
+  --token <panelden-aldiginiz-node-token> \
+  --ns-name ns1.alanadiniz.com
+```
+
+*   Ajan kurulduktan sonra 60 saniyede bir CPU/RAM durumunu ve sağlık durumunu ana panele raporlar.
+
+---
+
+### 3. Web Hosting Sunucu Entegrasyonları (Kancalar)
+Müşterilerinizin sitelerinde yaptığı DNS değişikliklerinin (ekleme, düzenleme, silme) anlık olarak gitmesi için hosting sunucularınıza uygun kancayı kurun:
+
+#### A. cPanel / WHM Sunucuları için:
+```bash
+curl -sS https://raw.githubusercontent.com/bburakguldogan/dnsadmin/main/install-cpanel.sh | bash -s -- \
+  --controller-url http://<kontrol-paneli-ip-adresiniz>:5380 \
+  --token <panelden-aldiginiz-server-api-key>
+```
+
+#### B. Plesk Sunucuları için:
+```bash
+curl -sS https://raw.githubusercontent.com/bburakguldogan/dnsadmin/main/install-plesk.sh | bash -s -- \
+  --controller-url http://<kontrol-paneli-ip-adresiniz>:5380 \
+  --token <panelden-aldiginiz-server-api-key>
+```
+
+#### C. DirectAdmin Sunucuları için:
+```bash
+curl -sS https://raw.githubusercontent.com/bburakguldogan/dnsadmin/main/install-directadmin.sh | bash -s -- \
+  --controller-url http://<kontrol-paneli-ip-adresiniz>:5380 \
+  --token <panelden-aldiginiz-server-api-key>
 ```
 
 ---
 
-## 📦 Installation Guide
+## 🇺🇸 English Installation Guide
 
 ### 1. Central Controller Setup (Master Server)
-
 Run the following command on a clean Debian/Ubuntu or RHEL/CentOS/AlmaLinux server to install Node.js, MariaDB (MySQL), configure the database, generate random passwords, and start the controller panel:
 
 ```bash
@@ -47,7 +75,6 @@ curl -sS https://raw.githubusercontent.com/bburakguldogan/dnsadmin/main/install.
 ---
 
 ### 2. DNS Nameserver Node Agent Setup (ns1/ns2)
-
 Run this installer on your dedicated nameservers. It installs BIND 9, configures directory paths, registers the agent node service, and triggers a 60-second status reporting heartbeat:
 
 ```bash
