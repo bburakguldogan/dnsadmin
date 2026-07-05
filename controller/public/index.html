@@ -99,35 +99,14 @@
   <!-- MAIN APP PANEL -->
   <div id="app-container" style="display: none;">
     <!-- STATIC TOP NAVBAR -->
-    <nav class="navbar navbar-static-top navbar-fixed-top">
-      <div class="container-fluid" style="display: flex; align-items: center; width: 100%;">
-        <div class="navbar-header" style="display: flex; align-items: center; justify-content: space-between; flex: 1;">
-          <button type="button" id="mobile-sidebar-toggle" style="background: transparent; border: none; padding: 10px 15px; color: var(--text-title); font-size: 16px; outline: none;">
-            <span class="glyphicon glyphicon-menu-hamburger"></span>
-          </button>
-          <a class="navbar-brand" href="#dashboard">DNSAdmin Panel</a>
-        </div>
-        <div class="navbar-collapse collapse">
-          <ul class="nav navbar-nav navbar-right" style="margin-right: 10px;">
-            <li>
-              <a href="#" id="theme-toggle-btn" style="cursor: pointer;">
-                <span class="glyphicon glyphicon-adjust"></span> Theme Toggle
-              </a>
-            </li>
-            <li class="dropdown">
-              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
-                👤 <span id="user-display" style="font-weight:600;">admin</span> <span class="caret"></span>
-              </a>
-              <ul class="dropdown-menu">
-                <li><a href="#profile">⚙️ Edit Profile</a></li>
-                <li role="separator" class="divider"></li>
-                <li><a href="#" id="logout-btn">🚪 Logout</a></li>
-              </ul>
-            </li>
-          </ul>
-        </div>
-      </div>
-    </nav>
+    <!-- MOBILE TOP BAR -->
+    <div class="mobile-header-bar">
+      <button type="button" id="mobile-sidebar-toggle" style="background: transparent; border: none; padding: 10px; color: var(--text-title); font-size: 16px; outline: none;">
+        <span class="glyphicon glyphicon-menu-hamburger"></span>
+      </button>
+      <span class="mobile-brand">DNSAdmin Panel</span>
+      <div></div>
+    </div>
 
     <!-- CONTENT WRAPPER GRID -->
     <div class="container-fluid">
@@ -142,7 +121,7 @@
           <div class="sidebar-user-panel">
             <div class="sidebar-user-avatar">AD</div>
             <div class="sidebar-user-info">
-              <span>Administrator</span>
+              <span id="user-display">Administrator</span>
               <span class="sidebar-user-status">● Online</span>
             </div>
           </div>
@@ -171,6 +150,9 @@
             </li>
             <li class="sidebar-menu-item" id="menu-users">
               <a href="#users"><span class="glyphicon glyphicon-user" style="margin-right: 8px;"></span> Users</a>
+            </li>
+            <li class="sidebar-menu-item">
+              <a href="#" id="sidebar-logout-btn"><span class="glyphicon glyphicon-log-out" style="margin-right: 8px;"></span> Logout</a>
             </li>
           </ul>
           <div style="position: absolute; bottom: 0; left: 0; right: 0; padding: 12px 15px; border-top: 1px solid var(--box-border); display: flex; justify-content: space-between; align-items: center; background-color: #151924; z-index: 10;">

@@ -192,7 +192,10 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
   }
 });
 
-document.getElementById('logout-btn').addEventListener('click', logout);
+const sidebarLogoutBtn = document.getElementById('sidebar-logout-btn');
+if (sidebarLogoutBtn) {
+  sidebarLogoutBtn.addEventListener('click', logout);
+}
 
 // ==========================================
 // Dashboard Page Logic
@@ -1229,7 +1232,10 @@ function toggleTheme(e) {
   }
 }
 
-document.getElementById('theme-toggle-btn').addEventListener('click', toggleTheme);
+const toggleBtnTop = document.getElementById('theme-toggle-btn');
+if (toggleBtnTop) {
+  toggleBtnTop.addEventListener('click', toggleTheme);
+}
 const toggleBtnSidebar = document.getElementById('theme-toggle-btn-sidebar');
 if (toggleBtnSidebar) {
   toggleBtnSidebar.addEventListener('click', toggleTheme);

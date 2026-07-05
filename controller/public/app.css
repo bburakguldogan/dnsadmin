@@ -55,7 +55,7 @@ body {
   background-color: var(--body-bg);
   color: var(--text-main);
   margin: 0;
-  padding-top: 50px;
+  padding-top: 0;
   overflow-x: hidden;
   transition: background-color 0.3s ease, color 0.3s ease;
   -webkit-font-smoothing: antialiased;
@@ -128,7 +128,7 @@ body {
 @media (min-width: 768px) {
   .sidebar-wrapper {
     position: fixed;
-    top: 50px;
+    top: 0;
     bottom: 0;
     left: 0;
     overflow-x: hidden;
@@ -558,7 +558,36 @@ label {
 /* ==========================================
    Responsive Styling Updates (Off-canvas sidebar)
    ========================================== */
+.mobile-header-bar {
+  display: none;
+}
+
 @media (max-width: 767px) {
+  body {
+    padding-top: 50px !important;
+  }
+
+  .mobile-header-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 50px;
+    background-color: var(--card-bg);
+    border-bottom: 1px solid var(--card-border);
+    z-index: 1040;
+    padding: 0 16px;
+  }
+
+  .mobile-brand {
+    font-weight: 700;
+    color: var(--text-title);
+    font-size: 15px;
+  }
+
   .sidebar-wrapper {
     position: fixed;
     top: 50px;
