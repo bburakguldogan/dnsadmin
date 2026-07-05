@@ -472,9 +472,9 @@ async function fetchNodes() {
     
     if (nodes.length === 0) {
       grid.innerHTML = `
-        <div class="col-md-12 text-center" style="padding: 40px; border: 1px dashed #ccc; background:#fff; border-radius: 4px;">
-          <p style="color: #7f8c8d; margin-bottom:15px;">No authoritative nameserver nodes configured yet.</p>
-          <p style="font-size:12px; color:#95a5a6">Add nodes to distribute your DNS zone files.</p>
+        <div class="col-12 text-center py-5 border rounded bg-white shadow-sm">
+          <p class="text-muted mb-2">No authoritative nameserver nodes configured yet.</p>
+          <p class="small text-secondary mb-0">Add nodes to distribute your DNS zone files.</p>
         </div>
       `;
       return;
@@ -484,44 +484,44 @@ async function fetchNodes() {
       const isOnline = node.status === 'online';
       const statusClass = node.status;
       const lastSeen = node.last_seen ? new Date(node.last_seen).toLocaleTimeString() : 'Never';
-      
       return `
-        <div class="col-md-4 col-sm-6">
-          <div class="box box-primary">
-            <div class="box-header">
-              <h3 class="box-title">
+        <div class="col-xl-4 col-md-6 col-12">
+          <div class="card shadow-sm border h-100">
+            <div class="card-header py-3 d-flex align-items-center justify-content-between bg-light">
+              <h6 class="m-0 fw-bold text-dark">
                 ${node.name}
-                ${node.group_name ? `<span class="version-badge" style="background-color: var(--primary-accent); color: #fff; border-color: transparent;">${node.group_name}</span>` : ''}
-              </h3>
+                ${node.group_name ? `<span class="version-badge ms-2">${node.group_name}</span>` : ''}
+              </h6>
               <span class="status-dot ${statusClass}"></span>
             </div>
-            <div class="box-body">
-              <p style="color: #7f8c8d; font-size:12px; margin-bottom:15px;">IP: ${node.ip || 'None'} | Port: <code style="font-family:'Source Code Pro', monospace; font-size:11px;">${node.url}</code></p>
+            <div class="card-body">
+              <p class="text-muted small mb-3">IP: ${node.ip || 'None'} | Port: <code class="small text-danger">${node.url}</code></p>
               
-              <div style="font-size:11px; margin-bottom:5px; color:#555;">CPU Usage: ${node.cpu_usage}%</div>
-              <div class="progress progress-compact" style="margin-bottom:15px; height:8px;">
-                <div class="progress-bar progress-bar-info" role="progressbar" style="width: ${node.cpu_usage}%"></div>
+              <div class="small mb-1 text-secondary">CPU Usage: ${node.cpu_usage}%</div>
+              <div class="progress mb-3" style="height: 6px;">
+                <div class="progress-bar bg-info" role="progressbar" style="width: ${node.cpu_usage}%"></div>
               </div>
 
-              <div style="font-size:11px; margin-bottom:5px; color:#555;">Memory Usage: ${node.ram_usage}%</div>
-              <div class="progress progress-compact" style="margin-bottom:15px; height:8px;">
-                <div class="progress-bar progress-bar-info" role="progressbar" style="width: ${node.ram_usage}%"></div>
+              <div class="small mb-1 text-secondary">Memory Usage: ${node.ram_usage}%</div>
+              <div class="progress mb-3" style="height: 6px;">
+                <div class="progress-bar bg-info" role="progressbar" style="width: ${node.ram_usage}%"></div>
               </div>
 
-              <div style="font-size:11px; color:#95a5a6; margin-top:10px;">Last Heartbeat: ${lastSeen}</div>
+              <div class="text-muted small mt-2">Last Heartbeat: ${lastSeen}</div>
               
-              <div class="masked-token-group" style="margin-top:15px; display:flex; align-items:center; gap:5px;">
-                <span style="font-size:11px; color:#555;">Token:</span>
-                <input type="text" class="masked-token-input" value="${node.token}" readonly style="flex:1; font-family:'Source Code Pro', monospace; font-size:11px; padding:3px 8px;">
-                <button class="btn btn-default btn-xs copy-token-btn" data-token="${node.token}">Copy</button>
+              <div class="input-group input-group-sm mt-3">
+                <span class="input-group-text py-1 text-muted small">Token</span>
+                <input type="text" class="form-control form-control-sm bg-light" value="${node.token}" readonly style="font-family:'Source Code Pro', monospace; font-size:11px;">
+                <button class="btn btn-outline-secondary copy-token-btn" data-token="${node.token}"><i class="bi bi-copy"></i></button>
               </div>
             </div>
-            <div class="box-footer text-right" style="display: flex; justify-content: flex-end; gap: 6px;">
-              <button class="btn btn-default btn-xs edit-node-btn" data-node='${JSON.stringify(node).replace(/'/g, "&apos;")}'>Edit</button>
-              <button class="btn btn-danger btn-xs delete-node-btn" data-id="${node.id}">Delete</button>
+            <div class="card-footer bg-light py-3 d-flex justify-content-end gap-2">
+              <button class="btn btn-outline-secondary btn-sm edit-node-btn" data-node='${JSON.stringify(node).replace(/'/g, "&apos;")}'>Edit</button>
+              <button class="btn btn-danger btn-sm delete-node-btn" data-id="${node.id}">Delete</button>
             </div>
           </div>
         </div>
+      `;
       `;
     }).join('');
 
@@ -607,9 +607,9 @@ async function fetchServers() {
     
     if (servers.length === 0) {
       grid.innerHTML = `
-        <div class="col-md-12 text-center" style="padding: 40px; border: 1px dashed #ccc; background:#fff; border-radius: 4px;">
-          <p style="color: #7f8c8d; margin-bottom:15px;">No web servers (cPanel/Plesk agents) registered yet.</p>
-          <p style="font-size:12px; color:#95a5a6">Register servers to enable automatic push integrations.</p>
+        <div class="col-12 text-center py-5 border rounded bg-white shadow-sm">
+          <p class="text-muted mb-2">No web servers (cPanel/Plesk agents) registered yet.</p>
+          <p class="small text-secondary mb-0">Register servers to enable automatic push integrations.</p>
         </div>
       `;
       return;
@@ -618,33 +618,33 @@ async function fetchServers() {
     grid.innerHTML = servers.map(server => {
       const lastSync = server.last_sync ? new Date(server.last_sync).toLocaleString() : 'Never';
       const logo = server.type === 'cpanel' ? '🔴' : server.type === 'plesk' ? '🔵' : server.type === 'directadmin' ? '🟡' : '🟢';
-      
       return `
-        <div class="col-md-4 col-sm-6">
-          <div class="box box-primary">
-            <div class="box-header">
-              <h3 class="box-title">
+        <div class="col-xl-4 col-md-6 col-12">
+          <div class="card shadow-sm border h-100">
+            <div class="card-header py-3 d-flex align-items-center justify-content-between bg-light">
+              <h6 class="m-0 fw-bold text-dark">
                 ${logo} ${server.name}
-                ${server.group_name ? `<span class="version-badge" style="background-color: var(--primary-accent); color: #fff; border-color: transparent;">${server.group_name}</span>` : ''}
-              </h3>
-              <span class="label label-primary" style="text-transform:uppercase">${server.type}</span>
+                ${server.group_name ? `<span class="version-badge ms-2">${server.group_name}</span>` : ''}
+              </h6>
+              <span class="badge bg-primary text-uppercase">${server.type}</span>
             </div>
-            <div class="box-body">
-              <p style="color: #7f8c8d; font-size:12px;">IP: ${server.ip || 'No IP'}</p>
-              <p style="color: #7f8c8d; font-size:12px; margin-bottom:15px;">Last Sync: ${lastSync}</p>
+            <div class="card-body">
+              <p class="text-muted small mb-1">IP: ${server.ip || 'No IP'}</p>
+              <p class="text-muted small mb-3">Last Sync: ${lastSync}</p>
               
-              <div class="masked-token-group" style="display:flex; align-items:center; gap:5px;">
-                <span style="font-size:11px; color:#555;">API Key:</span>
-                <input type="text" class="masked-token-input" value="${server.token}" readonly style="flex:1; font-family:'Source Code Pro', monospace; font-size:11px; padding:3px 8px;">
-                <button class="btn btn-default btn-xs copy-server-key-btn" data-key="${server.token}">Copy</button>
+              <div class="input-group input-group-sm">
+                <span class="input-group-text py-1 text-muted small">API Key</span>
+                <input type="text" class="form-control form-control-sm bg-light" value="${server.token}" readonly style="font-family:'Source Code Pro', monospace; font-size:11px;">
+                <button class="btn btn-outline-secondary copy-server-key-btn" data-key="${server.token}"><i class="bi bi-copy"></i></button>
               </div>
             </div>
-            <div class="box-footer text-right" style="display: flex; justify-content: flex-end; gap: 6px;">
-              <button class="btn btn-default btn-xs edit-server-btn" data-server='${JSON.stringify(server).replace(/'/g, "&apos;")}'>Edit</button>
-              <button class="btn btn-danger btn-xs delete-server-btn" data-id="${server.id}">Remove</button>
+            <div class="card-footer bg-light py-3 d-flex justify-content-end gap-2">
+              <button class="btn btn-outline-secondary btn-sm edit-server-btn" data-server='${JSON.stringify(server).replace(/'/g, "&apos;")}'>Edit</button>
+              <button class="btn btn-danger btn-sm delete-server-btn" data-id="${server.id}">Remove</button>
             </div>
           </div>
         </div>
+      `;
       `;
     }).join('');
 
@@ -1126,11 +1126,20 @@ document.getElementById('clear-logs-btn').addEventListener('click', async () => 
 // ==========================================
 
 function openModal(id) {
-  $(`#${id}`).modal('show');
+  const modalEl = document.getElementById(id);
+  let modalInstance = bootstrap.Modal.getInstance(modalEl);
+  if (!modalInstance) {
+    modalInstance = new bootstrap.Modal(modalEl);
+  }
+  modalInstance.show();
 }
 
 function closeModal(id) {
-  $(`#${id}`).modal('hide');
+  const modalEl = document.getElementById(id);
+  const modalInstance = bootstrap.Modal.getInstance(modalEl);
+  if (modalInstance) {
+    modalInstance.hide();
+  }
 }
 
 // Copy triggers for tokens
