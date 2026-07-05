@@ -482,43 +482,57 @@ async function fetchNodes() {
 
     grid.innerHTML = nodes.map(node => {
       const isOnline = node.status === 'online';
-      const statusClass = node.status;
       const lastSeen = node.last_seen ? new Date(node.last_seen).toLocaleTimeString() : 'Never';
       return `
-        <div class="col-xl-4 col-md-6 col-12">
-          <div class="card shadow-sm border h-100">
-            <div class="card-header py-3 d-flex align-items-center justify-content-between bg-light">
-              <h6 class="m-0 fw-bold text-dark">
-                ${node.name}
-                ${node.group_name ? `<span class="version-badge ms-2">${node.group_name}</span>` : ''}
-              </h6>
-              <span class="status-dot ${statusClass}"></span>
+        <div class="col-span-12 md:col-span-6 xl:col-span-4 bg-surface-container border border-outline-variant rounded-xl overflow-hidden shadow-lg flex flex-col h-full">
+          <div class="px-lg py-md border-b border-outline-variant bg-surface-container-low flex items-center justify-between">
+            <h3 class="font-headline-md text-headline-md text-on-surface flex items-center gap-xs">
+              ${node.name}
+              ${node.group_name ? `<span class="text-[10px] bg-primary-fixed-dim text-on-primary-fixed px-sm py-0.5 rounded font-label-mono">${node.group_name}</span>` : ''}
+            </h3>
+            <span class="w-2.5 h-2.5 rounded-full ${isOnline ? 'bg-secondary shadow-[0_0_8px_rgba(78,222,163,0.5)]' : 'bg-outline-variant'}"></span>
+          </div>
+          <div class="p-lg flex-grow space-y-md">
+            <div class="text-on-surface-variant font-body-sm space-y-xs">
+              <div>IP Address: <code class="text-primary font-label-mono">${node.ip || 'None'}</code></div>
+              <div>Port: <code class="text-primary font-label-mono">${node.url}</code></div>
             </div>
-            <div class="card-body">
-              <p class="text-muted small mb-3">IP: ${node.ip || 'None'} | Port: <code class="small text-danger">${node.url}</code></p>
-              
-              <div class="small mb-1 text-secondary">CPU Usage: ${node.cpu_usage}%</div>
-              <div class="progress mb-3" style="height: 6px;">
-                <div class="progress-bar bg-info" role="progressbar" style="width: ${node.cpu_usage}%"></div>
+            
+            <div class="space-y-xs">
+              <div class="flex justify-between items-center text-label-mono">
+                <span class="text-outline">CPU Usage</span>
+                <span class="text-on-surface font-semibold">${node.cpu_usage}%</span>
               </div>
+              <div class="w-full h-1.5 bg-surface-container-lowest rounded-full overflow-hidden">
+                <div class="h-full bg-primary animate-pulse" style="width: ${node.cpu_usage}%"></div>
+              </div>
+            </div>
 
-              <div class="small mb-1 text-secondary">Memory Usage: ${node.ram_usage}%</div>
-              <div class="progress mb-3" style="height: 6px;">
-                <div class="progress-bar bg-info" role="progressbar" style="width: ${node.ram_usage}%"></div>
+            <div class="space-y-xs">
+              <div class="flex justify-between items-center text-label-mono">
+                <span class="text-outline">RAM Usage</span>
+                <span class="text-on-surface font-semibold">${node.ram_usage}%</span>
               </div>
+              <div class="w-full h-1.5 bg-surface-container-lowest rounded-full overflow-hidden">
+                <div class="h-full bg-primary animate-pulse" style="width: ${node.ram_usage}%"></div>
+              </div>
+            </div>
 
-              <div class="text-muted small mt-2">Last Heartbeat: ${lastSeen}</div>
-              
-              <div class="input-group input-group-sm mt-3">
-                <span class="input-group-text py-1 text-muted small">Token</span>
-                <input type="text" class="form-control form-control-sm bg-light" value="${node.token}" readonly style="font-family:'Source Code Pro', monospace; font-size:11px;">
-                 <button class="btn btn-outline-secondary copy-token-btn" data-token="${node.token}"><span class="material-symbols-outlined text-[16px]">content_copy</span></button>
-              </div>
+            <div class="text-outline font-body-sm pt-xs border-t border-outline-variant/30">
+              Last Heartbeat: <span class="text-on-surface-variant">${lastSeen}</span>
             </div>
-            <div class="card-footer bg-light py-3 d-flex justify-content-end gap-2">
-              <button class="btn btn-outline-secondary btn-sm edit-node-btn" data-node='${JSON.stringify(node).replace(/'/g, "&apos;")}'>Edit</button>
-              <button class="btn btn-danger btn-sm delete-node-btn" data-id="${node.id}">Delete</button>
+            
+            <div class="flex items-center bg-surface-container-lowest border border-outline-variant rounded transition-all mt-md">
+              <span class="font-label-caps text-label-caps text-outline px-sm select-none">Token</span>
+              <input type="text" class="w-full bg-transparent border-none focus:ring-0 text-on-surface font-label-mono text-label-mono py-sm pr-sm outline-none" value="${node.token}" readonly>
+              <button class="px-sm text-outline hover:text-on-surface copy-token-btn" data-token="${node.token}">
+                <span class="material-symbols-outlined text-[18px]">content_copy</span>
+              </button>
             </div>
+          </div>
+          <div class="px-lg py-md border-t border-outline-variant/50 bg-surface-container-low flex justify-end gap-md">
+            <button class="px-md py-sm bg-surface-container border border-outline-variant rounded text-on-surface hover:bg-surface-container-high transition-colors font-label-caps text-label-caps edit-node-btn" data-node='${JSON.stringify(node).replace(/'/g, "&apos;")}'>Edit</button>
+            <button class="px-md py-sm bg-error-container text-on-error-container border border-error rounded hover:brightness-110 transition-all font-label-caps text-label-caps delete-node-btn" data-id="${node.id}">Delete</button>
           </div>
         </div>
       `;
@@ -618,29 +632,31 @@ async function fetchServers() {
       const lastSync = server.last_sync ? new Date(server.last_sync).toLocaleString() : 'Never';
       const logo = server.type === 'cpanel' ? '🔴' : server.type === 'plesk' ? '🔵' : server.type === 'directadmin' ? '🟡' : '🟢';
       return `
-        <div class="col-xl-4 col-md-6 col-12">
-          <div class="card shadow-sm border h-100">
-            <div class="card-header py-3 d-flex align-items-center justify-content-between bg-light">
-              <h6 class="m-0 fw-bold text-dark">
-                ${logo} ${server.name}
-                ${server.group_name ? `<span class="version-badge ms-2">${server.group_name}</span>` : ''}
-              </h6>
-              <span class="badge bg-primary text-uppercase">${server.type}</span>
+        <div class="col-span-12 md:col-span-6 xl:col-span-4 bg-surface-container border border-outline-variant rounded-xl overflow-hidden shadow-lg flex flex-col h-full">
+          <div class="px-lg py-md border-b border-outline-variant bg-surface-container-low flex items-center justify-between">
+            <h3 class="font-headline-md text-headline-md text-on-surface flex items-center gap-xs">
+              <span class="mr-xs">${logo}</span> ${server.name}
+              ${server.group_name ? `<span class="text-[10px] bg-primary-fixed-dim text-on-primary-fixed px-sm py-0.5 rounded font-label-mono">${server.group_name}</span>` : ''}
+            </h3>
+            <span class="px-sm py-0.5 rounded bg-primary-container text-on-primary-container font-label-caps text-label-caps uppercase">${server.type}</span>
+          </div>
+          <div class="p-lg flex-grow space-y-md">
+            <div class="text-on-surface-variant font-body-sm space-y-sm">
+              <div>IP Address: <code class="text-primary font-label-mono">${server.ip || 'No IP'}</code></div>
+              <div>Last Synchronization: <span class="text-on-surface">${lastSync}</span></div>
             </div>
-            <div class="card-body">
-              <p class="text-muted small mb-1">IP: ${server.ip || 'No IP'}</p>
-              <p class="text-muted small mb-3">Last Sync: ${lastSync}</p>
-              
-              <div class="input-group input-group-sm">
-                <span class="input-group-text py-1 text-muted small">API Key</span>
-                <input type="text" class="form-control form-control-sm bg-light" value="${server.token}" readonly style="font-family:'Source Code Pro', monospace; font-size:11px;">
-                 <button class="btn btn-outline-secondary copy-server-key-btn" data-key="${server.token}"><span class="material-symbols-outlined text-[16px]">content_copy</span></button>
-              </div>
+            
+            <div class="flex items-center bg-surface-container-lowest border border-outline-variant rounded transition-all mt-md">
+              <span class="font-label-caps text-label-caps text-outline px-sm select-none">API Key</span>
+              <input type="text" class="w-full bg-transparent border-none focus:ring-0 text-on-surface font-label-mono text-label-mono py-sm pr-sm outline-none" value="${server.token}" readonly>
+              <button class="px-sm text-outline hover:text-on-surface copy-server-key-btn" data-key="${server.token}">
+                <span class="material-symbols-outlined text-[18px]">content_copy</span>
+              </button>
             </div>
-            <div class="card-footer bg-light py-3 d-flex justify-content-end gap-2">
-              <button class="btn btn-outline-secondary btn-sm edit-server-btn" data-server='${JSON.stringify(server).replace(/'/g, "&apos;")}'>Edit</button>
-              <button class="btn btn-danger btn-sm delete-server-btn" data-id="${server.id}">Remove</button>
-            </div>
+          </div>
+          <div class="px-lg py-md border-t border-outline-variant/50 bg-surface-container-low flex justify-end gap-md">
+            <button class="px-md py-sm bg-surface-container border border-outline-variant rounded text-on-surface hover:bg-surface-container-high transition-colors font-label-caps text-label-caps edit-server-btn" data-server='${JSON.stringify(server).replace(/'/g, "&apos;")}'>Edit</button>
+            <button class="px-md py-sm bg-error-container text-on-error-container border border-error rounded hover:brightness-110 transition-all font-label-caps text-label-caps delete-server-btn" data-id="${server.id}">Remove</button>
           </div>
         </div>
       `;
@@ -805,45 +821,42 @@ async function fetchLists() {
       }
       const rowsHtml = checkedLists.map(listHost => {
         const isListed = rblData[listHost] === 'Listed';
-        const labelText = isListed ? 'Reported' : 'Not Reported';
-        const color = isListed ? '#ef4444' : '#10b981';
+        const labelText = isListed ? 'Reported' : 'Clean';
+        const colorClass = isListed ? 'text-red-400 font-semibold' : 'text-emerald-400';
         return `
           <tr>
-            <td style="font-weight: 500;">${listHost}</td>
-            <td class="text-right" style="color: ${color}; font-weight: 600;">
+            <td class="px-lg py-md">${listHost}</td>
+            <td class="px-lg py-md text-right ${colorClass}">
               ${labelText}
             </td>
           </tr>
         `;
       }).join('');
 
-      const badgeClass = item.rbl_status === 'Clean' ? 'success' : 'danger';
       const badgeText = item.rbl_status || 'Clean';
 
       return `
-        <div class="col-md-6" style="margin-bottom: 24px;">
-          <div class="box" style="margin-bottom: 0;">
-            <div class="box-header">
-              <h3 class="box-title">
-                ${item.name} 
-                <span class="version-badge">${item.typeLabel}</span>
-                ${item.group_name ? `<span class="version-badge" style="background-color: var(--primary-accent); color: #fff; border-color: transparent;">${item.group_name}</span>` : ''}
-              </h3>
-              <span class="label label-${badgeClass}">${badgeText}</span>
-            </div>
-            <div class="box-body" style="padding: 0;">
-              <table class="table" style="margin-bottom:0;">
-                <thead>
-                  <tr>
-                    <th>RBL Hostname</th>
-                    <th class="text-right">Blacklist Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  ${rowsHtml}
-                </tbody>
-              </table>
-            </div>
+        <div class="col-span-12 lg:col-span-6 bg-surface-container border border-outline-variant rounded-xl overflow-hidden shadow-lg flex flex-col">
+          <div class="px-lg py-md border-b border-outline-variant bg-surface-container-low flex items-center justify-between">
+            <h3 class="font-headline-md text-headline-md text-on-surface flex items-center gap-xs">
+              ${item.name} 
+              <span class="text-[10px] bg-primary-fixed-dim text-on-primary-fixed px-sm py-0.5 rounded font-label-mono">${item.typeLabel}</span>
+              ${item.group_name ? `<span class="text-[10px] bg-secondary-container text-on-secondary px-sm py-0.5 rounded font-label-mono">${item.group_name}</span>` : ''}
+            </h3>
+            <span class="px-sm py-0.5 rounded font-label-caps text-label-caps uppercase ${item.rbl_status === 'Clean' ? 'bg-secondary-container text-on-secondary-container border border-secondary' : 'bg-error-container text-on-error-container border border-error'}">${badgeText}</span>
+          </div>
+          <div class="overflow-x-auto max-h-[300px] custom-scrollbar">
+            <table class="w-full text-left border-collapse">
+              <thead class="bg-surface-container-lowest border-b border-outline-variant">
+                <tr>
+                  <th class="px-lg py-md font-label-caps text-label-caps text-outline uppercase">RBL Hostname</th>
+                  <th class="px-lg py-md font-label-caps text-label-caps text-outline uppercase text-right">Blacklist Status</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-outline-variant/30 text-on-surface font-label-mono text-label-mono">
+                ${rowsHtml}
+              </tbody>
+            </table>
           </div>
         </div>
       `;
@@ -1422,6 +1435,24 @@ window.addEventListener('DOMContentLoaded', async () => {
       e.stopPropagation();
       const sidebar = document.querySelector('.sidebar-wrapper');
       if (sidebar) sidebar.classList.toggle('show-mobile-sidebar');
+    });
+  }
+
+  // Password visibility toggle on login view
+  const togglePassBtn = document.getElementById('toggle-login-password');
+  if (togglePassBtn) {
+    togglePassBtn.addEventListener('click', () => {
+      const passInput = document.getElementById('password');
+      const icon = togglePassBtn.querySelector('.material-symbols-outlined');
+      if (passInput && icon) {
+        if (passInput.type === 'password') {
+          passInput.type = 'text';
+          icon.textContent = 'visibility_off';
+        } else {
+          passInput.type = 'password';
+          icon.textContent = 'visibility';
+        }
+      }
     });
   }
 

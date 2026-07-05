@@ -70,3 +70,20 @@ canvas {
   border-left: 3px solid #adc6ff;
   border-radius: 8px;
 }
+
+/* Color helper mappings to resolve Bootstrap text color class fallbacks */
+.text-muted {
+  color: #8b90a0 !important; /* maps to outline color */
+}
+.text-secondary {
+  color: #c1c6d7 !important; /* maps to on-surface-variant */
+}
+.text-light {
+  color: #dae2fd !important;
+}
+.text-dark {
+  color: #0b1326 !important;
+}
+.bg-light {
+  background-color: #131b2e !important; /* maps to surface-container-low */
+}

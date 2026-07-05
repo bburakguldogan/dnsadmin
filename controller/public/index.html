@@ -62,9 +62,9 @@
             "on-tertiary": "#472a00"
           },
           "borderRadius": {
-            "DEFAULT": "4px",
-            "lg": "8px",
-            "xl": "12px",
+            "DEFAULT": "0.125rem",
+            "lg": "0.25rem",
+            "xl": "0.5rem",
             "full": "9999px"
           },
           "spacing": {
@@ -109,30 +109,64 @@
 
   <!-- ==================== LOGIN VIEW ==================== -->
   <div id="login-container" class="flex min-h-screen items-center justify-center bg-background px-md py-xl relative overflow-hidden">
-    <div class="absolute inset-0 bg-[radial-gradient(circle_at_50%_120%,rgba(75,142,255,0.15),transparent_50%)] pointer-events-none"></div>
-    <div class="login-card max-w-md w-full bg-surface-container border border-outline-variant rounded-xl overflow-hidden shadow-2xl z-10">
-      <div class="login-card-header bg-surface-container-low border-b border-outline-variant px-lg py-md text-center">
-        <div class="inline-flex w-12 h-12 bg-primary-container rounded items-center justify-center text-on-primary-container mb-md">
-          <span class="material-symbols-outlined text-[28px]">dns</span>
+    <!-- Background decorative elements for NOC atmosphere -->
+    <div class="absolute inset-0 z-0 opacity-20 pointer-events-none">
+      <div class="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-[120px]"></div>
+      <div class="absolute bottom-1/4 right-1/4 w-96 h-96 bg-secondary/10 rounded-full blur-[120px]"></div>
+    </div>
+    <!-- Login Container -->
+    <div class="w-full max-w-[440px] px-md relative z-10">
+      <div class="glass-panel p-xl rounded-xl shadow-2xl flex flex-col gap-lg bg-surface-container border border-outline-variant">
+        <!-- Branding & Heading -->
+        <div class="text-center space-y-xs">
+          <div class="flex items-center justify-center gap-sm mb-sm">
+            <span class="material-symbols-outlined text-primary text-headline-md" style="font-variation-settings: 'FILL' 1;">terminal</span>
+            <span class="font-headline-md text-headline-md font-bold text-primary tracking-tight">Synthetic Edge</span>
+          </div>
+          <h1 class="font-headline-md text-headline-md text-on-surface">Sign in to NOC Terminal</h1>
+          <p class="font-body-sm text-body-sm text-on-surface-variant">Global DNS Infrastructure Node</p>
         </div>
-        <h2 class="font-headline-md text-headline-md text-on-surface">NetOps DNS Controller</h2>
-        <p class="text-on-surface-variant font-body-sm mt-xs">Access centralized network operations terminal</p>
-      </div>
-      <div class="login-card-body p-lg">
-        <form id="login-form" class="space-y-md">
-          <div>
-            <label class="block font-label-caps text-label-caps text-outline uppercase mb-xs">Username</label>
-            <input class="w-full bg-surface-container-lowest border border-outline-variant rounded px-md py-sm font-label-mono text-label-mono text-on-surface focus:ring-1 focus:ring-primary outline-none transition-all" id="username" placeholder="Enter username" required type="text"/>
+        <!-- Form Section -->
+        <form id="login-form" class="flex flex-col gap-md">
+          <!-- Username -->
+          <div class="flex flex-col gap-xs">
+            <label class="font-label-caps text-label-caps text-on-surface-variant" for="username">Username</label>
+            <div class="input-focus-glow flex items-center bg-surface-container-lowest border border-outline-variant rounded transition-all">
+              <span class="material-symbols-outlined px-sm text-on-surface-variant">alternate_email</span>
+              <input class="w-full bg-transparent border-none focus:ring-0 text-on-surface font-label-mono text-label-mono py-md pr-md placeholder:text-outline-variant outline-none" id="username" placeholder="admin" required type="text"/>
+            </div>
           </div>
-          <div>
-            <label class="block font-label-caps text-label-caps text-outline uppercase mb-xs">Password</label>
-            <input class="w-full bg-surface-container-lowest border border-outline-variant rounded px-md py-sm font-label-mono text-label-mono text-on-surface focus:ring-1 focus:ring-primary outline-none transition-all" id="password" placeholder="Enter password" required type="password"/>
+          <!-- Password -->
+          <div class="flex flex-col gap-xs">
+            <div class="flex justify-between items-center">
+              <label class="font-label-caps text-label-caps text-on-surface-variant" for="password">Password</label>
+            </div>
+            <div class="input-focus-glow flex items-center bg-surface-container-lowest border border-outline-variant rounded transition-all">
+              <span class="material-symbols-outlined px-sm text-on-surface-variant">lock</span>
+              <input class="w-full bg-transparent border-none focus:ring-0 text-on-surface font-label-mono text-label-mono py-md pr-md placeholder:text-outline-variant outline-none" id="password" placeholder="••••••••••••" required type="password"/>
+              <button class="px-sm text-on-surface-variant hover:text-on-surface" type="button" id="toggle-login-password">
+                <span class="material-symbols-outlined">visibility</span>
+              </button>
+            </div>
           </div>
-          <button type="submit" class="w-full bg-primary text-on-primary py-sm font-label-caps text-label-caps rounded hover:opacity-90 transition-opacity flex items-center justify-center gap-xs">
-            <span class="material-symbols-outlined text-[18px]">lock_open</span>
-            Sign In to Terminal
-          </button>
+          <!-- Actions -->
+          <div class="flex flex-col gap-md pt-sm">
+            <button type="submit" class="bg-primary text-on-primary-container font-label-caps text-label-caps py-md rounded-lg font-bold hover:brightness-110 active:scale-[0.98] transition-all shadow-lg shadow-primary/10 flex justify-center items-center gap-sm group">
+              Sign In
+              <span class="material-symbols-outlined group-hover:translate-x-1 transition-transform">login</span>
+            </button>
+          </div>
         </form>
+        <!-- Status Footer -->
+        <div class="pt-sm border-t border-outline-variant/20 flex flex-col gap-sm">
+          <div class="flex justify-between items-center">
+            <div class="flex items-center gap-xs">
+              <span class="w-2 h-2 rounded-full bg-secondary shadow-[0_0_8px_rgba(78,222,163,0.5)]"></span>
+              <span class="font-label-mono text-[10px] text-secondary uppercase">All Systems Operational</span>
+            </div>
+            <span class="font-label-mono text-[10px] text-on-surface-variant">NODE: TR-WEST-1</span>
+          </div>
+        </div>
       </div>
     </div>
   </div>
