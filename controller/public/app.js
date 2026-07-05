@@ -1034,6 +1034,17 @@ async function fetchLogs() {
 }
 
 document.getElementById('logs-refresh-btn').addEventListener('click', fetchLogs);
+document.getElementById('clear-logs-btn').addEventListener('click', async () => {
+  if (confirm('Are you sure you want to clear all synchronization logs?')) {
+    try {
+      await apiFetch('/logs', { method: 'DELETE' });
+      showToast('Logs cleared successfully.');
+      fetchLogs();
+    } catch (err) {
+      showToast(err.message, 'error');
+    }
+  }
+});
 
 // ==========================================
 // Modal Window Utility Helpers

@@ -1,5 +1,5 @@
 /* ==============================================================================
-   ZoneCloud Custom Premium Stylesheet (Complete Rewrite from Scratch)
+   DNSAdmin Custom Premium Stylesheet (Complete Rewrite from Scratch)
    ============================================================================== */
 
 /* Fonts & Core Theme Tokens */
@@ -28,7 +28,7 @@
 }
 
 body.dark-theme {
-  /* Premium Dark Theme Colors - Exact ZoneCloud Spec */
+  /* Premium Dark Theme Colors - Exact DNSAdmin Spec */
   --body-bg: #0c0f16;
   --card-bg: #141722;
   --card-border: #1e2230;

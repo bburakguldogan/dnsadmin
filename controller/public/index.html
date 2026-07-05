@@ -41,7 +41,7 @@
       <div class="col-md-4 col-md-offset-4 col-sm-6 col-sm-offset-3 col-xs-10 col-xs-offset-1">
         <div class="login-card">
           <div class="login-card-header">
-            <h2>ZoneCloud</h2>
+            <h2>DNSAdmin</h2>
             <p>Controller Management Panel</p>
           </div>
           <div class="login-card-body">
@@ -133,7 +133,7 @@
         <!-- SIDEBAR PANEL -->
         <div class="col-sm-3 col-md-2 sidebar-wrapper">
           <div class="sidebar-logo">
-            <h3 style="margin: 0; font-size: 19px; font-weight: 700; color: #fff; letter-spacing: 0.5px;">ZoneCloud</h3>
+            <h3 style="margin: 0; font-size: 19px; font-weight: 700; color: #fff; letter-spacing: 0.5px;">DNSAdmin</h3>
             <span style="font-size: 10px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">Controller</span>
           </div>
           <div class="sidebar-user-panel">
@@ -261,7 +261,7 @@
                 <div class="dashboard-card-info" style="min-height: 230px;">
                   <h4>RBL Status</h4>
                   <p id="dashboard-rbl-status-text">Your servers are not listed in any RBL.</p>
-                  <a href="#logs" class="btn-action" style="margin-top: 15px;">See reports →</a>
+                  <a href="#lists" class="btn-action" style="margin-top: 15px;">See reports →</a>
                 </div>
               </div>
 
@@ -491,7 +491,8 @@
           <!-- SYNC LOGS PAGE VIEW -->
           <section id="page-logs" class="page-section" style="display: none;">
             <div class="row" style="margin-bottom: 20px;">
-              <div class="col-md-12 text-right">
+              <div class="col-md-12 text-right" style="display: flex; justify-content: flex-end; gap: 8px;">
+                <button id="clear-logs-btn" class="btn btn-danger"><span class="glyphicon glyphicon-trash"></span> Clear logs</button>
                 <button id="logs-refresh-btn" class="btn btn-default"><span class="glyphicon glyphicon-refresh"></span> Refresh logs</button>
               </div>
             </div>

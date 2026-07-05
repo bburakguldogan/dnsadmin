@@ -566,7 +566,7 @@ router.delete('/servers/:id', authenticateToken, async (req, res) => {
 });
 
 // ==========================================
-// Log Retrieval Route
+// Log Retrieval & Management Routes
 // ==========================================
 
 router.get('/logs', authenticateToken, async (req, res) => {
@@ -579,6 +579,15 @@ router.get('/logs', authenticateToken, async (req, res) => {
       LIMIT 100
     `);
     res.json(logs);
+  } catch (err) {
+    res.status(500).json({ error: 'Database error' });
+  }
+});
+
+router.delete('/logs', authenticateToken, async (req, res) => {
+  try {
+    await query.run('DELETE FROM sync_logs');
+    res.json({ message: 'Logs cleared successfully' });
   } catch (err) {
     res.status(500).json({ error: 'Database error' });
   }
