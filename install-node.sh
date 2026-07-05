@@ -274,6 +274,15 @@ Restart=on-failure
 WantedBy=multi-user.target
 EOF
 
+# Open Node Agent Port in firewall
+if command -v firewall-cmd &>/dev/null; then
+  firewall-cmd --zone=public --add-port="$NODE_PORT"/tcp --permanent
+  firewall-cmd --reload &>/dev/null
+fi
+if command -v ufw &>/dev/null; then
+  ufw allow "$NODE_PORT"/tcp &>/dev/null
+fi
+
 # Reload and start services
 systemctl daemon-reload
 systemctl enable "$BIND_SERVICE"
