@@ -1,877 +1,891 @@
 <!DOCTYPE html>
-<html lang="en">
+<html class="dark" lang="en">
 <head>
-  <script>
-    window.onerror = function(message, source, lineno, colno, error) {
-      fetch('/api/v1/agent/log-browser-error', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          message: message,
-          source: source,
-          lineno: lineno,
-          colno: colno,
-          error: error ? error.stack : null
-        })
-      });
-    };
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>NetOps DNS | NOC Terminal</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "primary-fixed": "#d8e2ff",
+            "surface-container-highest": "#2d3449",
+            "error-container": "#93000a",
+            "primary": "#adc6ff",
+            "on-secondary-container": "#00311f",
+            "surface-container-lowest": "#060e20",
+            "on-secondary-fixed": "#002113",
+            "outline": "#8b90a0",
+            "surface-tint": "#adc6ff",
+            "on-error-container": "#ffdad6",
+            "secondary-fixed": "#6ffbbe",
+            "on-primary": "#002e69",
+            "on-error": "#690005",
+            "on-surface-variant": "#c1c6d7",
+            "on-secondary": "#003824",
+            "background": "#0b1326",
+            "secondary-fixed-dim": "#4edea3",
+            "tertiary-container": "#ca8100",
+            "surface-container-high": "#222a3d",
+            "on-primary-fixed-variant": "#004493",
+            "inverse-on-surface": "#283044",
+            "on-surface": "#dae2fd",
+            "surface-dim": "#0b1326",
+            "secondary": "#4edea3",
+            "on-tertiary-fixed": "#2a1700",
+            "on-secondary-fixed-variant": "#005236",
+            "on-background": "#dae2fd",
+            "inverse-primary": "#005bc1",
+            "on-tertiary-fixed-variant": "#653e00",
+            "on-primary-fixed": "#001a41",
+            "tertiary-fixed": "#ffddb8",
+            "on-tertiary-container": "#3e2400",
+            "primary-container": "#4b8eff",
+            "surface-variant": "#2d3449",
+            "surface-bright": "#31394d",
+            "surface-container-low": "#131b2e",
+            "tertiary-fixed-dim": "#ffb95f",
+            "tertiary": "#ffb95f",
+            "error": "#ffb4ab",
+            "on-primary-container": "#00285c",
+            "inverse-surface": "#dae2fd",
+            "outline-variant": "#414755",
+            "surface": "#0b1326",
+            "primary-fixed-dim": "#adc6ff",
+            "secondary-container": "#00a572",
+            "surface-container": "#171f33",
+            "on-tertiary": "#472a00"
+          },
+          "borderRadius": {
+            "DEFAULT": "4px",
+            "lg": "8px",
+            "xl": "12px",
+            "full": "9999px"
+          },
+          "spacing": {
+            "md": "16px",
+            "xs": "4px",
+            "gutter": "20px",
+            "xl": "32px",
+            "sm": "8px",
+            "lg": "24px",
+            "base": "4px",
+            "container-max": "1440px"
+          },
+          "fontFamily": {
+            "label-caps": ["Inter"],
+            "body-md": ["Inter"],
+            "headline-lg-mobile": ["Inter"],
+            "display-lg": ["Inter"],
+            "headline-lg": ["Inter"],
+            "headline-md": ["Inter"],
+            "body-sm": ["Inter"],
+            "body-lg": ["Inter"],
+            "label-mono": ["JetBrains Mono"]
+          },
+          "fontSize": {
+            "label-caps": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+            "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+            "headline-lg-mobile": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+            "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+            "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+            "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+            "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+            "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+            "label-mono": ["13px", {"lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500"}]
+          }
+        },
+      },
+    }
   </script>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>DNSAdmin - Centralized DNS Controller</title>
-  <meta name="description" content="Centralized DNS Control Panel with panel integrations and multi-node synchronization.">
-  
-  <!-- Bootstrap 5.3.2 CSS & Icons -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
-  <!-- Google Fonts Inter & Source Code Pro -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Source+Code+Pro:wght@400;500;600&display=swap" rel="stylesheet">
-  
-  <link rel="stylesheet" href="app.css?v=3">
+  <link href="app.css" rel="stylesheet"/>
 </head>
-<body>
+<body class="font-body-md text-body-md overflow-hidden selection:bg-primary selection:text-on-primary">
 
-  <!-- TOAST ALERTS CONTAINER -->
-  <div id="toast-container"></div>
-
-  <!-- LOGIN PANEL -->
-  <div id="login-container" class="container">
-    <div class="row">
-      <div class="col-lg-4 offset-lg-4 col-md-6 offset-md-3 col-sm-8 offset-sm-2 col-10 offset-1">
-        <div class="login-card card border-0 shadow">
-          <div class="login-card-header text-center card-header py-4">
-            <h2 class="fw-bold mb-1">DNSAdmin</h2>
-            <p class="text-muted small mb-0">Controller Management Panel</p>
-          </div>
-          <div class="login-card-body card-body p-4">
-            <form id="login-form">
-              <div class="mb-3">
-                <label class="form-label">Username</label>
-                <input type="text" class="form-control" id="username" placeholder="Username" required autocomplete="username">
-              </div>
-              <div class="mb-4">
-                <label class="form-label">Password</label>
-                <input type="password" class="form-control" id="password" placeholder="Password" required autocomplete="current-password">
-              </div>
-              <button type="submit" class="btn btn-primary w-100 py-2 fw-semibold">Sign In</button>
-            </form>
-          </div>
+  <!-- ==================== LOGIN VIEW ==================== -->
+  <div id="login-container" class="flex min-h-screen items-center justify-center bg-background px-md py-xl relative overflow-hidden">
+    <div class="absolute inset-0 bg-[radial-gradient(circle_at_50%_120%,rgba(75,142,255,0.15),transparent_50%)] pointer-events-none"></div>
+    <div class="login-card max-w-md w-full bg-surface-container border border-outline-variant rounded-xl overflow-hidden shadow-2xl z-10">
+      <div class="login-card-header bg-surface-container-low border-b border-outline-variant px-lg py-md text-center">
+        <div class="inline-flex w-12 h-12 bg-primary-container rounded items-center justify-center text-on-primary-container mb-md">
+          <span class="material-symbols-outlined text-[28px]">dns</span>
         </div>
+        <h2 class="font-headline-md text-headline-md text-on-surface">NetOps DNS Controller</h2>
+        <p class="text-on-surface-variant font-body-sm mt-xs">Access centralized network operations terminal</p>
+      </div>
+      <div class="login-card-body p-lg">
+        <form id="login-form" class="space-y-md">
+          <div>
+            <label class="block font-label-caps text-label-caps text-outline uppercase mb-xs">Username</label>
+            <input class="w-full bg-surface-container-lowest border border-outline-variant rounded px-md py-sm font-label-mono text-label-mono text-on-surface focus:ring-1 focus:ring-primary outline-none transition-all" id="username" placeholder="Enter username" required type="text"/>
+          </div>
+          <div>
+            <label class="block font-label-caps text-label-caps text-outline uppercase mb-xs">Password</label>
+            <input class="w-full bg-surface-container-lowest border border-outline-variant rounded px-md py-sm font-label-mono text-label-mono text-on-surface focus:ring-1 focus:ring-primary outline-none transition-all" id="password" placeholder="Enter password" required type="password"/>
+          </div>
+          <button type="submit" class="w-full bg-primary text-on-primary py-sm font-label-caps text-label-caps rounded hover:opacity-90 transition-opacity flex items-center justify-center gap-xs">
+            <span class="material-symbols-outlined text-[18px]">lock_open</span>
+            Sign In to Terminal
+          </button>
+        </form>
       </div>
     </div>
   </div>
 
-  <!-- FORCE PASSWORD CHANGE PANEL -->
-  <div id="force-password-container" class="container" style="display: none;">
-    <div class="row">
-      <div class="col-lg-4 offset-lg-4 col-md-6 offset-md-3 col-sm-8 offset-sm-2 col-10 offset-1">
-        <div class="login-card card border-0 shadow">
-          <div class="login-card-header text-center card-header danger py-4">
-            <h3 class="fw-bold text-danger mb-1">Password Change Required</h3>
-            <p class="text-muted small mb-0">Please update your credentials to proceed</p>
+  <!-- ==================== FORCE PASSWORD VIEW ==================== -->
+  <div id="force-password-container" style="display: none;" class="flex min-h-screen items-center justify-center bg-background px-md py-xl relative overflow-hidden">
+    <div class="login-card max-w-md w-full bg-surface-container border border-outline-variant rounded-xl overflow-hidden shadow-2xl z-10">
+      <div class="login-card-header bg-surface-container-low border-b border-outline-variant px-lg py-md text-center">
+        <h2 class="font-headline-md text-headline-md text-on-surface">Change Password</h2>
+        <p class="text-on-surface-variant font-body-sm mt-xs">You must change your password before logging in</p>
+      </div>
+      <div class="login-card-body p-lg">
+        <form id="force-password-form" class="space-y-md">
+          <div>
+            <label class="block font-label-caps text-label-caps text-outline uppercase mb-xs">New Password</label>
+            <input class="w-full bg-surface-container-lowest border border-outline-variant rounded px-md py-sm font-label-mono text-label-mono text-on-surface focus:ring-1 focus:ring-primary outline-none transition-all" id="force-password" required type="password"/>
           </div>
-          <div class="login-card-body card-body p-4">
-            <p class="text-muted small mb-4">
-              Your account has been initialized with a temporary random password. You must change it before you can access the dashboard.
-            </p>
-            <form id="force-password-form">
-              <div class="mb-3">
-                <label class="form-label">Email Address</label>
-                <input type="email" class="form-control" id="force-email" placeholder="e.g. admin@yourdomain.com" required>
-              </div>
-              <div class="mb-3">
-                <label class="form-label">New Password</label>
-                <input type="password" class="form-control" id="force-new-password" placeholder="Enter new password" required>
-              </div>
-              <div class="mb-4">
-                <label class="form-label">Confirm Password</label>
-                <input type="password" class="form-control" id="force-confirm-password" placeholder="Confirm new password" required>
-              </div>
-              <button type="submit" class="btn btn-danger w-100 py-2 fw-semibold">Update & Proceed</button>
-            </form>
+          <div>
+            <label class="block font-label-caps text-label-caps text-outline uppercase mb-xs">Confirm Password</label>
+            <input class="w-full bg-surface-container-lowest border border-outline-variant rounded px-md py-sm font-label-mono text-label-mono text-on-surface focus:ring-1 focus:ring-primary outline-none transition-all" id="force-confirm-password" required type="password"/>
           </div>
-        </div>
+          <button type="submit" class="w-full bg-primary text-on-primary py-sm font-label-caps text-label-caps rounded hover:opacity-90 transition-opacity flex items-center justify-center gap-xs">
+            Update Password
+          </button>
+        </form>
       </div>
     </div>
   </div>
 
-  <!-- MAIN APP PANEL -->
-  <div id="app-container" style="display: none;">
-    <!-- MOBILE TOP BAR -->
-    <div class="mobile-header-bar d-flex align-items-center justify-content-between">
-      <button type="button" id="mobile-sidebar-toggle" class="btn p-2 text-dark border-0">
-        <i class="bi bi-list fs-4"></i>
-      </button>
-      <span class="mobile-brand fw-bold">DNSAdmin Panel</span>
-      <div style="width: 40px;"></div>
-    </div>
-
-    <!-- CONTENT WRAPPER GRID -->
-    <div class="container-fluid p-0">
-      <div class="d-flex min-vh-100 flex-column flex-md-row">
-        
-        <!-- SIDEBAR PANEL -->
-        <div class="sidebar-wrapper flex-shrink-0">
-          <div class="sidebar-logo text-center py-4 border-bottom">
-            <h3 class="m-0 fw-bold text-white fs-4">DNSAdmin</h3>
-            <span class="text-muted small fw-bold text-uppercase tracking-wider">Controller</span>
+  <!-- ==================== MAIN DASHBOARD VIEW ==================== -->
+  <div id="app-container" style="display: none;" class="flex h-screen w-full overflow-hidden">
+    <!-- SideNavBar -->
+    <aside class="fixed left-0 top-0 h-full w-64 bg-surface-container-low border-r border-outline-variant flex flex-col py-lg z-50">
+      <div class="px-md mb-xl">
+        <div class="flex items-center gap-sm">
+          <div class="w-8 h-8 bg-primary rounded flex items-center justify-center text-on-primary">
+            <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">dns</span>
           </div>
-          <div class="sidebar-user-panel d-flex align-items-center gap-3 p-3 border-bottom">
-            <div class="sidebar-user-avatar d-flex align-items-center justify-content-center fw-bold text-white bg-primary">AD</div>
-            <div class="sidebar-user-info">
-              <span id="user-display" class="fw-semibold text-white d-block">Administrator</span>
-              <span class="sidebar-user-status small">● Online</span>
+          <span class="font-headline-md text-headline-md text-on-surface">NOC Terminal</span>
+        </div>
+        <p class="font-label-mono text-label-mono text-on-surface-variant mt-xs">Global Admin</p>
+      </div>
+      <nav class="flex-1 px-sm space-y-xs overflow-y-auto custom-scrollbar">
+        <a id="menu-dashboard" class="sidebar-menu-item flex items-center gap-md px-md py-sm text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high rounded-lg mx-2 transition-all group active" href="#dashboard">
+          <span class="material-symbols-outlined">dashboard</span>
+          <span class="font-label-caps text-label-caps">Dashboard</span>
+        </a>
+        <a id="menu-nodes" class="sidebar-menu-item flex items-center gap-md px-md py-sm text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high rounded-lg mx-2 transition-all group" href="#nodes">
+          <span class="material-symbols-outlined">dns</span>
+          <span class="font-label-caps text-label-caps">DNS Nodes</span>
+        </a>
+        <a id="menu-servers" class="sidebar-menu-item flex items-center gap-md px-md py-sm text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high rounded-lg mx-2 transition-all group" href="#servers">
+          <span class="material-symbols-outlined">server</span>
+          <span class="font-label-caps text-label-caps">Hosting Agents</span>
+        </a>
+        <a id="menu-lists" class="sidebar-menu-item flex items-center gap-md px-md py-sm text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high rounded-lg mx-2 transition-all group" href="#lists">
+          <span class="material-symbols-outlined">shield_lock</span>
+          <span class="font-label-caps text-label-caps">RBL Blacklists</span>
+        </a>
+        <a id="menu-zones" class="sidebar-menu-item flex items-center gap-md px-md py-sm text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high rounded-lg mx-2 transition-all group" href="#zones">
+          <span class="material-symbols-outlined">language</span>
+          <span class="font-label-caps text-label-caps">DNS Zones</span>
+        </a>
+        <a id="menu-logs" class="sidebar-menu-item flex items-center gap-md px-md py-sm text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high rounded-lg mx-2 transition-all group" href="#logs">
+          <span class="material-symbols-outlined">terminal</span>
+          <span class="font-label-caps text-label-caps">System Logs</span>
+        </a>
+        <a id="menu-users" class="sidebar-menu-item flex items-center gap-md px-md py-sm text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high rounded-lg mx-2 transition-all group" href="#users">
+          <span class="material-symbols-outlined">group</span>
+          <span class="font-label-caps text-label-caps">System Users</span>
+        </a>
+        <a id="menu-profile" class="sidebar-menu-item flex items-center gap-md px-md py-sm text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high rounded-lg mx-2 transition-all group" href="#profile">
+          <span class="material-symbols-outlined">manage_accounts</span>
+          <span class="font-label-caps text-label-caps">My Profile</span>
+        </a>
+      </nav>
+      <div class="px-md mt-auto">
+        <a id="sidebar-logout-btn" class="w-full bg-error-container text-on-error-container py-sm font-label-caps text-label-caps rounded-lg hover:opacity-90 transition-opacity flex items-center justify-center gap-xs cursor-pointer" href="#">
+          <span class="material-symbols-outlined text-[18px]">logout</span>
+          Logout Terminal
+        </a>
+      </div>
+    </aside>
+
+    <!-- Main Content Wrapper -->
+    <main class="flex-1 ml-64 flex flex-col h-screen relative bg-background overflow-hidden">
+      <!-- TopNavBar -->
+      <header class="h-16 flex justify-between items-center w-full px-gutter bg-surface border-b border-outline-variant z-40 relative">
+        <div class="flex items-center gap-lg flex-1">
+          <a id="mobile-sidebar-toggle" class="md:hidden text-primary p-2 mr-2 cursor-pointer">
+            <span class="material-symbols-outlined">menu</span>
+          </a>
+          <span id="page-title" class="font-headline-md text-headline-md font-bold text-primary">NOC Terminal</span>
+        </div>
+        <div class="flex items-center gap-md">
+          <div class="flex items-center gap-xs px-md border-r border-outline-variant mr-md">
+            <a id="theme-toggle-btn" class="text-primary hover:bg-surface-container-highest p-1.5 rounded transition-colors cursor-pointer">
+              <span class="material-symbols-outlined">contrast</span>
+            </a>
+          </div>
+          <div class="flex items-center gap-sm">
+            <div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-on-primary font-bold" id="user-avatar-initial">A</div>
+            <div>
+              <p class="font-label-caps text-label-caps leading-none" id="user-display">Admin_Root</p>
+              <p class="text-[10px] text-primary-fixed leading-none mt-1">Superuser</p>
             </div>
           </div>
-          <div class="sidebar-menu-header text-uppercase p-3 pb-2 text-muted fw-bold">Navigation</div>
-          <ul class="sidebar-menu list-unstyled mb-5">
-            <li class="sidebar-menu-item active" id="menu-dashboard">
-              <a href="#dashboard"><i class="bi bi-speedometer2 me-3"></i> Dashboard</a>
-            </li>
-            <li class="sidebar-menu-item" id="menu-servers">
-              <a href="#servers"><i class="bi bi-server me-3"></i> Servers</a>
-            </li>
-            <li class="sidebar-menu-item" id="menu-nodes">
-              <a href="#nodes"><i class="bi bi-cpu me-3"></i> Nodes</a>
-            </li>
-            <li class="sidebar-menu-item" id="menu-zones">
-              <a href="#zones"><i class="bi bi-globe me-3"></i> Zones</a>
-            </li>
-            <li class="sidebar-menu-item" id="menu-lists">
-              <a href="#lists"><i class="bi bi-list-check me-3"></i> Lists</a>
-            </li>
-            <li class="sidebar-menu-item" id="menu-logs">
-              <a href="#logs"><i class="bi bi-journal-text me-3"></i> Logs</a>
-            </li>
-            <li class="sidebar-menu-item" id="menu-profile">
-              <a href="#profile"><i class="bi bi-gear me-3"></i> Settings</a>
-            </li>
-            <li class="sidebar-menu-item" id="menu-users">
-              <a href="#users"><i class="bi bi-people me-3"></i> Users</a>
-            </li>
-            <li class="sidebar-menu-item">
-              <a href="#" id="sidebar-logout-btn"><i class="bi bi-box-arrow-right me-3"></i> Logout</a>
-            </li>
-          </ul>
-          <div class="sidebar-footer d-flex justify-content-between align-items-center p-3 border-top bg-dark-deep">
-            <a href="#" id="theme-toggle-btn-sidebar" class="text-muted"><i class="bi bi-brightness-high-fill fs-5"></i></a>
-            <span class="text-muted small fw-semibold">v2.4.0</span>
-          </div>
         </div>
+      </header>
 
-        <!-- MAIN PANEL BODY -->
-        <div class="flex-grow-1 content-wrapper p-4">
+      <!-- Scrollable Content Canvas -->
+      <div class="flex-1 overflow-y-auto p-gutter relative z-10 scanline custom-scrollbar">
+        <div class="max-w-container-max mx-auto space-y-lg">
           
-          <div class="mb-4">
-            <h2 id="page-title" class="m-0 fw-bold">Dashboard</h2>
-          </div>
+          <!-- ==================== VIEW: DASHBOARD ==================== -->
+          <section id="page-dashboard" class="page-section space-y-lg">
+            <div class="flex justify-between items-end">
+              <div>
+                <h1 class="font-headline-lg text-headline-lg text-on-surface">Network Overview</h1>
+                <p class="text-on-surface-variant font-body-sm mt-1">Real-time status of global DNS resolution and infrastructure.</p>
+              </div>
+              <div id="dashboard-issues-card" class="bg-surface-container border border-outline-variant px-md py-sm rounded-lg flex items-center gap-sm">
+                <span class="w-2 h-2 bg-secondary rounded-full glow-pulse" id="status-glow-dot"></span>
+                <span class="font-label-caps text-label-caps" id="dashboard-issues-text">System Status: Nominal</span>
+              </div>
+            </div>
 
-          <!-- DASHBOARD PAGE VIEW -->
-          <section id="page-dashboard" class="page-section">
-            
-            <!-- Row 1: Hosting Servers (Agents) and Nameservers (Nodes) Tables -->
-            <div class="row row-flex g-4 mb-4">
-              <div class="col-xl-6 col-12">
-                <div class="card h-100 border shadow-sm">
-                  <div class="card-header py-3 d-flex align-items-center justify-content-between bg-light">
-                    <h5 class="m-0 fw-bold text-dark">Agents (Hosting Servers)</h5>
-                  </div>
-                  <div class="card-body p-0 table-responsive">
-                    <table class="table table-hover align-middle mb-0">
-                      <thead>
-                        <tr>
-                          <th>Server name</th>
-                          <th>Last seen</th>
-                          <th>Zones / excluded</th>
-                          <th>Panel | DNS Type</th>
-                          <th>RBL Status</th>
-                          <th>Cluster</th>
-                        </tr>
-                      </thead>
-                      <tbody id="dashboard-servers-table">
-                        <tr><td colspan="6" class="text-center py-4 text-muted">Loading hosting servers...</td></tr>
-                      </tbody>
-                    </table>
+            <!-- Bento Stats Panel -->
+            <div class="grid grid-cols-12 gap-lg">
+              <div class="col-span-12 md:col-span-4 bg-surface-container border border-outline-variant rounded-xl p-lg flex flex-col justify-between">
+                <div>
+                  <h3 class="font-label-caps text-label-caps text-on-surface-variant mb-md uppercase">DNS Nodes</h3>
+                  <div class="flex items-baseline gap-sm">
+                    <span class="font-display-lg text-display-lg text-primary" id="dashboard-stat-users">0</span>
                   </div>
                 </div>
+                <div class="pt-md border-t border-outline-variant mt-md text-body-sm text-outline">Authoritative cluster nodes</div>
               </div>
+              <div class="col-span-12 md:col-span-4 bg-surface-container border border-outline-variant rounded-xl p-lg flex flex-col justify-between">
+                <div>
+                  <h3 class="font-label-caps text-label-caps text-on-surface-variant mb-md uppercase">Hosting Servers</h3>
+                  <div class="flex items-baseline gap-sm">
+                    <span class="font-display-lg text-display-lg text-secondary" id="dashboard-stat-servers">0</span>
+                  </div>
+                </div>
+                <div class="pt-md border-t border-outline-variant mt-md text-body-sm text-outline">Active integrated hosting agents</div>
+              </div>
+              <div class="col-span-12 md:col-span-4 bg-surface-container border border-outline-variant rounded-xl p-lg flex flex-col justify-between">
+                <div>
+                  <h3 class="font-label-caps text-label-caps text-on-surface-variant mb-md uppercase">Managed Zones</h3>
+                  <div class="flex items-baseline gap-sm">
+                    <span class="font-display-lg text-display-lg text-tertiary" id="dashboard-stat-zones">0</span>
+                  </div>
+                </div>
+                <div class="pt-md border-t border-outline-variant mt-md text-body-sm text-outline">DNS zone files served</div>
+              </div>
+            </div>
 
-              <div class="col-xl-6 col-12">
-                <div class="card h-100 border shadow-sm">
-                  <div class="card-header py-3 d-flex align-items-center justify-content-between bg-light">
-                    <h5 class="m-0 fw-bold text-dark">Nodes (DNS Nameservers)</h5>
-                  </div>
-                  <div class="card-body p-0 table-responsive">
-                    <table class="table table-hover align-middle mb-0">
-                      <thead>
-                        <tr>
-                          <th>Server name</th>
-                          <th>Last seen</th>
-                          <th>Zones</th>
-                          <th>RBL Status</th>
-                          <th>Cluster</th>
-                        </tr>
-                      </thead>
-                      <tbody id="dashboard-nodes-table">
-                        <tr><td colspan="5" class="text-center py-4 text-muted">Loading DNS nodes...</td></tr>
-                      </tbody>
-                    </table>
-                  </div>
+            <!-- Main Area Chart Row -->
+            <div class="grid grid-cols-12 gap-lg">
+              <div class="col-span-12 lg:col-span-6 bg-surface-container border border-outline-variant rounded-xl p-lg">
+                <h3 class="font-label-caps text-label-caps text-on-surface-variant mb-md">Zone Count Per Server</h3>
+                <div class="h-64 w-full relative">
+                  <canvas id="chart-zone-count"></canvas>
+                </div>
+              </div>
+              <div class="col-span-12 lg:col-span-6 bg-surface-container border border-outline-variant rounded-xl p-lg">
+                <h3 class="font-label-caps text-label-caps text-on-surface-variant mb-md">Zone Activity Logs</h3>
+                <div class="h-64 w-full relative">
+                  <canvas id="chart-activity"></canvas>
                 </div>
               </div>
             </div>
 
-            <!-- Row 2: Logs, RBL Status, Issues, Stats Cards -->
-            <div class="row row-flex g-4 mb-4">
-              <!-- Latest Logs -->
-              <div class="col-xl-3 col-md-6 col-12">
-                <div class="card h-100 border shadow-sm" style="min-height: 230px;">
-                  <div class="card-header py-3 bg-light">
-                    <h6 class="m-0 fw-bold text-dark">Latest logs</h6>
-                  </div>
-                  <div class="card-body p-0" style="max-height: 180px; overflow-y: auto;">
-                    <table class="table align-middle mb-0" style="font-size: 11px;">
-                      <tbody id="dashboard-recent-logs">
-                        <!-- Dynamic -->
-                      </tbody>
-                    </table>
-                  </div>
+            <!-- Real-time Agent/Node tables -->
+            <div class="grid grid-cols-12 gap-lg">
+              <div class="col-span-12 lg:col-span-6 bg-surface-container border border-outline-variant rounded-xl overflow-hidden">
+                <div class="p-md border-b border-outline-variant bg-surface-container-low">
+                  <h3 class="font-label-caps text-label-caps text-on-surface">Hosting Agents</h3>
+                </div>
+                <div class="overflow-x-auto">
+                  <table class="w-full text-left border-collapse">
+                    <thead class="bg-surface-container-lowest border-b border-outline-variant">
+                      <tr>
+                        <th class="px-md py-sm font-label-caps text-label-caps text-outline uppercase">Server name</th>
+                        <th class="px-md py-sm font-label-caps text-label-caps text-outline uppercase">Last seen</th>
+                        <th class="px-md py-sm font-label-caps text-label-caps text-outline uppercase">Zones</th>
+                        <th class="px-md py-sm font-label-caps text-label-caps text-outline uppercase">DNS Type</th>
+                        <th class="px-md py-sm font-label-caps text-label-caps text-outline uppercase">RBL</th>
+                        <th class="px-md py-sm font-label-caps text-label-caps text-outline uppercase">Cluster</th>
+                      </tr>
+                    </thead>
+                    <tbody id="dashboard-servers-table" class="divide-y divide-outline-variant/30">
+                      <tr><td colspan="6" class="px-md py-sm text-center text-muted">Loading servers...</td></tr>
+                    </tbody>
+                  </table>
                 </div>
               </div>
-
-              <!-- RBL Status Card -->
-              <div class="col-xl-3 col-md-6 col-12">
-                <div class="dashboard-card-info card h-100 border shadow-sm p-4 text-center d-flex flex-column align-items-center justify-content-center" style="min-height: 230px;">
-                  <h6 class="fw-bold mb-2">RBL Status</h6>
-                  <p id="dashboard-rbl-status-text" class="text-muted small mb-3">Your servers are not listed in any RBL.</p>
-                  <a href="#lists" class="btn btn-outline-primary btn-sm rounded-pill px-3">See reports →</a>
+              <div class="col-span-12 lg:col-span-6 bg-surface-container border border-outline-variant rounded-xl overflow-hidden">
+                <div class="p-md border-b border-outline-variant bg-surface-container-low">
+                  <h3 class="font-label-caps text-label-caps text-on-surface">DNS Nameservers</h3>
                 </div>
-              </div>
-
-              <!-- Issues Card -->
-              <div class="col-xl-3 col-md-6 col-12">
-                <div class="dashboard-card-info card h-100 border shadow-sm p-4 text-center d-flex flex-column align-items-center justify-content-center border-start border-4 border-success" id="dashboard-issues-card" style="min-height: 230px;">
-                  <h6 class="fw-bold mb-2">Issues</h6>
-                  <p id="dashboard-issues-text" class="text-muted small mb-0">No problems found</p>
-                </div>
-              </div>
-
-              <!-- Stats Card -->
-              <div class="col-xl-3 col-md-6 col-12">
-                <div class="dashboard-card-info card h-100 border shadow-sm p-4 d-flex flex-column justify-content-center" style="min-height: 230px;">
-                  <h6 class="fw-bold text-center mb-3">Stats</h6>
-                  <div class="stats-badge-list">
-                    <div class="stats-badge-item d-flex justify-content-between py-2 border-bottom">
-                      <span class="text-muted small fw-medium">User count</span>
-                      <span class="fw-bold" id="dashboard-stat-users">0</span>
-                    </div>
-                    <div class="stats-badge-item d-flex justify-content-between py-2 border-bottom">
-                      <span class="text-muted small fw-medium">Server count</span>
-                      <span class="fw-bold" id="dashboard-stat-servers">0</span>
-                    </div>
-                    <div class="stats-badge-item d-flex justify-content-between py-2">
-                      <span class="text-muted small fw-medium">Zone count</span>
-                      <span class="fw-bold" id="dashboard-stat-zones">0</span>
-                    </div>
-                  </div>
+                <div class="overflow-x-auto">
+                  <table class="w-full text-left border-collapse">
+                    <thead class="bg-surface-container-lowest border-b border-outline-variant">
+                      <tr>
+                        <th class="px-md py-sm font-label-caps text-label-caps text-outline uppercase">Server name</th>
+                        <th class="px-md py-sm font-label-caps text-label-caps text-outline uppercase">Last seen</th>
+                        <th class="px-md py-sm font-label-caps text-label-caps text-outline uppercase">Zones</th>
+                        <th class="px-md py-sm font-label-caps text-label-caps text-outline uppercase">RBL</th>
+                        <th class="px-md py-sm font-label-caps text-label-caps text-outline uppercase">Cluster</th>
+                      </tr>
+                    </thead>
+                    <tbody id="dashboard-nodes-table" class="divide-y divide-outline-variant/30">
+                      <tr><td colspan="5" class="px-md py-sm text-center text-muted">Loading nodes...</td></tr>
+                    </tbody>
+                  </table>
                 </div>
               </div>
             </div>
 
-            <!-- Row 3: Chart.js Graphs -->
-            <div class="row row-flex g-4">
-              <div class="col-md-6 col-12">
-                <div class="card border shadow-sm">
-                  <div class="card-header py-3 bg-light">
-                    <h6 class="m-0 fw-bold text-dark">Zone count per server</h6>
-                  </div>
-                  <div class="card-body p-3">
-                    <canvas id="chart-zone-count" style="max-height: 240px;"></canvas>
-                  </div>
+            <!-- Logs & RBL sweep indicators -->
+            <div class="grid grid-cols-12 gap-lg">
+              <div class="col-span-12 lg:col-span-8 bg-surface-container border border-outline-variant rounded-xl overflow-hidden">
+                <div class="p-md border-b border-outline-variant bg-surface-container-low">
+                  <h3 class="font-label-caps text-label-caps text-on-surface">Recent Sync logs</h3>
+                </div>
+                <div class="overflow-x-auto">
+                  <table class="w-full text-left border-collapse">
+                    <tbody id="dashboard-recent-logs" class="divide-y divide-outline-variant/30">
+                      <tr><td class="px-md py-sm text-center text-muted">Loading sync logs...</td></tr>
+                    </tbody>
+                  </table>
                 </div>
               </div>
-
-              <div class="col-md-6 col-12">
-                <div class="card border shadow-sm">
-                  <div class="card-header py-3 bg-light">
-                    <h6 class="m-0 fw-bold text-dark">Zone additions/removals last 6 months</h6>
-                  </div>
-                  <div class="card-body p-3">
-                    <canvas id="chart-activity" style="max-height: 240px;"></canvas>
-                  </div>
+              <div class="col-span-12 lg:col-span-4 bg-surface-container border border-outline-variant rounded-xl p-lg flex flex-col justify-between">
+                <div>
+                  <h3 class="font-label-caps text-label-caps text-on-surface-variant mb-md uppercase">RBL Blacklists</h3>
+                  <p id="dashboard-rbl-status-text" class="text-on-surface-variant font-body-sm mb-lg">Your nodes are not listed in any blacklists.</p>
                 </div>
+                <a href="#lists" class="w-full bg-primary text-on-primary py-sm font-label-caps text-label-caps rounded text-center block">View Full Reports</a>
               </div>
-            </div>
-
-          </section>
-
-          <!-- DNS NODES PAGE VIEW -->
-          <section id="page-nodes" class="page-section" style="display: none;">
-            <div class="row g-4 mb-4">
-              <div class="col-12 text-end">
-                <button id="add-node-btn" class="btn btn-primary fw-semibold shadow-sm">
-                  <i class="bi bi-plus-lg me-2"></i> Add Nameserver Node
-                </button>
-              </div>
-            </div>
-            <div class="row row-flex g-4" id="nodes-grid">
-              <!-- Dynamic Nodes -->
             </div>
           </section>
 
-          <!-- HOSTING SERVERS PAGE VIEW -->
-          <section id="page-servers" class="page-section" style="display: none;">
-            <div class="row g-4 mb-4">
-              <div class="col-12 text-end">
-                <button id="add-server-btn" class="btn btn-primary fw-semibold shadow-sm">
-                  <i class="bi bi-plus-lg me-2"></i> Register Web Server
-                </button>
+          <!-- ==================== VIEW: DNS NODES ==================== -->
+          <section id="page-nodes" style="display: none;" class="page-section space-y-lg">
+            <div class="flex justify-between items-center">
+              <div>
+                <h1 class="font-headline-lg text-headline-lg text-on-surface">DNS Nameservers</h1>
+                <p class="text-on-surface-variant font-body-sm mt-1">Authoritative nameservers serving active BIND9 configurations.</p>
               </div>
+              <button id="add-node-btn" class="bg-primary text-on-primary px-md py-sm rounded font-label-caps text-label-caps flex items-center gap-xs" onclick="openModal('modal-add-node')">
+                <span class="material-symbols-outlined">add</span> Add Node
+              </button>
             </div>
-            <div class="row row-flex g-4" id="servers-grid">
-              <!-- Dynamic Servers -->
+            <div class="grid grid-cols-12 gap-lg" id="nodes-grid">
+              <!-- Dynamic nodes list -->
             </div>
           </section>
 
-          <!-- RBL LISTS PAGE VIEW -->
-          <section id="page-lists" class="page-section" style="display: none;">
-            <div class="row row-flex g-4" id="rbl-reports-grid">
-              <!-- Dynamic RBL reports -->
+          <!-- ==================== VIEW: HOSTING AGENTS ==================== -->
+          <section id="page-servers" style="display: none;" class="page-section space-y-lg">
+            <div class="flex justify-between items-center">
+              <div>
+                <h1 class="font-headline-lg text-headline-lg text-on-surface">Hosting Servers (Agents)</h1>
+                <p class="text-on-surface-variant font-body-sm mt-1">Hosting nodes executing Plesk/cPanel sync hooks.</p>
+              </div>
+              <button id="add-server-btn" class="bg-primary text-on-primary px-md py-sm rounded font-label-caps text-label-caps flex items-center gap-xs" onclick="openModal('modal-add-server')">
+                <span class="material-symbols-outlined">add</span> Add Server
+              </button>
+            </div>
+            <div class="grid grid-cols-12 gap-lg" id="servers-grid">
+              <!-- Dynamic servers list -->
             </div>
           </section>
 
-          <!-- DNS ZONES PAGE VIEW -->
-          <section id="page-zones" class="page-section" style="display: none;">
-            <div class="row g-3 mb-4 align-items-center">
-              <div class="col-md-4">
-                <div class="input-group shadow-sm">
-                  <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
-                  <input type="text" class="form-control border-start-0 ps-1" id="zone-search-input" placeholder="Search DNS zones...">
-                </div>
-              </div>
-              <div class="col-md-8 text-end">
-                <button id="add-zone-btn" class="btn btn-primary fw-semibold shadow-sm">
-                  <i class="bi bi-plus-lg me-2"></i> Create New DNS Zone
-                </button>
-              </div>
+          <!-- ==================== VIEW: RBL BLACKLISTS ==================== -->
+          <section id="page-lists" style="display: none;" class="page-section space-y-lg">
+            <div>
+              <h1 class="font-headline-lg text-headline-lg text-on-surface">RBL Blacklist Sweep</h1>
+              <p class="text-on-surface-variant font-body-sm mt-1">Real-time blacklist status check across 60 global RBL servers.</p>
             </div>
+            <div class="grid grid-cols-12 gap-lg" id="rbl-reports-grid">
+              <!-- Dynamic RBL list -->
+            </div>
+          </section>
 
-            <div class="card border shadow-sm">
-              <div class="card-body p-0 table-responsive">
-                <table class="table table-striped table-hover align-middle mb-0">
-                  <thead>
+          <!-- ==================== VIEW: DNS ZONES ==================== -->
+          <section id="page-zones" style="display: none;" class="page-section space-y-lg">
+            <div class="flex justify-between items-center">
+              <div>
+                <h1 class="font-headline-lg text-headline-lg text-on-surface">DNS Zones</h1>
+                <p class="text-on-surface-variant font-body-sm mt-1">Configured authoritative domain zones.</p>
+              </div>
+              <button id="add-zone-btn" class="bg-primary text-on-primary px-md py-sm rounded font-label-caps text-label-caps flex items-center gap-xs" onclick="openModal('modal-add-zone')">
+                <span class="material-symbols-outlined">add</span> Create Zone
+              </button>
+            </div>
+            <div class="bg-surface-container border border-outline-variant rounded-xl overflow-hidden shadow-2xl">
+              <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                  <thead class="bg-surface-container-lowest border-b border-outline-variant">
                     <tr>
-                      <th>Domain</th>
-                      <th>Serial Number</th>
-                      <th>Default TTL</th>
-                      <th>Last Sync</th>
-                      <th>Status</th>
-                      <th class="text-end">Actions</th>
+                      <th class="px-lg py-md font-label-caps text-label-caps text-outline uppercase tracking-wider">Domain</th>
+                      <th class="px-lg py-md font-label-caps text-label-caps text-outline uppercase tracking-wider">Serial</th>
+                      <th class="px-lg py-md font-label-caps text-label-caps text-outline uppercase tracking-wider">TTL</th>
+                      <th class="px-lg py-md font-label-caps text-label-caps text-outline uppercase tracking-wider">Server Node</th>
+                      <th class="px-lg py-md font-label-caps text-label-caps text-outline uppercase tracking-wider">Sync Date</th>
+                      <th class="px-lg py-md font-label-caps text-label-caps text-outline tracking-wider text-right uppercase">Actions</th>
                     </tr>
                   </thead>
-                  <tbody id="zones-table-body">
-                    <!-- Dynamic Zones -->
+                  <tbody id="zones-table-body" class="divide-y divide-outline-variant/30">
+                    <tr><td colspan="6" class="px-lg py-md text-center text-muted">Loading zones...</td></tr>
                   </tbody>
                 </table>
               </div>
             </div>
           </section>
 
-          <!-- ZONE RECORDS EDITOR (SUB-PAGE) -->
-          <section id="page-zone-editor" class="page-section" style="display: none;">
-            <div class="row g-3 mb-4 align-items-center">
-              <div class="col-md-6">
-                <button id="editor-back-btn" class="btn btn-outline-secondary fw-semibold">
-                  <i class="bi bi-arrow-left me-2"></i> Back to Zones
-                </button>
+          <!-- ==================== VIEW: DNS ZONE EDITOR ==================== -->
+          <section id="page-zone-editor" style="display: none;" class="page-section space-y-lg">
+            <div class="flex justify-between items-center">
+              <div>
+                <div class="flex items-center gap-sm">
+                  <span class="px-xs py-[2px] bg-emerald-500/20 text-emerald-400 text-[10px] font-label-caps border border-emerald-500/30 rounded uppercase tracking-widest">Active Zone</span>
+                  <span class="font-label-mono text-label-mono text-outline">v2.14.0-production</span>
+                </div>
+                <h1 id="editor-domain-title" class="font-headline-lg text-headline-lg text-on-surface">example.com</h1>
+                <p class="text-on-surface-variant font-body-sm mt-1">Zone Serial: <span id="editor-serial-title" class="font-label-mono text-primary font-bold">0</span></p>
               </div>
-              <div class="col-md-6 text-end">
-                <span class="badge bg-primary px-3 py-2 fs-6">Domain: <span id="editor-domain-title">example.com</span></span>
-                <span class="badge bg-info px-3 py-2 fs-6 ms-2">Serial: <span id="editor-serial-title">2026070401</span></span>
+              <div class="flex gap-md">
+                <button id="editor-back-btn" class="bg-surface-container hover:bg-surface-container-highest border border-outline-variant text-on-surface px-md py-sm rounded font-label-caps text-label-caps flex items-center gap-xs">
+                  <span class="material-symbols-outlined text-[18px]">arrow_back</span> BACK
+                </button>
+                <button id="save-records-btn" class="bg-primary text-on-primary px-md py-sm rounded font-label-caps text-label-caps flex items-center gap-xs">
+                  <span class="material-symbols-outlined text-[18px]">publish</span> DEPLOY CHANGES
+                </button>
               </div>
             </div>
 
-            <div class="row g-4">
-              <!-- Add record box -->
-              <div class="col-lg-4 col-12">
-                <div class="card border shadow-sm">
-                  <div class="card-header py-3 bg-light">
-                    <h6 class="m-0 fw-bold text-dark">Add New DNS Record</h6>
-                  </div>
-                  <div class="card-body">
-                    <form id="add-record-form">
-                      <div class="mb-3">
-                        <label class="form-label small text-muted">Record Name (subdomain or @)</label>
-                        <input type="text" class="form-control" id="rec-name" placeholder="e.g. www, mail, or @" required>
-                      </div>
-                      <div class="mb-3">
-                        <label class="form-label small text-muted">Record Type</label>
-                        <select class="form-control" id="rec-type" required>
-                          <option value="A">A (IPv4)</option>
-                          <option value="AAAA">AAAA (IPv6)</option>
-                          <option value="CNAME">CNAME (Alias)</option>
-                          <option value="MX">MX (Mail)</option>
-                          <option value="TXT">TXT (Text)</option>
-                          <option value="NS">NS (Name Server)</option>
-                          <option value="SRV">SRV (Service)</option>
-                          <option value="CAA">CAA (Authority)</option>
-                          <option value="PTR">PTR (Reverse Pointer)</option>
-                        </select>
-                      </div>
-                      <div class="mb-3" id="rec-priority-group" style="display: none;">
-                        <label class="form-label small text-muted">Priority</label>
-                        <input type="number" class="form-control" id="rec-priority" value="0">
-                      </div>
-                      <div class="mb-3">
-                        <label class="form-label small text-muted">Value (Content)</label>
-                        <input type="text" class="form-control" id="rec-content" placeholder="e.g. 192.168.1.100" required>
-                      </div>
-                      <div class="mb-4">
-                        <label class="form-label small text-muted">TTL (Seconds)</label>
-                        <input type="number" class="form-control" id="rec-ttl" value="3600" required>
-                      </div>
-                      <button type="submit" class="btn btn-primary w-100 fw-semibold">Add to List</button>
-                    </form>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Records List box -->
-              <div class="col-lg-8 col-12">
-                <div class="card border shadow-sm">
-                  <div class="card-header py-3 bg-light d-flex align-items-center justify-content-between">
-                    <h6 class="m-0 fw-bold text-dark">DNS Records</h6>
-                    <button id="save-records-btn" class="btn btn-success btn-sm fw-semibold">
-                      <i class="bi bi-floppy me-2"></i> Save Changes & Push
+            <div class="grid grid-cols-12 gap-lg">
+              <!-- Left Column: Add DNS Record -->
+              <div class="col-span-12 lg:col-span-4 bg-surface-container border border-outline-variant rounded-xl p-lg flex flex-col justify-between">
+                <div>
+                  <h3 class="font-label-caps text-label-caps text-on-surface uppercase mb-md">Add New Record</h3>
+                  <form id="add-record-form" class="space-y-md">
+                    <div>
+                      <label class="block font-label-caps text-label-caps text-outline uppercase mb-xs">Record Name (subdomain or @)</label>
+                      <input class="w-full bg-surface-container-lowest border border-outline-variant rounded px-md py-sm font-label-mono text-label-mono text-on-surface focus:ring-1 focus:ring-primary outline-none" id="rec-name" placeholder="e.g. www, mail, or @" required type="text"/>
+                    </div>
+                    <div>
+                      <label class="block font-label-caps text-label-caps text-outline uppercase mb-xs">Record Type</label>
+                      <select class="w-full bg-surface-container-lowest border border-outline-variant rounded px-md py-sm font-label-mono text-label-mono text-on-surface focus:ring-1 focus:ring-primary outline-none" id="rec-type" required>
+                        <option value="A">A (IPv4 Address)</option>
+                        <option value="AAAA">AAAA (IPv6 Address)</option>
+                        <option value="CNAME">CNAME (Alias)</option>
+                        <option value="MX">MX (Mail Exchanger)</option>
+                        <option value="TXT">TXT (Text)</option>
+                        <option value="NS">NS (Name Server)</option>
+                        <option value="SRV">SRV (Service Finder)</option>
+                        <option value="CAA">CAA (Authority Certification)</option>
+                        <option value="PTR">PTR (Reverse Pointer)</option>
+                      </select>
+                    </div>
+                    <div id="rec-priority-group" style="display: none;">
+                      <label class="block font-label-caps text-label-caps text-outline uppercase mb-xs">Priority</label>
+                      <input class="w-full bg-surface-container-lowest border border-outline-variant rounded px-md py-sm font-label-mono text-label-mono text-on-surface focus:ring-1 focus:ring-primary outline-none" id="rec-priority" value="0" type="number"/>
+                    </div>
+                    <div>
+                      <label class="block font-label-caps text-label-caps text-outline uppercase mb-xs">Value (Content)</label>
+                      <input class="w-full bg-surface-container-lowest border border-outline-variant rounded px-md py-sm font-label-mono text-label-mono text-on-surface focus:ring-1 focus:ring-primary outline-none" id="rec-content" placeholder="e.g. 192.168.1.100" required type="text"/>
+                    </div>
+                    <div>
+                      <label class="block font-label-caps text-label-caps text-outline uppercase mb-xs">TTL (Seconds)</label>
+                      <input class="w-full bg-surface-container-lowest border border-outline-variant rounded px-md py-sm font-label-mono text-label-mono text-on-surface focus:ring-1 focus:ring-primary outline-none" id="rec-ttl" value="3600" required type="number"/>
+                    </div>
+                    <button type="submit" class="w-full bg-secondary text-on-secondary-container py-sm font-label-caps text-label-caps rounded hover:opacity-90 transition-opacity">
+                      Add to List
                     </button>
+                  </form>
+                </div>
+              </div>
+
+              <!-- Right Column: Current DNS Records Table -->
+              <div class="col-span-12 lg:col-span-8 bg-surface-container border border-outline-variant rounded-xl overflow-hidden shadow-2xl">
+                <div class="overflow-x-auto">
+                  <table class="w-full text-left border-collapse">
+                    <thead class="bg-surface-container-lowest border-b border-outline-variant">
+                      <tr>
+                        <th class="px-lg py-md font-label-caps text-label-caps text-outline uppercase tracking-wider">Type</th>
+                        <th class="px-lg py-md font-label-caps text-label-caps text-outline uppercase tracking-wider">Name</th>
+                        <th class="px-lg py-md font-label-caps text-label-caps text-outline uppercase tracking-wider">Value</th>
+                        <th class="px-lg py-md font-label-caps text-label-caps text-outline uppercase tracking-wider">TTL</th>
+                        <th class="px-lg py-md font-label-caps text-label-caps text-outline uppercase tracking-wider text-right">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody id="records-table-body" class="divide-y divide-outline-variant/30">
+                      <tr><td colspan="5" class="px-lg py-md text-center text-muted">No records defined yet.</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            <!-- Dynamic Edge Propagation Panel -->
+            <div class="mt-lg grid grid-cols-12 gap-lg pb-lg">
+              <div class="col-span-12 lg:col-span-12 bg-surface-container border border-outline-variant rounded-xl p-lg flex flex-col md:flex-row gap-lg items-center">
+                <div class="w-full md:w-1/3">
+                  <h3 class="font-headline-md text-headline-md text-on-surface mb-sm">Edge Propagation</h3>
+                  <p class="text-on-surface-variant font-body-sm text-body-sm mb-lg" id="propagation-summary">Pushes DNS zone configurations across authoritative BIND nodes.</p>
+                  <div class="space-y-md" id="propagation-nodes-list">
+                    <!-- Dynamic Node Sync Propagation List -->
                   </div>
-                  <div class="card-body p-0 table-responsive">
-                    <table class="table table-striped table-hover align-middle mb-0">
-                      <thead>
-                        <tr>
-                          <th>Name</th>
-                          <th>Type</th>
-                          <th>Content</th>
-                          <th>Priority</th>
-                          <th>TTL</th>
-                          <th class="text-end">Actions</th>
-                        </tr>
-                      </thead>
-                      <tbody id="records-table-body">
-                        <!-- Dynamic Records -->
-                      </tbody>
-                    </table>
+                </div>
+                <div class="w-full md:w-2/3 h-64 rounded-lg overflow-hidden border border-outline-variant relative">
+                  <div class="absolute inset-0 bg-surface-container-lowest/50 z-10 pointer-events-none"></div>
+                  <div class="w-full h-full grayscale opacity-40 hover:grayscale-0 hover:opacity-60 transition-all bg-cover bg-center" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDn_5FVlD3CIUqMrx4hl21-o011QSwuaupTkyUYLiiAYb6BuE8MEPSsiB8HVWSfTr0oko8Wl2hov6_YIVeWFvTN8tdTcp6ZpY5ogx-PAQin9bEtxnielDH15s_8WG7870C9q-6FbGNrKGoL_I7nJA9TGUD4FsQo6MvOLNuN3n5Wa5SHasIVHREB59IVJxYnVAEgK_RT6RcmlbmZEIvBupZ1ysoxF7-eZSxQnM85oOJ3nR_tQAIY1qBKZWnminIhx-5Y8XiAIxUnEw4')"></div>
+                  <div class="absolute inset-0 flex items-center justify-center z-20">
+                    <div class="glass-panel p-md rounded-lg border border-primary/30 flex items-center gap-md bg-slate-900/80 backdrop-blur-sm">
+                      <span class="material-symbols-outlined text-primary text-[32px] status-pulse">sensors</span>
+                      <div>
+                        <p class="font-label-caps text-label-caps text-on-surface">REAL-TIME MONITORING</p>
+                        <p class="font-label-mono text-label-mono text-primary" id="propagation-online-count">0 NODES ONLINE</p>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
           </section>
 
-          <!-- SYNC LOGS PAGE VIEW -->
-          <section id="page-logs" class="page-section" style="display: none;">
-            <div class="row g-3 mb-4">
-              <div class="col-12 text-end d-flex justify-content-end gap-2">
-                <button id="clear-logs-btn" class="btn btn-danger fw-semibold"><i class="bi bi-trash me-2"></i> Clear logs</button>
-                <button id="logs-refresh-btn" class="btn btn-outline-secondary fw-semibold"><i class="bi bi-arrow-clockwise me-2"></i> Refresh logs</button>
+          <!-- ==================== VIEW: SYSTEM LOGS ==================== -->
+          <section id="page-logs" style="display: none;" class="page-section space-y-lg">
+            <div class="flex justify-between items-center">
+              <div>
+                <h1 class="font-headline-lg text-headline-lg text-on-surface">System Logs</h1>
+                <p class="text-on-surface-variant font-body-sm mt-1">Audit log records of sync attempts and api requests.</p>
               </div>
-            </div>
-
-            <div class="card border shadow-sm">
-              <div class="card-body p-0 table-responsive">
-                <table class="table table-striped table-hover align-middle mb-0">
-                  <thead>
-                    <tr>
-                      <th>Timestamp</th>
-                      <th>Nameserver Node</th>
-                      <th>DNS Zone</th>
-                      <th>Action</th>
-                      <th>Message</th>
-                    </tr>
-                  </thead>
-                  <tbody id="logs-table-body">
-                    <!-- Dynamic Logs -->
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </section>
-
-          <!-- PANEL USERS PAGE VIEW -->
-          <section id="page-users" class="page-section" style="display: none;">
-            <div class="row g-3 mb-4">
-              <div class="col-12 text-end">
-                <button id="add-user-btn" class="btn btn-primary fw-semibold shadow-sm">
-                  <i class="bi bi-plus-lg me-2"></i> Add Administrator
+              <div class="flex gap-md">
+                <button id="clear-logs-btn" class="bg-error-container text-on-error-container px-md py-sm rounded font-label-caps text-label-caps flex items-center gap-xs">
+                  <span class="material-symbols-outlined">delete</span> Clear Logs
+                </button>
+                <button id="logs-refresh-btn" class="bg-primary text-on-primary px-md py-sm rounded font-label-caps text-label-caps flex items-center gap-xs">
+                  <span class="material-symbols-outlined">refresh</span> Refresh
                 </button>
               </div>
             </div>
-
-            <div class="card border shadow-sm">
-              <div class="card-body p-0 table-responsive">
-                <table class="table table-striped table-hover align-middle mb-0">
-                  <thead>
+            <div class="bg-surface-container border border-outline-variant rounded-xl overflow-hidden shadow-2xl">
+              <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                  <thead class="bg-surface-container-lowest border-b border-outline-variant">
                     <tr>
-                      <th>Username</th>
-                      <th>Email Address</th>
-                      <th>Role</th>
-                      <th>Created At</th>
-                      <th class="text-end">Actions</th>
+                      <th class="px-lg py-md font-label-caps text-label-caps text-outline uppercase tracking-wider">Timestamp</th>
+                      <th class="px-lg py-md font-label-caps text-label-caps text-outline uppercase tracking-wider">Node Name</th>
+                      <th class="px-lg py-md font-label-caps text-label-caps text-outline uppercase tracking-wider">Zone</th>
+                      <th class="px-lg py-md font-label-caps text-label-caps text-outline uppercase tracking-wider">Action</th>
+                      <th class="px-lg py-md font-label-caps text-label-caps text-outline uppercase tracking-wider">Message</th>
                     </tr>
                   </thead>
-                  <tbody id="users-table-body">
-                    <!-- Dynamic Users -->
+                  <tbody id="logs-table-body" class="divide-y divide-outline-variant/30">
+                    <tr><td colspan="5" class="px-lg py-md text-center text-muted">No logs recorded yet.</td></tr>
                   </tbody>
                 </table>
               </div>
             </div>
           </section>
 
-          <!-- EDIT PROFILE PAGE VIEW -->
-          <section id="page-profile" class="page-section" style="display: none;">
-            <div class="row justify-content-center">
-              <div class="col-lg-6 col-md-8 col-12">
-                <div class="card border shadow-sm">
-                  <div class="card-header py-3 bg-light">
-                    <h6 class="m-0 fw-bold text-dark">Edit Administrator Profile</h6>
-                  </div>
-                  <div class="card-body p-4">
-                    <form id="profile-form">
-                      <div class="mb-3">
-                        <label class="form-label">Username</label>
-                        <input type="text" class="form-control bg-light" id="profile-username" readonly style="cursor:not-allowed;">
-                      </div>
-                      <div class="mb-4">
-                        <label class="form-label">Email Address</label>
-                        <input type="email" class="form-control" id="profile-email" placeholder="e.g. admin@yourdomain.com" required>
-                      </div>
-                      <hr class="text-muted">
-                      <h6 class="fw-bold mb-2">Change Password (Optional)</h6>
-                      <p class="text-muted small mb-3">Leave password field blank if you do not want to modify it.</p>
-                      <div class="mb-3">
-                        <label class="form-label">New Password</label>
-                        <input type="password" class="form-control" id="profile-password" placeholder="Enter new password">
-                      </div>
-                      <div class="mb-4">
-                        <label class="form-label">Confirm Password</label>
-                        <input type="password" class="form-control" id="profile-confirm-password" placeholder="Confirm new password">
-                      </div>
-                      <button type="submit" class="btn btn-success w-100 fw-semibold">
-                        <i class="bi bi-floppy me-2"></i> Save Profile Changes
-                      </button>
-                    </form>
-                  </div>
-                </div>
+          <!-- ==================== VIEW: SYSTEM USERS ==================== -->
+          <section id="page-users" style="display: none;" class="page-section space-y-lg">
+            <div class="flex justify-between items-center">
+              <div>
+                <h1 class="font-headline-lg text-headline-lg text-on-surface">System Users</h1>
+                <p class="text-on-surface-variant font-body-sm mt-1">Management terminal users and administrator accounts.</p>
               </div>
+              <button id="add-user-btn" class="bg-primary text-on-primary px-md py-sm rounded font-label-caps text-label-caps flex items-center gap-xs" onclick="openModal('modal-add-user')">
+                <span class="material-symbols-outlined">add</span> Create User
+              </button>
+            </div>
+            <div class="bg-surface-container border border-outline-variant rounded-xl overflow-hidden shadow-2xl">
+              <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                  <thead class="bg-surface-container-lowest border-b border-outline-variant">
+                    <tr>
+                      <th class="px-lg py-md font-label-caps text-label-caps text-outline uppercase tracking-wider">Username</th>
+                      <th class="px-lg py-md font-label-caps text-label-caps text-outline uppercase tracking-wider">Email</th>
+                      <th class="px-lg py-md font-label-caps text-label-caps text-outline uppercase tracking-wider">Role</th>
+                      <th class="px-lg py-md font-label-caps text-label-caps text-outline uppercase tracking-wider">Created Date</th>
+                      <th class="px-lg py-md font-label-caps text-label-caps text-outline tracking-wider text-right uppercase">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="users-table-body" class="divide-y divide-outline-variant/30">
+                    <tr><td colspan="5" class="px-lg py-md text-center text-muted">Loading users...</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </section>
+
+          <!-- ==================== VIEW: MY PROFILE ==================== -->
+          <section id="page-profile" style="display: none;" class="page-section space-y-lg">
+            <div>
+              <h1 class="font-headline-lg text-headline-lg text-on-surface">My Profile</h1>
+              <p class="text-on-surface-variant font-body-sm mt-1">Update profile information and password credentials.</p>
+            </div>
+            <div class="max-w-xl bg-surface-container border border-outline-variant rounded-xl p-lg shadow-2xl">
+              <form id="profile-form" class="space-y-md">
+                <div>
+                  <label class="block font-label-caps text-label-caps text-outline uppercase mb-xs">Email Address</label>
+                  <input class="w-full bg-surface-container-lowest border border-outline-variant rounded px-md py-sm font-label-mono text-label-mono text-on-surface focus:ring-1 focus:ring-primary outline-none" id="profile-email" required type="email"/>
+                </div>
+                <div>
+                  <label class="block font-label-caps text-label-caps text-outline uppercase mb-xs">New Password (optional)</label>
+                  <input class="w-full bg-surface-container-lowest border border-outline-variant rounded px-md py-sm font-label-mono text-label-mono text-on-surface focus:ring-1 focus:ring-primary outline-none" id="profile-password" type="password" placeholder="Leave empty to keep current password"/>
+                </div>
+                <div>
+                  <label class="block font-label-caps text-label-caps text-outline uppercase mb-xs">Confirm New Password</label>
+                  <input class="w-full bg-surface-container-lowest border border-outline-variant rounded px-md py-sm font-label-mono text-label-mono text-on-surface focus:ring-1 focus:ring-primary outline-none" id="profile-confirm-password" type="password"/>
+                </div>
+                <button type="submit" class="w-full bg-primary text-on-primary py-sm font-label-caps text-label-caps rounded hover:opacity-90 transition-opacity">
+                  Save Settings
+                </button>
+              </form>
             </div>
           </section>
 
         </div>
       </div>
-    </div>
+    </main>
   </div>
 
-  <!-- MODALS -->
-
-  <!-- Add Node Modal -->
-  <div id="modal-add-node" class="modal fade" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title fw-bold">Add Nameserver Node</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <form id="add-node-form">
-          <div class="modal-body">
-            <div class="mb-3">
-              <label class="form-label">Nameserver Hostname</label>
-              <input type="text" class="form-control" id="node-name" placeholder="e.g. ns1.dnsadmin.io" required>
-            </div>
-            <div class="mb-3">
-              <label class="form-label">IP Address</label>
-              <input type="text" class="form-control" id="node-ip" placeholder="e.g. 198.51.100.1">
-            </div>
-            <div class="mb-3">
-              <label class="form-label">Agent API URL</label>
-              <input type="url" class="form-control" id="node-url" placeholder="e.g. http://198.51.100.1:5300" required>
-            </div>
-            <div class="mb-3">
-              <label class="form-label">Cluster Group Name</label>
-              <input type="text" class="form-control" id="node-group" placeholder="e.g. Nixpal Cluster">
-            </div>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-            <button type="submit" class="btn btn-primary">Create Node</button>
-          </div>
-        </form>
+  <!-- ==================== MODAL Dialogs ==================== -->
+  
+  <!-- Add DNS Node Modal -->
+  <div class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" id="modal-add-node">
+    <div class="bg-surface-container border border-outline-variant rounded-xl max-w-lg w-full overflow-hidden shadow-2xl">
+      <div class="flex justify-between items-center px-lg py-md border-b border-outline-variant bg-surface-container-low">
+        <h3 class="font-headline-md text-headline-md text-on-surface">Add DNS Node</h3>
+        <button type="button" class="text-on-surface-variant hover:text-on-surface" onclick="closeModal('modal-add-node')">
+          <span class="material-symbols-outlined">close</span>
+        </button>
       </div>
+      <form id="add-node-form" class="p-lg space-y-md">
+        <div>
+          <label class="block font-label-caps text-label-caps text-outline uppercase mb-xs">Node Name</label>
+          <input class="w-full bg-surface-container-lowest border border-outline-variant rounded px-md py-sm font-label-mono text-label-mono text-on-surface focus:ring-1 focus:ring-primary outline-none" id="node-name" placeholder="ns1.domain.com" required type="text"/>
+        </div>
+        <div>
+          <label class="block font-label-caps text-label-caps text-outline uppercase mb-xs">Node URL (IP/DNS Agent host:port)</label>
+          <input class="w-full bg-surface-container-lowest border border-outline-variant rounded px-md py-sm font-label-mono text-label-mono text-on-surface focus:ring-1 focus:ring-primary outline-none" id="node-url" placeholder="http://1.2.3.4:5385" required type="text"/>
+        </div>
+        <div>
+          <label class="block font-label-caps text-label-caps text-outline uppercase mb-xs">Node Public IP (for zone testing)</label>
+          <input class="w-full bg-surface-container-lowest border border-outline-variant rounded px-md py-sm font-label-mono text-label-mono text-on-surface focus:ring-1 focus:ring-primary outline-none" id="node-ip" placeholder="1.2.3.4" required type="text"/>
+        </div>
+        <div>
+          <label class="block font-label-caps text-label-caps text-outline uppercase mb-xs">Cluster / Group Name</label>
+          <input class="w-full bg-surface-container-lowest border border-outline-variant rounded px-md py-sm font-label-mono text-label-mono text-on-surface focus:ring-1 focus:ring-primary outline-none" id="node-group-name" placeholder="Default" type="text"/>
+        </div>
+        <div class="flex justify-end gap-md pt-md border-t border-outline-variant">
+          <button type="button" class="px-md py-sm bg-surface-container-low border border-outline-variant rounded text-on-surface-variant hover:text-on-surface transition-colors" onclick="closeModal('modal-add-node')">Cancel</button>
+          <button type="submit" class="px-md py-sm bg-primary text-on-primary rounded hover:opacity-90 transition-opacity">Add Node</button>
+        </div>
+      </form>
     </div>
   </div>
 
-  <!-- Add Server Modal -->
-  <div id="modal-add-server" class="modal fade" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title fw-bold">Register Web Hosting Server</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <form id="add-server-form">
-          <div class="modal-body">
-            <div class="mb-3">
-              <label class="form-label">Server Name</label>
-              <input type="text" class="form-control" id="server-name" placeholder="e.g. Production-cPanel-01" required>
-            </div>
-            <div class="mb-3">
-              <label class="form-label">Server IP</label>
-              <input type="text" class="form-control" id="server-ip" placeholder="e.g. 203.0.113.10">
-            </div>
-            <div class="mb-3">
-              <label class="form-label">Control Panel Type</label>
-              <select class="form-control" id="server-type" required>
-                <option value="cpanel">cPanel / WHM</option>
-                <option value="plesk">Plesk Panel</option>
-                <option value="directadmin">DirectAdmin</option>
-                <option value="lamp">LAMP / LEMP (Custom)</option>
-              </select>
-            </div>
-            <div class="mb-3">
-              <label class="form-label">Cluster Group Name</label>
-              <input type="text" class="form-control" id="server-group" placeholder="e.g. Production Cluster">
-            </div>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-            <button type="submit" class="btn btn-primary">Register Server</button>
-          </div>
-        </form>
+  <!-- Edit DNS Node Modal -->
+  <div class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" id="modal-edit-node">
+    <div class="bg-surface-container border border-outline-variant rounded-xl max-w-lg w-full overflow-hidden shadow-2xl">
+      <div class="flex justify-between items-center px-lg py-md border-b border-outline-variant bg-surface-container-low">
+        <h3 class="font-headline-md text-headline-md text-on-surface">Edit DNS Node</h3>
+        <button type="button" class="text-on-surface-variant hover:text-on-surface" onclick="closeModal('modal-edit-node')">
+          <span class="material-symbols-outlined">close</span>
+        </button>
       </div>
+      <form id="edit-node-form" class="p-lg space-y-md">
+        <input type="hidden" id="node-id-edit"/>
+        <div>
+          <label class="block font-label-caps text-label-caps text-outline uppercase mb-xs">Node Name</label>
+          <input class="w-full bg-surface-container-lowest border border-outline-variant rounded px-md py-sm font-label-mono text-label-mono text-on-surface focus:ring-1 focus:ring-primary outline-none" id="node-name-edit" required type="text"/>
+        </div>
+        <div>
+          <label class="block font-label-caps text-label-caps text-outline uppercase mb-xs">Node URL (IP/DNS Agent host:port)</label>
+          <input class="w-full bg-surface-container-lowest border border-outline-variant rounded px-md py-sm font-label-mono text-label-mono text-on-surface focus:ring-1 focus:ring-primary outline-none" id="node-url-edit" required type="text"/>
+        </div>
+        <div>
+          <label class="block font-label-caps text-label-caps text-outline uppercase mb-xs">Node Public IP</label>
+          <input class="w-full bg-surface-container-lowest border border-outline-variant rounded px-md py-sm font-label-mono text-label-mono text-on-surface focus:ring-1 focus:ring-primary outline-none" id="node-ip-edit" required type="text"/>
+        </div>
+        <div>
+          <label class="block font-label-caps text-label-caps text-outline uppercase mb-xs">Cluster / Group Name</label>
+          <input class="w-full bg-surface-container-lowest border border-outline-variant rounded px-md py-sm font-label-mono text-label-mono text-on-surface focus:ring-1 focus:ring-primary outline-none" id="node-group-name-edit" type="text"/>
+        </div>
+        <div class="flex justify-end gap-md pt-md border-t border-outline-variant">
+          <button type="button" class="px-md py-sm bg-surface-container-low border border-outline-variant rounded text-on-surface-variant hover:text-on-surface transition-colors" onclick="closeModal('modal-edit-node')">Cancel</button>
+          <button type="submit" class="px-md py-sm bg-primary text-on-primary rounded hover:opacity-90 transition-opacity">Save Changes</button>
+        </div>
+      </form>
     </div>
   </div>
 
-  <!-- Edit Node Modal -->
-  <div id="modal-edit-node" class="modal fade" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title fw-bold">Edit Nameserver Node</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <form id="edit-node-form">
-          <input type="hidden" id="node-id-edit">
-          <div class="modal-body">
-            <div class="mb-3">
-              <label class="form-label">Nameserver Hostname</label>
-              <input type="text" class="form-control" id="node-name-edit" required>
-            </div>
-            <div class="mb-3">
-              <label class="form-label">IP Address</label>
-              <input type="text" class="form-control" id="node-ip-edit">
-            </div>
-            <div class="mb-3">
-              <label class="form-label">Agent API URL</label>
-              <input type="url" class="form-control" id="node-url-edit" required>
-            </div>
-            <div class="mb-3">
-              <label class="form-label">Cluster Group Name</label>
-              <input type="text" class="form-control" id="node-group-edit">
-            </div>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-            <button type="submit" class="btn btn-primary">Save Changes</button>
-          </div>
-        </form>
+  <!-- Add Hosting Server Modal -->
+  <div class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" id="modal-add-server">
+    <div class="bg-surface-container border border-outline-variant rounded-xl max-w-lg w-full overflow-hidden shadow-2xl">
+      <div class="flex justify-between items-center px-lg py-md border-b border-outline-variant bg-surface-container-low">
+        <h3 class="font-headline-md text-headline-md text-on-surface">Add Hosting Agent</h3>
+        <button type="button" class="text-on-surface-variant hover:text-on-surface" onclick="closeModal('modal-add-server')">
+          <span class="material-symbols-outlined">close</span>
+        </button>
       </div>
+      <form id="add-server-form" class="p-lg space-y-md">
+        <div>
+          <label class="block font-label-caps text-label-caps text-outline uppercase mb-xs">Server Name</label>
+          <input class="w-full bg-surface-container-lowest border border-outline-variant rounded px-md py-sm font-label-mono text-label-mono text-on-surface focus:ring-1 focus:ring-primary outline-none" id="server-name" placeholder="plesk-server-01" required type="text"/>
+        </div>
+        <div>
+          <label class="block font-label-caps text-label-caps text-outline uppercase mb-xs">Server IP Address</label>
+          <input class="w-full bg-surface-container-lowest border border-outline-variant rounded px-md py-sm font-label-mono text-label-mono text-on-surface focus:ring-1 focus:ring-primary outline-none" id="server-ip" placeholder="1.2.3.4" required type="text"/>
+        </div>
+        <div>
+          <label class="block font-label-caps text-label-caps text-outline uppercase mb-xs">Panel / System Type</label>
+          <select class="w-full bg-surface-container-lowest border border-outline-variant rounded px-md py-sm font-label-mono text-label-mono text-on-surface focus:ring-1 focus:ring-primary outline-none" id="server-type" required>
+            <option value="cpanel">cPanel (WHM)</option>
+            <option value="plesk">Plesk Onyx/Obsidian</option>
+            <option value="directadmin">DirectAdmin</option>
+          </select>
+        </div>
+        <div>
+          <label class="block font-label-caps text-label-caps text-outline uppercase mb-xs">Cluster / Group Name</label>
+          <input class="w-full bg-surface-container-lowest border border-outline-variant rounded px-md py-sm font-label-mono text-label-mono text-on-surface focus:ring-1 focus:ring-primary outline-none" id="server-group-name" placeholder="Default" type="text"/>
+        </div>
+        <div class="flex justify-end gap-md pt-md border-t border-outline-variant">
+          <button type="button" class="px-md py-sm bg-surface-container-low border border-outline-variant rounded text-on-surface-variant hover:text-on-surface transition-colors" onclick="closeModal('modal-add-server')">Cancel</button>
+          <button type="submit" class="px-md py-sm bg-primary text-on-primary rounded hover:opacity-90 transition-opacity">Add Server</button>
+        </div>
+      </form>
     </div>
   </div>
 
-  <!-- Edit Server Modal -->
-  <div id="modal-edit-server" class="modal fade" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title fw-bold">Edit Web Hosting Server</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <form id="edit-server-form">
-          <input type="hidden" id="server-id-edit">
-          <div class="modal-body">
-            <div class="mb-3">
-              <label class="form-label">Server Name</label>
-              <input type="text" class="form-control" id="server-name-edit" required>
-            </div>
-            <div class="mb-3">
-              <label class="form-label">Server IP</label>
-              <input type="text" class="form-control" id="server-ip-edit">
-            </div>
-            <div class="mb-3">
-              <label class="form-label">Control Panel Type</label>
-              <select class="form-control" id="server-type-edit" required>
-                <option value="cpanel">cPanel / WHM</option>
-                <option value="plesk">Plesk Panel</option>
-                <option value="directadmin">DirectAdmin</option>
-                <option value="lamp">LAMP / LEMP (Custom)</option>
-              </select>
-            </div>
-            <div class="mb-3">
-              <label class="form-label">Cluster Group Name</label>
-              <input type="text" class="form-control" id="server-group-edit">
-            </div>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-            <button type="submit" class="btn btn-primary">Save Changes</button>
-          </div>
-        </form>
+  <!-- Edit Hosting Server Modal -->
+  <div class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" id="modal-edit-server">
+    <div class="bg-surface-container border border-outline-variant rounded-xl max-w-lg w-full overflow-hidden shadow-2xl">
+      <div class="flex justify-between items-center px-lg py-md border-b border-outline-variant bg-surface-container-low">
+        <h3 class="font-headline-md text-headline-md text-on-surface">Edit Hosting Agent</h3>
+        <button type="button" class="text-on-surface-variant hover:text-on-surface" onclick="closeModal('modal-edit-server')">
+          <span class="material-symbols-outlined">close</span>
+        </button>
       </div>
+      <form id="edit-server-form" class="p-lg space-y-md">
+        <input type="hidden" id="server-id-edit"/>
+        <div>
+          <label class="block font-label-caps text-label-caps text-outline uppercase mb-xs">Server Name</label>
+          <input class="w-full bg-surface-container-lowest border border-outline-variant rounded px-md py-sm font-label-mono text-label-mono text-on-surface focus:ring-1 focus:ring-primary outline-none" id="server-name-edit" required type="text"/>
+        </div>
+        <div>
+          <label class="block font-label-caps text-label-caps text-outline uppercase mb-xs">Server IP Address</label>
+          <input class="w-full bg-surface-container-lowest border border-outline-variant rounded px-md py-sm font-label-mono text-label-mono text-on-surface focus:ring-1 focus:ring-primary outline-none" id="server-ip-edit" required type="text"/>
+        </div>
+        <div>
+          <label class="block font-label-caps text-label-caps text-outline uppercase mb-xs">Panel / System Type</label>
+          <select class="w-full bg-surface-container-lowest border border-outline-variant rounded px-md py-sm font-label-mono text-label-mono text-on-surface focus:ring-1 focus:ring-primary outline-none" id="server-type-edit" required>
+            <option value="cpanel">cPanel (WHM)</option>
+            <option value="plesk">Plesk Onyx/Obsidian</option>
+            <option value="directadmin">DirectAdmin</option>
+          </select>
+        </div>
+        <div>
+          <label class="block font-label-caps text-label-caps text-outline uppercase mb-xs">Cluster / Group Name</label>
+          <input class="w-full bg-surface-container-lowest border border-outline-variant rounded px-md py-sm font-label-mono text-label-mono text-on-surface focus:ring-1 focus:ring-primary outline-none" id="server-group-name-edit" type="text"/>
+        </div>
+        <div class="flex justify-end gap-md pt-md border-t border-outline-variant">
+          <button type="button" class="px-md py-sm bg-surface-container-low border border-outline-variant rounded text-on-surface-variant hover:text-on-surface transition-colors" onclick="closeModal('modal-edit-server')">Cancel</button>
+          <button type="submit" class="px-md py-sm bg-primary text-on-primary rounded hover:opacity-90 transition-opacity">Save Changes</button>
+        </div>
+      </form>
     </div>
   </div>
 
-  <!-- Add Zone Modal -->
-  <div id="modal-add-zone" class="modal fade" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title fw-bold">Create New DNS Zone</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <form id="add-zone-form">
-          <div class="modal-body">
-            <div class="mb-3">
-              <label class="form-label">Domain Name</label>
-              <input type="text" class="form-control" id="zone-domain" placeholder="e.g. mynewdomain.com" required>
-            </div>
-            <div class="mb-3">
-              <label class="form-label">Default TTL (Seconds)</label>
-              <input type="number" class="form-control" id="zone-ttl" value="3600" required>
-            </div>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-            <button type="submit" class="btn btn-primary">Create Zone</button>
-          </div>
-        </form>
+  <!-- Create DNS Zone Modal -->
+  <div class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" id="modal-add-zone">
+    <div class="bg-surface-container border border-outline-variant rounded-xl max-w-lg w-full overflow-hidden shadow-2xl">
+      <div class="flex justify-between items-center px-lg py-md border-b border-outline-variant bg-surface-container-low">
+        <h3 class="font-headline-md text-headline-md text-on-surface">Create DNS Zone</h3>
+        <button type="button" class="text-on-surface-variant hover:text-on-surface" onclick="closeModal('modal-add-zone')">
+          <span class="material-symbols-outlined">close</span>
+        </button>
       </div>
+      <form id="add-zone-form" class="p-lg space-y-md">
+        <div>
+          <label class="block font-label-caps text-label-caps text-outline uppercase mb-xs">Domain Name</label>
+          <input class="w-full bg-surface-container-lowest border border-outline-variant rounded px-md py-sm font-label-mono text-label-mono text-on-surface focus:ring-1 focus:ring-primary outline-none" id="zone-domain" placeholder="domain.com" required type="text"/>
+        </div>
+        <div>
+          <label class="block font-label-caps text-label-caps text-outline uppercase mb-xs">Default TTL (Seconds)</label>
+          <input class="w-full bg-surface-container-lowest border border-outline-variant rounded px-md py-sm font-label-mono text-label-mono text-on-surface focus:ring-1 focus:ring-primary outline-none" id="zone-ttl" value="3600" required type="number"/>
+        </div>
+        <div>
+          <label class="block font-label-caps text-label-caps text-outline uppercase mb-xs">Assigned Hosting Server (Optional)</label>
+          <select class="w-full bg-surface-container-lowest border border-outline-variant rounded px-md py-sm font-label-mono text-label-mono text-on-surface focus:ring-1 focus:ring-primary outline-none" id="zone-server">
+            <option value="">None / Standalone Zone</option>
+          </select>
+        </div>
+        <div class="flex justify-end gap-md pt-md border-t border-outline-variant">
+          <button type="button" class="px-md py-sm bg-surface-container-low border border-outline-variant rounded text-on-surface-variant hover:text-on-surface transition-colors" onclick="closeModal('modal-add-zone')">Cancel</button>
+          <button type="submit" class="px-md py-sm bg-primary text-on-primary rounded hover:opacity-90 transition-opacity">Create Zone</button>
+        </div>
+      </form>
     </div>
   </div>
 
-  <!-- Node Token Modal -->
-  <div id="modal-node-token" class="modal fade" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content">
-        <div class="modal-header bg-success text-white">
-          <h5 class="modal-title fw-bold">Nameserver Node Registered!</h5>
-          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          <p>Your new DNS Nameserver Node has been registered successfully. Use the token below to configure the Node Agent.</p>
-          
-          <div class="well text-center p-3 mb-4 rounded border">
-            <code id="node-token-display" class="fs-5 fw-bold text-danger d-block word-break" style="font-family:'Source Code Pro', monospace;">node_xxxxxxxxx</code>
-            <div class="mt-3">
-              <button id="copy-node-token" class="btn btn-success btn-sm fw-semibold"><i class="bi bi-copy me-2"></i> Copy Token</button>
-            </div>
-          </div>
-
-          <h6 class="fw-bold mb-2">Quick Setup Guide:</h6>
-          <ol class="ps-3 mb-0 small text-muted leading-relaxed">
-            <li>Install Node.js on the nameserver.</li>
-            <li>Deploy the <code>dnsadmin-node-agent</code> code.</li>
-            <li>Set environment variables:<br>
-              <code>DNSADMIN_TOKEN="&lt;token_above&gt;"</code><br>
-              <code>PORT="5300"</code>
-            </li>
-            <li>Start the agent using <code>npm start</code>.</li>
-          </ol>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Done</button>
-        </div>
+  <!-- Create User Modal -->
+  <div class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" id="modal-add-user">
+    <div class="bg-surface-container border border-outline-variant rounded-xl max-w-lg w-full overflow-hidden shadow-2xl">
+      <div class="flex justify-between items-center px-lg py-md border-b border-outline-variant bg-surface-container-low">
+        <h3 class="font-headline-md text-headline-md text-on-surface">Create Administrator</h3>
+        <button type="button" class="text-on-surface-variant hover:text-on-surface" onclick="closeModal('modal-add-user')">
+          <span class="material-symbols-outlined">close</span>
+        </button>
       </div>
+      <form id="add-user-form" class="p-lg space-y-md">
+        <div>
+          <label class="block font-label-caps text-label-caps text-outline uppercase mb-xs">Username</label>
+          <input class="w-full bg-surface-container-lowest border border-outline-variant rounded px-md py-sm font-label-mono text-label-mono text-on-surface focus:ring-1 focus:ring-primary outline-none" id="user-username" required type="text"/>
+        </div>
+        <div>
+          <label class="block font-label-caps text-label-caps text-outline uppercase mb-xs">Email Address</label>
+          <input class="w-full bg-surface-container-lowest border border-outline-variant rounded px-md py-sm font-label-mono text-label-mono text-on-surface focus:ring-1 focus:ring-primary outline-none" id="user-email" required type="email"/>
+        </div>
+        <div>
+          <label class="block font-label-caps text-label-caps text-outline uppercase mb-xs">Temporary Password</label>
+          <input class="w-full bg-surface-container-lowest border border-outline-variant rounded px-md py-sm font-label-mono text-label-mono text-on-surface focus:ring-1 focus:ring-primary outline-none" id="user-password" required type="password"/>
+        </div>
+        <div>
+          <label class="block font-label-caps text-label-caps text-outline uppercase mb-xs">Role</label>
+          <select class="w-full bg-surface-container-lowest border border-outline-variant rounded px-md py-sm font-label-mono text-label-mono text-on-surface focus:ring-1 focus:ring-primary outline-none" id="user-role" required>
+            <option value="admin">Administrator</option>
+            <option value="read-only">Read Only Operator</option>
+          </select>
+        </div>
+        <div class="flex justify-end gap-md pt-md border-t border-outline-variant">
+          <button type="button" class="px-md py-sm bg-surface-container-low border border-outline-variant rounded text-on-surface-variant hover:text-on-surface transition-colors" onclick="closeModal('modal-add-user')">Cancel</button>
+          <button type="submit" class="px-md py-sm bg-primary text-on-primary rounded hover:opacity-90 transition-opacity">Create User</button>
+        </div>
+      </form>
     </div>
   </div>
 
-  <!-- Server Token Modal -->
-  <div id="modal-server-token" class="modal fade" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content">
-        <div class="modal-header bg-success text-white">
-          <h5 class="modal-title fw-bold">Hosting Server Agent Registered!</h5>
-          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          <p>A secure API key has been generated for this server to trigger DNS synchronization.</p>
-          
-          <div class="well text-center p-3 mb-4 rounded border">
-            <code id="server-token-display" class="fs-5 fw-bold text-danger d-block word-break" style="font-family:'Source Code Pro', monospace;">agent_xxxxxxxxx</code>
-            <div class="mt-3">
-              <button id="copy-server-token" class="btn btn-success btn-sm fw-semibold"><i class="bi bi-copy me-2"></i> Copy API Key</button>
-            </div>
-          </div>
+  <!-- Toast Notification Container -->
+  <div id="toast-container" class="fixed bottom-lg right-lg z-[100] flex flex-col gap-sm"></div>
 
-          <h6 class="fw-bold mb-2">Integration Hook Setup:</h6>
-          <p class="small text-muted mb-3">
-            Configure your server's DNS hook script to post updates to the Controller:
-          </p>
-          <pre class="bg-dark text-white p-3 rounded mb-0 text-start" style="font-family:'Source Code Pro', monospace; font-size:11px; overflow-x:auto;">
-URL: http://&lt;controller_ip&gt;:5380/api/v1/agent/sync-zone
-Headers:
-  X-DNSAdmin-Token: &lt;token_above&gt;
-  Content-Type: application/json
-Body:
-  {
-    "domain": "example.com",
-    "zone_text": "raw_bind_zone_file_content"
-  }
-          </pre>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Done</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Add User Modal -->
-  <div id="modal-add-user" class="modal fade" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title fw-bold">Add Panel Administrator</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <form id="add-user-form">
-          <div class="modal-body">
-            <div class="mb-3">
-              <label class="form-label">Username</label>
-              <input type="text" class="form-control" id="new-user-username" placeholder="Enter unique username" required>
-            </div>
-            <div class="mb-3">
-              <label class="form-label">Email Address</label>
-              <input type="email" class="form-control" id="new-user-email" placeholder="Enter email address">
-            </div>
-            <div class="mb-3">
-              <label class="form-label">Password</label>
-              <input type="password" class="form-control" id="new-user-password" placeholder="Enter secure password" required>
-            </div>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-            <button type="submit" class="btn btn-primary">Create User</button>
-          </div>
-        </form>
-      </div>
-    </div>
-  </div>
-
-  <!-- Bootstrap 5.3.2 JS Bundle -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-  <!-- Chart.js 4.4.1 -->
+  <!-- Script Libraries -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <!-- Custom App JS -->
-  <script src="app.js?v=3"></script>
+  <script src="app.js"></script>
 </body>
 </html>

@@ -348,6 +348,58 @@ router.get('/zones/:domain', authenticateToken, async (req, res) => {
   }
 });
 
+router.get('/zones/:domain/propagation', authenticateToken, async (req, res) => {
+  const { domain } = req.params;
+  try {
+    const zone = await query.get('SELECT * FROM zones WHERE domain = ?', [domain]);
+    if (!zone) return res.status(404).json({ error: 'Zone not found' });
+
+    const nodes = await query.all('SELECT id, name, status, last_seen, ip FROM nodes');
+    const propagation = [];
+    
+    for (const node of nodes) {
+      const latestLog = await query.get(`
+        SELECT action, message, created_at 
+        FROM sync_logs 
+        WHERE node_id = ? AND zone = ? 
+        ORDER BY created_at DESC LIMIT 1
+      `, [node.id, domain]);
+
+      let status = 'pending';
+      let message = 'Pending sync';
+      let timestamp = null;
+
+      if (latestLog) {
+        timestamp = latestLog.created_at;
+        if (latestLog.action === 'sync_success') {
+          status = 'synced';
+          message = latestLog.message;
+        } else if (latestLog.action === 'sync_failed') {
+          status = 'failed';
+          message = latestLog.message;
+        }
+      }
+
+      propagation.push({
+        node_id: node.id,
+        node_name: node.name,
+        status,
+        message,
+        timestamp,
+        ip: node.ip || 'None'
+      });
+    }
+
+    res.json({
+      domain,
+      serial: zone.serial,
+      propagation
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 router.put('/zones/:domain', authenticateToken, async (req, res) => {
   const { records } = req.body;
   const { domain } = req.params;

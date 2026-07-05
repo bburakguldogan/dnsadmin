@@ -952,6 +952,70 @@ document.getElementById('add-zone-form').addEventListener('submit', async (e) =>
 // Zone Records Editor Logic (Inline client-side arrays)
 // ==========================================
 
+async function fetchZonePropagation(domain) {
+  try {
+    const data = await apiFetch(`/zones/${domain}/propagation`);
+    const nodesList = document.getElementById('propagation-nodes-list');
+    const summaryEl = document.getElementById('propagation-summary');
+    const onlineCountEl = document.getElementById('propagation-online-count');
+    
+    if (!data.propagation || data.propagation.length === 0) {
+      nodesList.innerHTML = `<div class="text-muted small">No active DNS nodes configured to track.</div>`;
+      if (onlineCountEl) onlineCountEl.textContent = '0 NODES ONLINE';
+      return;
+    }
+
+    let syncedCount = 0;
+    let onlineCount = 0;
+    
+    nodesList.innerHTML = data.propagation.map(node => {
+      const isSynced = node.status === 'synced';
+      const isFailed = node.status === 'failed';
+      
+      if (isSynced) syncedCount++;
+      onlineCount++;
+      
+      let statusText = '100% Converged';
+      let statusColorClass = 'text-emerald-400';
+      let barColorClass = 'bg-emerald-500';
+      let barWidth = '100%';
+      
+      if (isFailed) {
+        statusText = 'Sync Failed';
+        statusColorClass = 'text-red-400';
+        barColorClass = 'bg-red-500';
+        barWidth = '100%';
+      } else if (node.status === 'pending') {
+        statusText = 'Sync Pending...';
+        statusColorClass = 'text-amber-400';
+        barColorClass = 'bg-amber-500';
+        barWidth = '40%';
+      }
+      
+      return `
+        <div class="space-y-xs">
+          <div class="flex justify-between items-center text-label-mono text-label-mono">
+            <span class="text-outline font-semibold">${node.node_name} <code class="text-[10px] text-outline">(${node.ip})</code></span>
+            <span class="${statusColorClass}">${statusText}</span>
+          </div>
+          <div class="w-full h-1 bg-surface-container-lowest rounded-full overflow-hidden">
+            <div class="h-full ${barColorClass} transition-all duration-500" style="width: ${barWidth}"></div>
+          </div>
+        </div>
+      `;
+    }).join('');
+    
+    const percentage = Math.round((syncedCount / data.propagation.length) * 100);
+    summaryEl.innerHTML = `Your changes are propagating. Convergence: <strong class="text-primary">${percentage}%</strong> (${syncedCount}/${data.propagation.length} nodes).`;
+    
+    if (onlineCountEl) {
+      onlineCountEl.textContent = `${onlineCount} NODES ACTIVE`;
+    }
+  } catch (err) {
+    console.error('Failed to fetch zone propagation:', err.message);
+  }
+}
+
 async function loadZoneEditor(domain) {
   try {
     const data = await apiFetch(`/zones/${domain}`);
@@ -962,6 +1026,19 @@ async function loadZoneEditor(domain) {
     document.getElementById('editor-serial-title').textContent = data.zone.serial;
     
     renderEditorRecords();
+
+    // Fetch propagation immediately
+    await fetchZonePropagation(domain);
+
+    // Setup active poller
+    if (state.propagationInterval) clearInterval(state.propagationInterval);
+    state.propagationInterval = setInterval(async () => {
+      if (window.location.hash.startsWith('#zones/editor/')) {
+        await fetchZonePropagation(domain);
+      } else {
+        clearInterval(state.propagationInterval);
+      }
+    }, 4000);
   } catch (err) {
     showToast(err.message, 'error');
     window.location.hash = '#zones';
@@ -1063,6 +1140,9 @@ document.getElementById('save-records-btn').addEventListener('click', async () =
     
     document.getElementById('editor-serial-title').textContent = data.serial;
     showToast(`Zone records successfully saved! Pushing updates to active DNS nodes.`);
+    
+    // Refresh propagation immediately
+    await fetchZonePropagation(domain);
   } catch (err) {
     showToast(err.message, 'error');
   }
@@ -1129,18 +1209,15 @@ document.getElementById('clear-logs-btn').addEventListener('click', async () => 
 
 function openModal(id) {
   const modalEl = document.getElementById(id);
-  let modalInstance = bootstrap.Modal.getInstance(modalEl);
-  if (!modalInstance) {
-    modalInstance = new bootstrap.Modal(modalEl);
+  if (modalEl) {
+    modalEl.classList.remove('hidden');
   }
-  modalInstance.show();
 }
 
 function closeModal(id) {
   const modalEl = document.getElementById(id);
-  const modalInstance = bootstrap.Modal.getInstance(modalEl);
-  if (modalInstance) {
-    modalInstance.hide();
+  if (modalEl) {
+    modalEl.classList.add('hidden');
   }
 }
 
