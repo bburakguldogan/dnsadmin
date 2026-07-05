@@ -300,16 +300,9 @@ body {
 }
 .status-online {
   background-color: var(--success-glow);
-  box-shadow: 0 0 8px var(--success-glow);
-  animation: pulse-glow-green 2s infinite;
 }
 .status-offline {
   background-color: #9ca3af;
-}
-@keyframes pulse-glow-green {
-  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
-  70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
-  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
 }
 
 /* Premium Info and Alert Panels (RBL, Issues, Stats) */
@@ -417,7 +410,6 @@ body {
 }
 .form-control:focus {
   border-color: var(--primary-accent) !important;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25) !important;
   outline: none;
 }
 
@@ -494,3 +486,60 @@ label {
   border: 1px solid var(--card-border) !important;
   border-radius: 8px !important;
 }
+
+/* ==========================================
+   Minimal Flat Login Card Styling
+   ========================================== */
+#login-container, #force-password-container {
+  padding-top: 120px;
+}
+
+.login-card {
+  background-color: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.login-card-header {
+  background-color: var(--card-header-bg);
+  border-bottom: 1px solid var(--card-border);
+  padding: 32px 24px 24px 24px;
+  text-align: center;
+}
+
+.login-card-header h2, .login-card-header h3 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--text-title);
+  letter-spacing: -0.5px;
+}
+
+.login-card-header p {
+  margin: 6px 0 0 0;
+  font-size: 12px;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.login-card-header.danger {
+  border-bottom: 1px solid rgba(239, 68, 68, 0.1);
+}
+
+.login-card-header.danger h3 {
+  color: var(--danger-glow);
+}
+
+.login-card-body {
+  padding: 32px 24px;
+}
+
+.login-card-body p {
+  color: var(--text-muted);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
