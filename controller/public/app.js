@@ -225,9 +225,9 @@ async function renderCharts(distribution, trend) {
     console.warn('[Chart] Chart.js library not loaded yet.');
     return;
   }
-  const isDark = document.body.classList.contains('dark-theme');
-  const textColor = isDark ? '#8c9ba5' : '#64748b';
-  const gridColor = isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)';
+  const isDark = document.documentElement.classList.contains('dark');
+  const textColor = isDark ? '#dae2fd' : '#64748b';
+  const gridColor = isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.05)';
 
   // Chart 1: Zone count per server (Bar chart)
   const ctxZone = document.getElementById('chart-zone-count');
@@ -512,7 +512,7 @@ async function fetchNodes() {
               <div class="input-group input-group-sm mt-3">
                 <span class="input-group-text py-1 text-muted small">Token</span>
                 <input type="text" class="form-control form-control-sm bg-light" value="${node.token}" readonly style="font-family:'Source Code Pro', monospace; font-size:11px;">
-                <button class="btn btn-outline-secondary copy-token-btn" data-token="${node.token}"><i class="bi bi-copy"></i></button>
+                 <button class="btn btn-outline-secondary copy-token-btn" data-token="${node.token}"><span class="material-symbols-outlined text-[16px]">content_copy</span></button>
               </div>
             </div>
             <div class="card-footer bg-light py-3 d-flex justify-content-end gap-2">
@@ -634,7 +634,7 @@ async function fetchServers() {
               <div class="input-group input-group-sm">
                 <span class="input-group-text py-1 text-muted small">API Key</span>
                 <input type="text" class="form-control form-control-sm bg-light" value="${server.token}" readonly style="font-family:'Source Code Pro', monospace; font-size:11px;">
-                <button class="btn btn-outline-secondary copy-server-key-btn" data-key="${server.token}"><i class="bi bi-copy"></i></button>
+                 <button class="btn btn-outline-secondary copy-server-key-btn" data-key="${server.token}"><span class="material-symbols-outlined text-[16px]">content_copy</span></button>
               </div>
             </div>
             <div class="card-footer bg-light py-3 d-flex justify-content-end gap-2">
@@ -1371,22 +1371,31 @@ document.getElementById('force-password-form').addEventListener('submit', async 
   }
 });
 
-// Theme Toggle Handlers
 function initTheme() {
-  const currentTheme = localStorage.getItem('dnsadmin_theme') || 'light';
+  const currentTheme = localStorage.getItem('dnsadmin_theme') || 'dark';
   if (currentTheme === 'dark') {
+    document.documentElement.classList.add('dark');
     document.body.classList.add('dark-theme');
   } else {
+    document.documentElement.classList.remove('dark');
     document.body.classList.remove('dark-theme');
   }
 }
 
 function toggleTheme(e) {
   if (e) e.preventDefault();
-  document.body.classList.toggle('dark-theme');
-  const theme = document.body.classList.contains('dark-theme') ? 'dark' : 'light';
-  localStorage.setItem('dnsadmin_theme', theme);
-  showToast(`Switched to ${theme} mode.`);
+  const isDark = document.documentElement.classList.contains('dark');
+  if (isDark) {
+    document.documentElement.classList.remove('dark');
+    document.body.classList.remove('dark-theme');
+    localStorage.setItem('dnsadmin_theme', 'light');
+    showToast('Switched to light mode.');
+  } else {
+    document.documentElement.classList.add('dark');
+    document.body.classList.add('dark-theme');
+    localStorage.setItem('dnsadmin_theme', 'dark');
+    showToast('Switched to dark mode.');
+  }
   if (state.currentDistribution && state.currentTrend) {
     renderCharts(state.currentDistribution, state.currentTrend);
   }

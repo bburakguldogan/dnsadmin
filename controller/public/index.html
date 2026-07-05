@@ -185,7 +185,7 @@
           <span class="font-label-caps text-label-caps">DNS Nodes</span>
         </a>
         <a id="menu-servers" class="sidebar-menu-item flex items-center gap-md px-md py-sm text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high rounded-lg mx-2 transition-all group" href="#servers">
-          <span class="material-symbols-outlined">server</span>
+          <span class="material-symbols-outlined">lan</span>
           <span class="font-label-caps text-label-caps">Hosting Agents</span>
         </a>
         <a id="menu-lists" class="sidebar-menu-item flex items-center gap-md px-md py-sm text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high rounded-lg mx-2 transition-all group" href="#lists">
@@ -428,9 +428,15 @@
                 <h1 class="font-headline-lg text-headline-lg text-on-surface">DNS Zones</h1>
                 <p class="text-on-surface-variant font-body-sm mt-1">Configured authoritative domain zones.</p>
               </div>
-              <button id="add-zone-btn" class="bg-primary text-on-primary px-md py-sm rounded font-label-caps text-label-caps flex items-center gap-xs" onclick="openModal('modal-add-zone')">
-                <span class="material-symbols-outlined">add</span> Create Zone
-              </button>
+              <div class="flex gap-md items-center">
+                <div class="relative min-w-[240px]">
+                  <span class="material-symbols-outlined absolute left-sm top-1/2 -translate-y-1/2 text-outline">search</span>
+                  <input class="w-full bg-surface-container-lowest border border-outline-variant rounded py-xs pl-xl pr-md text-label-mono font-label-mono text-on-surface focus:ring-1 focus:ring-primary outline-none" id="zone-search-input" placeholder="Search zones..." type="text"/>
+                </div>
+                <button id="add-zone-btn" class="bg-primary text-on-primary px-md py-sm rounded font-label-caps text-label-caps flex items-center gap-xs" onclick="openModal('modal-add-zone')">
+                  <span class="material-symbols-outlined">add</span> Create Zone
+                </button>
+              </div>
             </div>
             <div class="bg-surface-container border border-outline-variant rounded-xl overflow-hidden shadow-2xl">
               <div class="overflow-x-auto">
@@ -690,7 +696,7 @@
         </div>
         <div>
           <label class="block font-label-caps text-label-caps text-outline uppercase mb-xs">Cluster / Group Name</label>
-          <input class="w-full bg-surface-container-lowest border border-outline-variant rounded px-md py-sm font-label-mono text-label-mono text-on-surface focus:ring-1 focus:ring-primary outline-none" id="node-group-name" placeholder="Default" type="text"/>
+          <input class="w-full bg-surface-container-lowest border border-outline-variant rounded px-md py-sm font-label-mono text-label-mono text-on-surface focus:ring-1 focus:ring-primary outline-none" id="node-group" placeholder="Default" type="text"/>
         </div>
         <div class="flex justify-end gap-md pt-md border-t border-outline-variant">
           <button type="button" class="px-md py-sm bg-surface-container-low border border-outline-variant rounded text-on-surface-variant hover:text-on-surface transition-colors" onclick="closeModal('modal-add-node')">Cancel</button>
@@ -725,7 +731,7 @@
         </div>
         <div>
           <label class="block font-label-caps text-label-caps text-outline uppercase mb-xs">Cluster / Group Name</label>
-          <input class="w-full bg-surface-container-lowest border border-outline-variant rounded px-md py-sm font-label-mono text-label-mono text-on-surface focus:ring-1 focus:ring-primary outline-none" id="node-group-name-edit" type="text"/>
+          <input class="w-full bg-surface-container-lowest border border-outline-variant rounded px-md py-sm font-label-mono text-label-mono text-on-surface focus:ring-1 focus:ring-primary outline-none" id="node-group-edit" type="text"/>
         </div>
         <div class="flex justify-end gap-md pt-md border-t border-outline-variant">
           <button type="button" class="px-md py-sm bg-surface-container-low border border-outline-variant rounded text-on-surface-variant hover:text-on-surface transition-colors" onclick="closeModal('modal-edit-node')">Cancel</button>
@@ -763,7 +769,7 @@
         </div>
         <div>
           <label class="block font-label-caps text-label-caps text-outline uppercase mb-xs">Cluster / Group Name</label>
-          <input class="w-full bg-surface-container-lowest border border-outline-variant rounded px-md py-sm font-label-mono text-label-mono text-on-surface focus:ring-1 focus:ring-primary outline-none" id="server-group-name" placeholder="Default" type="text"/>
+          <input class="w-full bg-surface-container-lowest border border-outline-variant rounded px-md py-sm font-label-mono text-label-mono text-on-surface focus:ring-1 focus:ring-primary outline-none" id="server-group" placeholder="Default" type="text"/>
         </div>
         <div class="flex justify-end gap-md pt-md border-t border-outline-variant">
           <button type="button" class="px-md py-sm bg-surface-container-low border border-outline-variant rounded text-on-surface-variant hover:text-on-surface transition-colors" onclick="closeModal('modal-add-server')">Cancel</button>
@@ -802,7 +808,7 @@
         </div>
         <div>
           <label class="block font-label-caps text-label-caps text-outline uppercase mb-xs">Cluster / Group Name</label>
-          <input class="w-full bg-surface-container-lowest border border-outline-variant rounded px-md py-sm font-label-mono text-label-mono text-on-surface focus:ring-1 focus:ring-primary outline-none" id="server-group-name-edit" type="text"/>
+          <input class="w-full bg-surface-container-lowest border border-outline-variant rounded px-md py-sm font-label-mono text-label-mono text-on-surface focus:ring-1 focus:ring-primary outline-none" id="server-group-edit" type="text"/>
         </div>
         <div class="flex justify-end gap-md pt-md border-t border-outline-variant">
           <button type="button" class="px-md py-sm bg-surface-container-low border border-outline-variant rounded text-on-surface-variant hover:text-on-surface transition-colors" onclick="closeModal('modal-edit-server')">Cancel</button>
@@ -878,6 +884,46 @@
           <button type="submit" class="px-md py-sm bg-primary text-on-primary rounded hover:opacity-90 transition-opacity">Create User</button>
         </div>
       </form>
+    </div>
+  </div>
+
+  <!-- Node Token Modal -->
+  <div class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" id="modal-node-token">
+    <div class="bg-surface-container border border-outline-variant rounded-xl max-w-lg w-full overflow-hidden shadow-2xl">
+      <div class="flex justify-between items-center px-lg py-md border-b border-outline-variant bg-surface-container-low">
+        <h3 class="font-headline-md text-headline-md text-on-surface">Node Integration Token</h3>
+        <button type="button" class="text-on-surface-variant hover:text-on-surface" onclick="closeModal('modal-node-token')">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+      <div class="p-lg space-y-md">
+        <p class="text-on-surface-variant font-body-sm">Use this token to authenticate your nameserver node agent during installation:</p>
+        <div class="bg-surface-container-lowest p-md border border-outline-variant rounded font-label-mono text-label-mono text-primary select-all break-all" id="node-token-display"></div>
+        <div class="flex justify-end gap-md pt-md border-t border-outline-variant">
+          <button type="button" class="px-md py-sm bg-surface-container-low border border-outline-variant rounded text-on-surface-variant hover:text-on-surface transition-colors" onclick="closeModal('modal-node-token')">Close</button>
+          <button type="button" class="px-md py-sm bg-primary text-on-primary rounded hover:opacity-90 transition-opacity" id="copy-node-token">Copy Token</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Server Token Modal -->
+  <div class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" id="modal-server-token">
+    <div class="bg-surface-container border border-outline-variant rounded-xl max-w-lg w-full overflow-hidden shadow-2xl">
+      <div class="flex justify-between items-center px-lg py-md border-b border-outline-variant bg-surface-container-low">
+        <h3 class="font-headline-md text-headline-md text-on-surface">Server Integration Token</h3>
+        <button type="button" class="text-on-surface-variant hover:text-on-surface" onclick="closeModal('modal-server-token')">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+      <div class="p-lg space-y-md">
+        <p class="text-on-surface-variant font-body-sm">Use this API Key to authenticate your cPanel/Plesk hooks:</p>
+        <div class="bg-surface-container-lowest p-md border border-outline-variant rounded font-label-mono text-label-mono text-primary select-all break-all" id="server-token-display"></div>
+        <div class="flex justify-end gap-md pt-md border-t border-outline-variant">
+          <button type="button" class="px-md py-sm bg-surface-container-low border border-outline-variant rounded text-on-surface-variant hover:text-on-surface transition-colors" onclick="closeModal('modal-server-token')">Close</button>
+          <button type="button" class="px-md py-sm bg-primary text-on-primary rounded hover:opacity-90 transition-opacity" id="copy-server-token">Copy Key</button>
+        </div>
+      </div>
     </div>
   </div>
 
