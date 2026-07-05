@@ -389,7 +389,7 @@ elif [ "$ROLE" == "cpanel" ]; then
   chmod +x "$DEST"
 
   # Inject credentials into Bash script via sed
-  sed -i "s|CONTROLLER_URL=\"http://your-controller-ip:5380/api/v1/agent/sync-zone\"|CONTROLLER_URL=\"$CONTROLLER_URL/api/v1/agent/sync-zone\"|g" "$DEST"
+  sed -i "s|CONTROLLER_API=\"http://your-controller-ip:5380/api/v1/agent\"|CONTROLLER_API=\"$CONTROLLER_URL/api/v1/agent\"|g" "$DEST"
   sed -i "s|AGENT_TOKEN=\"your_agent_api_key_here\"|AGENT_TOKEN=\"$TOKEN\"|g" "$DEST"
 
   # Register hooks in WHM hook manager
@@ -420,7 +420,7 @@ elif [ "$ROLE" == "plesk" ]; then
   chmod +x "$DEST"
 
   # Inject credentials via sed
-  sed -i "s|CONTROLLER_URL=\"http://your-controller-ip:5380/api/v1/agent/sync-zone\"|CONTROLLER_URL=\"$CONTROLLER_URL/api/v1/agent/sync-zone\"|g" "$DEST"
+  sed -i "s|CONTROLLER_API=\"http://your-controller-ip:5380/api/v1/agent\"|CONTROLLER_API=\"$CONTROLLER_URL/api/v1/agent\"|g" "$DEST"
   sed -i "s|AGENT_TOKEN=\"your_agent_api_key_here\"|AGENT_TOKEN=\"$TOKEN\"|g" "$DEST"
 
   # Register handlers via plesk bin event_handler
