@@ -522,6 +522,21 @@ router.delete('/nodes/:id', authenticateToken, async (req, res) => {
   }
 });
 
+router.put('/nodes/:id', authenticateToken, async (req, res) => {
+  const { name, ip, url, group_name } = req.body;
+  if (!name || !url) return res.status(400).json({ error: 'Name and URL are required' });
+
+  try {
+    await query.run(
+      'UPDATE nodes SET name = ?, ip = ?, url = ?, group_name = ? WHERE id = ?',
+      [name, ip || '', url, group_name || null, req.params.id]
+    );
+    res.json({ message: 'Node updated successfully' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // ==========================================
 // Hosting Server (Agent) Management Routes
 // ==========================================
@@ -560,6 +575,21 @@ router.delete('/servers/:id', authenticateToken, async (req, res) => {
   try {
     await query.run('DELETE FROM servers WHERE id = ?', [req.params.id]);
     res.json({ message: 'Hosting server agent deleted' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.put('/servers/:id', authenticateToken, async (req, res) => {
+  const { name, ip, type, group_name } = req.body;
+  if (!name || !type) return res.status(400).json({ error: 'Name and Type are required' });
+
+  try {
+    await query.run(
+      'UPDATE servers SET name = ?, ip = ?, type = ?, group_name = ? WHERE id = ?',
+      [name, ip || '', type, group_name || null, req.params.id]
+    );
+    res.json({ message: 'Hosting server updated successfully' });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

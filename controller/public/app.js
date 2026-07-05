@@ -516,7 +516,8 @@ async function fetchNodes() {
                 <button class="btn btn-default btn-xs copy-token-btn" data-token="${node.token}">Copy</button>
               </div>
             </div>
-            <div class="box-footer text-right">
+            <div class="box-footer text-right" style="display: flex; justify-content: flex-end; gap: 6px;">
+              <button class="btn btn-default btn-xs edit-node-btn" data-node='${JSON.stringify(node).replace(/'/g, "&apos;")}'>Edit</button>
               <button class="btn btn-danger btn-xs delete-node-btn" data-id="${node.id}">Delete</button>
             </div>
           </div>
@@ -527,8 +528,21 @@ async function fetchNodes() {
     // Attach copy actions
     document.querySelectorAll('.copy-token-btn').forEach(btn => {
       btn.addEventListener('click', (e) => {
-        navigator.clipboard.writeText(e.target.dataset.token);
+        navigator.clipboard.writeText(btn.getAttribute('data-token'));
         showToast('Node Token copied to clipboard!');
+      });
+    });
+
+    // Attach edit actions
+    document.querySelectorAll('.edit-node-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const node = JSON.parse(e.target.dataset.node);
+        document.getElementById('node-id-edit').value = node.id;
+        document.getElementById('node-name-edit').value = node.name;
+        document.getElementById('node-ip-edit').value = node.ip || '';
+        document.getElementById('node-url-edit').value = node.url;
+        document.getElementById('node-group-edit').value = node.group_name || '';
+        openModal('modal-edit-node');
       });
     });
 
@@ -625,7 +639,8 @@ async function fetchServers() {
                 <button class="btn btn-default btn-xs copy-server-key-btn" data-key="${server.token}">Copy</button>
               </div>
             </div>
-            <div class="box-footer text-right">
+            <div class="box-footer text-right" style="display: flex; justify-content: flex-end; gap: 6px;">
+              <button class="btn btn-default btn-xs edit-server-btn" data-server='${JSON.stringify(server).replace(/'/g, "&apos;")}'>Edit</button>
               <button class="btn btn-danger btn-xs delete-server-btn" data-id="${server.id}">Remove</button>
             </div>
           </div>
@@ -636,8 +651,21 @@ async function fetchServers() {
     // Attach copy actions
     document.querySelectorAll('.copy-server-key-btn').forEach(btn => {
       btn.addEventListener('click', (e) => {
-        navigator.clipboard.writeText(e.target.dataset.key);
+        navigator.clipboard.writeText(btn.getAttribute('data-key'));
         showToast('API Key copied to clipboard!');
+      });
+    });
+
+    // Attach edit actions
+    document.querySelectorAll('.edit-server-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const server = JSON.parse(e.target.dataset.server);
+        document.getElementById('server-id-edit').value = server.id;
+        document.getElementById('server-name-edit').value = server.name;
+        document.getElementById('server-ip-edit').value = server.ip || '';
+        document.getElementById('server-type-edit').value = server.type;
+        document.getElementById('server-group-edit').value = server.group_name || '';
+        openModal('modal-edit-server');
       });
     });
 
@@ -685,6 +713,50 @@ document.getElementById('add-server-form').addEventListener('submit', async (e) 
     document.getElementById('server-token-display').textContent = data.token;
     openModal('modal-server-token');
     
+    fetchServers();
+  } catch (err) {
+    showToast(err.message, 'error');
+  }
+});
+
+// Edit Node Modal submission
+document.getElementById('edit-node-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const id = document.getElementById('node-id-edit').value;
+  const name = document.getElementById('node-name-edit').value;
+  const ip = document.getElementById('node-ip-edit').value;
+  const url = document.getElementById('node-url-edit').value;
+  const group_name = document.getElementById('node-group-edit').value || null;
+
+  try {
+    await apiFetch(`/nodes/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify({ name, ip, url, group_name })
+    });
+    closeModal('modal-edit-node');
+    showToast('Node details updated successfully.');
+    fetchNodes();
+  } catch (err) {
+    showToast(err.message, 'error');
+  }
+});
+
+// Edit Server Modal submission
+document.getElementById('edit-server-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const id = document.getElementById('server-id-edit').value;
+  const name = document.getElementById('server-name-edit').value;
+  const ip = document.getElementById('server-ip-edit').value;
+  const type = document.getElementById('server-type-edit').value;
+  const group_name = document.getElementById('server-group-edit').value || null;
+
+  try {
+    await apiFetch(`/servers/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify({ name, ip, type, group_name })
+    });
+    closeModal('modal-edit-server');
+    showToast('Hosting server details updated successfully.');
     fetchServers();
   } catch (err) {
     showToast(err.message, 'error');

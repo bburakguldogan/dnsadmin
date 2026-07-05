@@ -659,6 +659,85 @@
     </div>
   </div>
 
+  <!-- Edit Node Modal -->
+  <div id="modal-edit-node" class="modal fade" role="dialog" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+          <h4 class="modal-title" style="font-weight:600;">Edit Nameserver Node</h4>
+        </div>
+        <form id="edit-node-form">
+          <input type="hidden" id="node-id-edit">
+          <div class="modal-body">
+            <div class="form-group">
+              <label>Nameserver Hostname</label>
+              <input type="text" class="form-control" id="node-name-edit" required>
+            </div>
+            <div class="form-group">
+              <label>IP Address</label>
+              <input type="text" class="form-control" id="node-ip-edit">
+            </div>
+            <div class="form-group">
+              <label>Agent API URL</label>
+              <input type="url" class="form-control" id="node-url-edit" required>
+            </div>
+            <div class="form-group">
+              <label>Cluster Group Name</label>
+              <input type="text" class="form-control" id="node-group-edit">
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-primary">Save Changes</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Server Modal -->
+  <div id="modal-edit-server" class="modal fade" role="dialog" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+          <h4 class="modal-title" style="font-weight:600;">Edit Web Hosting Server</h4>
+        </div>
+        <form id="edit-server-form">
+          <input type="hidden" id="server-id-edit">
+          <div class="modal-body">
+            <div class="form-group">
+              <label>Server Name</label>
+              <input type="text" class="form-control" id="server-name-edit" required>
+            </div>
+            <div class="form-group">
+              <label>Server IP</label>
+              <input type="text" class="form-control" id="server-ip-edit">
+            </div>
+            <div class="form-group">
+              <label>Control Panel Type</label>
+              <select class="form-control" id="server-type-edit" required>
+                <option value="cpanel">cPanel / WHM</option>
+                <option value="plesk">Plesk Panel</option>
+                <option value="directadmin">DirectAdmin</option>
+                <option value="lamp">LAMP / LEMP (Custom)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Cluster Group Name</label>
+              <input type="text" class="form-control" id="server-group-edit">
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-primary">Save Changes</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
   <!-- Add Zone Modal -->
   <div id="modal-add-zone" class="modal fade" role="dialog" tabindex="-1">
     <div class="modal-dialog">
