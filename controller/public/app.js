@@ -218,6 +218,10 @@ function formatLastSeen(dateStr) {
 }
 
 async function renderCharts(distribution, trend) {
+  if (typeof Chart === 'undefined') {
+    console.warn('[Chart] Chart.js library not loaded yet.');
+    return;
+  }
   const isDark = document.body.classList.contains('dark-theme');
   const textColor = isDark ? '#8c9ba5' : '#64748b';
   const gridColor = isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)';
@@ -315,128 +319,143 @@ async function renderCharts(distribution, trend) {
 }
 
 async function fetchStats() {
+  let data = { counts: { users: 0, servers: 0, zones: 0 }, distribution: [], trend: [], logs: [] };
   try {
-    const data = await apiFetch('/dashboard/stats');
+    data = await apiFetch('/dashboard/stats');
     state.currentDistribution = data.distribution;
     state.currentTrend = data.trend;
-    
-    // Stats count numbers
-    document.getElementById('dashboard-stat-users').textContent = data.counts.users;
-    document.getElementById('dashboard-stat-servers').textContent = data.counts.servers;
-    document.getElementById('dashboard-stat-zones').textContent = data.counts.zones;
+  } catch (err) {
+    console.error('Failed to load dashboard stats:', err.message);
+  }
 
-    // Render hosting servers table
+  // Stats count numbers
+  const uCount = document.getElementById('dashboard-stat-users');
+  const sCount = document.getElementById('dashboard-stat-servers');
+  const zCount = document.getElementById('dashboard-stat-zones');
+  if (uCount) uCount.textContent = data.counts.users;
+  if (sCount) sCount.textContent = data.counts.servers;
+  if (zCount) zCount.textContent = data.counts.zones;
+
+  let rblListedCount = 0;
+  const issueList = [];
+
+  // Render hosting servers table
+  try {
     const servers = await apiFetch('/servers');
     const serversTbody = document.getElementById('dashboard-servers-table');
-    let rblListedCount = 0;
-    const issueList = [];
-
-    if (servers.length === 0) {
-      serversTbody.innerHTML = `<tr><td colspan="6" class="text-center text-muted" style="padding: 20px;">No hosting servers registered yet.</td></tr>`;
-    } else {
-      serversTbody.innerHTML = servers.map(s => {
-        const lastSeenStr = s.last_sync ? formatLastSeen(s.last_sync) : 'Never';
-        const isOnline = s.status === 'active';
-        const statusDot = isOnline ? '<span class="status-dot status-online"></span>' : '<span class="status-dot status-offline"></span>';
-        if (s.rbl_status !== 'Clean') {
-          rblListedCount++;
-          issueList.push(`Server ${s.name} listed in RBL`);
-        }
-        return `
-          <tr>
-            <td style="font-weight: 600;">${s.name} <span class="version-badge">${s.version || 'v1.0.0'}</span></td>
-            <td>${statusDot} ${lastSeenStr}</td>
-            <td>${s.zone_count || 0}</td>
-            <td>${s.type.toUpperCase()} | named</td>
-            <td><span class="label label-${s.rbl_status === 'Clean' ? 'success' : 'danger'}">${s.rbl_status || 'Clean'}</span></td>
-            <td>${s.cluster_name || 'Nixpal'}</td>
-          </tr>
-        `;
-      }).join('');
-    }
-
-    // Render DNS Nodes table
-    const nodes = await apiFetch('/nodes');
-    const nodesTbody = document.getElementById('dashboard-nodes-table');
-    if (nodes.length === 0) {
-      nodesTbody.innerHTML = `<tr><td colspan="5" class="text-center text-muted" style="padding: 20px;">No DNS nameservers registered yet.</td></tr>`;
-    } else {
-      nodesTbody.innerHTML = nodes.map(n => {
-        const lastSeenStr = n.last_seen ? formatLastSeen(n.last_seen) : 'Never';
-        const isOnline = n.status === 'online';
-        const statusDot = isOnline ? '<span class="status-dot status-online"></span>' : '<span class="status-dot status-offline"></span>';
-        if (!isOnline) {
-          issueList.push(`Node ${n.name} is Offline`);
-        }
-        if (n.rbl_status !== 'Clean') {
-          rblListedCount++;
-          issueList.push(`Node ${n.name} listed in RBL`);
-        }
-        return `
-          <tr>
-            <td style="font-weight: 600;">${n.name} <span class="version-badge">${n.version || 'v1.0.0'}</span></td>
-            <td>${statusDot} ${lastSeenStr}</td>
-            <td>${data.counts.zones || 0}</td>
-            <td><span class="label label-${n.rbl_status === 'Clean' ? 'success' : 'danger'}">${n.rbl_status || 'Clean'}</span></td>
-            <td>${n.cluster_name || 'Nixpal'}</td>
-          </tr>
-        `;
-      }).join('');
-    }
-
-    // RBL status card text
-    const rblStatusText = document.getElementById('dashboard-rbl-status-text');
-    if (rblStatusText) {
-      if (rblListedCount > 0) {
-        rblStatusText.textContent = `Warning: ${rblListedCount} of your server IP(s) are listed in RBL blacklists!`;
-        rblStatusText.style.color = '#ef4444';
+    if (serversTbody) {
+      if (servers.length === 0) {
+        serversTbody.innerHTML = `<tr><td colspan="6" class="text-center text-muted" style="padding: 20px;">No hosting servers registered yet.</td></tr>`;
       } else {
-        rblStatusText.textContent = 'Your servers are not listed in any RBL.';
-        rblStatusText.style.color = 'var(--text-muted)';
-      }
-    }
-
-    // Issues card text
-    const issuesText = document.getElementById('dashboard-issues-text');
-    const issuesCard = document.getElementById('dashboard-issues-card');
-    if (issuesText && issuesCard) {
-      if (issueList.length > 0) {
-        issuesCard.style.borderLeft = '4px solid #ef4444';
-        issuesText.innerHTML = issueList.map(i => `⚠️ ${i}`).join('<br>');
-      } else {
-        issuesCard.style.borderLeft = '4px solid #10b981';
-        issuesText.textContent = 'No problems found';
-      }
-    }
-
-    // Render latest logs table
-    const logsTbody = document.getElementById('dashboard-recent-logs');
-    if (logsTbody) {
-      if (data.logs.length === 0) {
-        logsTbody.innerHTML = `<tr><td class="text-center text-muted" style="padding: 20px;">No logs recorded yet.</td></tr>`;
-      } else {
-        logsTbody.innerHTML = data.logs.map(l => {
-          const isSuccess = l.action.includes('success') || l.action === 'create';
-          const time = new Date(l.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        serversTbody.innerHTML = servers.map(s => {
+          const lastSeenStr = s.last_sync ? formatLastSeen(s.last_sync) : 'Never';
+          const isOnline = s.status === 'active';
+          const statusDot = isOnline ? '<span class="status-dot status-online"></span>' : '<span class="status-dot status-offline"></span>';
+          if (s.rbl_status !== 'Clean') {
+            rblListedCount++;
+            issueList.push(`Server ${s.name} listed in RBL`);
+          }
           return `
             <tr>
-              <td>
-                <span class="label label-${isSuccess ? 'success' : 'danger'}" style="font-size: 9px; text-transform: uppercase;">${l.action}</span>
-              </td>
-              <td style="font-weight: 600;">${l.zone}</td>
-              <td class="text-muted text-right">${time}</td>
+              <td style="font-weight: 600;">${s.name} <span class="version-badge">${s.version || 'v1.0.0'}</span></td>
+              <td>${statusDot} ${lastSeenStr}</td>
+              <td>${s.zone_count || 0}</td>
+              <td>${s.type.toUpperCase()} | named</td>
+              <td><span class="label label-${s.rbl_status === 'Clean' ? 'success' : 'danger'}">${s.rbl_status || 'Clean'}</span></td>
+              <td>${s.cluster_name || 'Nixpal'}</td>
             </tr>
           `;
         }).join('');
       }
     }
-
-    // Render Charts
-    renderCharts(data.distribution, data.trend);
-
   } catch (err) {
-    console.error('Error fetching dashboard stats:', err.message);
+    console.error('Failed to load servers table:', err.message);
   }
+
+  // Render DNS Nodes table
+  try {
+    const nodes = await apiFetch('/nodes');
+    const nodesTbody = document.getElementById('dashboard-nodes-table');
+    if (nodesTbody) {
+      if (nodes.length === 0) {
+        nodesTbody.innerHTML = `<tr><td colspan="5" class="text-center text-muted" style="padding: 20px;">No DNS nameservers registered yet.</td></tr>`;
+      } else {
+        nodesTbody.innerHTML = nodes.map(n => {
+          const lastSeenStr = n.last_seen ? formatLastSeen(n.last_seen) : 'Never';
+          const isOnline = n.status === 'online';
+          const statusDot = isOnline ? '<span class="status-dot status-online"></span>' : '<span class="status-dot status-offline"></span>';
+          if (!isOnline) {
+            issueList.push(`Node ${n.name} is Offline`);
+          }
+          if (n.rbl_status !== 'Clean') {
+            rblListedCount++;
+            issueList.push(`Node ${n.name} listed in RBL`);
+          }
+          return `
+            <tr>
+              <td style="font-weight: 600;">${n.name} <span class="version-badge">${n.version || 'v1.0.0'}</span></td>
+              <td>${statusDot} ${lastSeenStr}</td>
+              <td>${data.counts.zones || 0}</td>
+              <td><span class="label label-${n.rbl_status === 'Clean' ? 'success' : 'danger'}">${n.rbl_status || 'Clean'}</span></td>
+              <td>${n.cluster_name || 'Nixpal'}</td>
+            </tr>
+          `;
+        }).join('');
+      }
+    }
+  } catch (err) {
+    console.error('Failed to load nodes table:', err.message);
+  }
+
+  // RBL status card text
+  const rblStatusText = document.getElementById('dashboard-rbl-status-text');
+  if (rblStatusText) {
+    if (rblListedCount > 0) {
+      rblStatusText.textContent = `Warning: ${rblListedCount} of your server IP(s) are listed in RBL blacklists!`;
+      rblStatusText.style.color = '#ef4444';
+    } else {
+      rblStatusText.textContent = 'Your servers are not listed in any RBL.';
+      rblStatusText.style.color = 'var(--text-muted)';
+    }
+  }
+
+  // Issues card text
+  const issuesText = document.getElementById('dashboard-issues-text');
+  const issuesCard = document.getElementById('dashboard-issues-card');
+  if (issuesText && issuesCard) {
+    if (issueList.length > 0) {
+      issuesCard.style.borderLeft = '4px solid #ef4444';
+      issuesText.innerHTML = issueList.map(i => `⚠️ ${i}`).join('<br>');
+    } else {
+      issuesCard.style.borderLeft = '4px solid #10b981';
+      issuesText.textContent = 'No problems found';
+    }
+  }
+
+  // Render latest logs table
+  const logsTbody = document.getElementById('dashboard-recent-logs');
+  if (logsTbody) {
+    if (data.logs.length === 0) {
+      logsTbody.innerHTML = `<tr><td class="text-center text-muted" style="padding: 20px;">No logs recorded yet.</td></tr>`;
+    } else {
+      logsTbody.innerHTML = data.logs.map(l => {
+        const isSuccess = l.action.includes('success') || l.action === 'create';
+        const time = new Date(l.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        return `
+          <tr>
+            <td>
+              <span class="label label-${isSuccess ? 'success' : 'danger'}" style="font-size: 9px; text-transform: uppercase;">${l.action}</span>
+            </td>
+            <td style="font-weight: 600;">${l.zone}</td>
+            <td class="text-muted text-right">${time}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+  }
+
+  // Render Charts
+  renderCharts(data.distribution, data.trend);
 }
 
 // ==========================================
