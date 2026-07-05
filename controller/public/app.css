@@ -87,3 +87,49 @@ canvas {
 .bg-light {
   background-color: #131b2e !important; /* maps to surface-container-low */
 }
+
+/* Badge label styles */
+.label {
+  display: inline-block;
+  padding: 3px 8px !important;
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  line-height: 1 !important;
+  text-align: center;
+  white-space: nowrap;
+  vertical-align: baseline;
+  border-radius: 4px;
+  text-transform: uppercase;
+  font-family: 'Inter', sans-serif;
+  border: 1px solid transparent;
+}
+.label-success {
+  background-color: rgba(78, 222, 163, 0.15) !important;
+  color: #4edea3 !important;
+  border-color: rgba(78, 222, 163, 0.3) !important;
+}
+.label-danger {
+  background-color: rgba(239, 68, 68, 0.15) !important;
+  color: #f87171 !important;
+  border-color: rgba(239, 68, 68, 0.3) !important;
+}
+.label-info {
+  background-color: rgba(75, 142, 255, 0.15) !important;
+  color: #adc6ff !important;
+  border-color: rgba(75, 142, 255, 0.3) !important;
+}
+.label-warning {
+  background-color: rgba(245, 158, 11, 0.15) !important;
+  color: #fbbf24 !important;
+  border-color: rgba(245, 158, 11, 0.3) !important;
+}
+
+/* Global table cell padding styling to prevent squishing */
+table td {
+  padding: 12px 16px !important;
+  vertical-align: middle;
+}
+table th {
+  padding: 12px 16px !important;
+  vertical-align: middle;
+}

@@ -67,7 +67,7 @@ async function checkAuth() {
       if (state.user.force_password_change) {
         document.getElementById('login-container').style.display = 'none';
         document.getElementById('app-container').style.display = 'none';
-        document.getElementById('force-password-container').style.display = 'block';
+        document.getElementById('force-password-container').style.display = 'flex';
         return;
       }
 
@@ -86,7 +86,7 @@ async function checkAuth() {
       logout();
     }
   } else {
-    document.getElementById('login-container').style.display = 'block';
+    document.getElementById('login-container').style.display = 'flex';
     document.getElementById('force-password-container').style.display = 'none';
     document.getElementById('app-container').style.display = 'none';
   }
@@ -96,7 +96,7 @@ function logout() {
   state.token = null;
   state.user = null;
   localStorage.removeItem('dnsadmin_token');
-  document.getElementById('login-container').style.display = 'block';
+  document.getElementById('login-container').style.display = 'flex';
   document.getElementById('force-password-container').style.display = 'none';
   document.getElementById('app-container').style.display = 'none';
 }
@@ -244,7 +244,8 @@ async function renderCharts(distribution, trend) {
         datasets: [{
           label: 'Zones',
           data: dataVals.length > 0 ? dataVals : [0],
-          backgroundColor: '#3c8dbc',
+          backgroundColor: '#adc6ff',
+          hoverBackgroundColor: '#4edea3',
           borderRadius: 4
         }]
       },
@@ -486,9 +487,9 @@ async function fetchNodes() {
       return `
         <div class="col-span-12 md:col-span-6 xl:col-span-4 bg-surface-container border border-outline-variant rounded-xl overflow-hidden shadow-lg flex flex-col h-full">
           <div class="px-lg py-md border-b border-outline-variant bg-surface-container-low flex items-center justify-between">
-            <h3 class="font-headline-md text-headline-md text-on-surface flex items-center gap-xs">
+            <h3 class="font-headline-md text-headline-md text-on-surface flex items-center gap-xs flex-wrap">
               ${node.name}
-              ${node.group_name ? `<span class="text-[10px] bg-primary-fixed-dim text-on-primary-fixed px-sm py-0.5 rounded font-label-mono">${node.group_name}</span>` : ''}
+              ${node.group_name ? `<span class="text-[10px] bg-primary-fixed-dim text-on-primary-fixed px-sm py-0.5 rounded font-label-mono whitespace-nowrap">${node.group_name}</span>` : ''}
             </h3>
             <span class="w-2.5 h-2.5 rounded-full ${isOnline ? 'bg-secondary shadow-[0_0_8px_rgba(78,222,163,0.5)]' : 'bg-outline-variant'}"></span>
           </div>
@@ -634,9 +635,9 @@ async function fetchServers() {
       return `
         <div class="col-span-12 md:col-span-6 xl:col-span-4 bg-surface-container border border-outline-variant rounded-xl overflow-hidden shadow-lg flex flex-col h-full">
           <div class="px-lg py-md border-b border-outline-variant bg-surface-container-low flex items-center justify-between">
-            <h3 class="font-headline-md text-headline-md text-on-surface flex items-center gap-xs">
+            <h3 class="font-headline-md text-headline-md text-on-surface flex items-center gap-xs flex-wrap">
               <span class="mr-xs">${logo}</span> ${server.name}
-              ${server.group_name ? `<span class="text-[10px] bg-primary-fixed-dim text-on-primary-fixed px-sm py-0.5 rounded font-label-mono">${server.group_name}</span>` : ''}
+              ${server.group_name ? `<span class="text-[10px] bg-primary-fixed-dim text-on-primary-fixed px-sm py-0.5 rounded font-label-mono whitespace-nowrap">${server.group_name}</span>` : ''}
             </h3>
             <span class="px-sm py-0.5 rounded bg-primary-container text-on-primary-container font-label-caps text-label-caps uppercase">${server.type}</span>
           </div>
