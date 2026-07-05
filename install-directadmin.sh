@@ -58,10 +58,10 @@ fi
 # Insert configuration variables
 echo "Configuring integration hooks..."
 sed -i "s|CONTROLLER_URL=\"[^\"]*\"|CONTROLLER_URL=\"$CONTROLLER_URL\"|g" "$WRITE_HOOK"
-sed -i "s|TOKEN=\"[^\"]*\"|TOKEN=\"$TOKEN\"|g" "$WRITE_HOOK"
+sed -i "s|AGENT_TOKEN=\"[^\"]*\"|AGENT_TOKEN=\"$TOKEN\"|g" "$WRITE_HOOK"
 
 sed -i "s|CONTROLLER_URL=\"[^\"]*\"|CONTROLLER_URL=\"$CONTROLLER_URL\"|g" "$DELETE_HOOK"
-sed -i "s|TOKEN=\"[^\"]*\"|TOKEN=\"$TOKEN\"|g" "$DELETE_HOOK"
+sed -i "s|AGENT_TOKEN=\"[^\"]*\"|AGENT_TOKEN=\"$TOKEN\"|g" "$DELETE_HOOK"
 
 # Set permissions for DirectAdmin
 echo "Configuring permissions..."

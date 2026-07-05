@@ -6,7 +6,7 @@
 # ==============================================================================
 
 # CONFIGURATION
-CONTROLLER_URL="http://your-controller-ip:5380/api/v1/agent/sync-zone"
+CONTROLLER_API="http://your-controller-ip:5380/api/v1/agent"
 AGENT_TOKEN="your_agent_api_key_here"
 
 log() {
@@ -33,7 +33,7 @@ if [ -z "$DOMAIN" ]; then
   exit 0 # Exit 0 to prevent blocking WHM in case of metadata queries
 fi
 
-log "Attempting to sync domain: $DOMAIN"
+log "Processing domain: $DOMAIN"
 
 # Locate zone file in standard cPanel paths
 ZONE_FILE=""
@@ -44,11 +44,29 @@ for path in "/var/named/${DOMAIN}.db" "/var/named/chroot/var/named/${DOMAIN}.db"
   fi
 done
 
+# If zone file is missing, treat as a DELETION
 if [ -z "$ZONE_FILE" ]; then
-  log "Error: Could not locate zone file for $DOMAIN"
+  log "Zone file not found. Sending DELETE request for $DOMAIN..."
+  
+  JSON_BODY="{\"domain\":\"$DOMAIN\"}"
+  RESPONSE=$(curl -s -w "\n%{http_code}" -X POST \
+    -H "Content-Type: application/json" \
+    -H "X-DNSAdmin-Token: $AGENT_TOKEN" \
+    -d "$JSON_BODY" \
+    "$CONTROLLER_API/delete-zone")
+    
+  HTTP_STATUS=$(echo "$RESPONSE" | tail -n 1)
+  BODY=$(echo "$RESPONSE" | head -n -1)
+  
+  if [ "$HTTP_STATUS" -eq 200 ]; then
+    log "Successfully deleted zone $DOMAIN. Response: $BODY"
+  else
+    log "Delete failed for $DOMAIN (HTTP $HTTP_STATUS). Response: $BODY"
+  fi
   exit 0
 fi
 
+# If zone file exists, sync it
 ZONE_TEXT=$(cat "$ZONE_FILE")
 
 # Escape newlines and double quotes for JSON compatibility
@@ -60,7 +78,7 @@ RESPONSE=$(curl -s -w "\n%{http_code}" -X POST \
   -H "Content-Type: application/json" \
   -H "X-DNSAdmin-Token: $AGENT_TOKEN" \
   -d "$JSON_BODY" \
-  "$CONTROLLER_URL")
+  "$CONTROLLER_API/sync-zone")
 
 HTTP_STATUS=$(echo "$RESPONSE" | tail -n 1)
 BODY=$(echo "$RESPONSE" | head -n -1)
