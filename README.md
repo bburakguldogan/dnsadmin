@@ -9,10 +9,18 @@ DNSAdmin is a secure, light-weight, centralized DNS management panel designed fo
 Bu proje, hosting sunucularınızdaki (cPanel, Plesk, DirectAdmin) DNS kayıtlarını merkezi bir panel üzerinden kendi bağımsız BIND 9 DNS sunucularınıza (ns1, ns2) anlık olarak senkronize eder.
 
 ### 1. Ana Yönetim Paneli Kurulumu (Master Controller)
-Yönetim panelini kurmak istediğiniz temiz bir **Debian/Ubuntu** veya **RHEL/CentOS/AlmaLinux** sunucusunda aşağıdaki komutu çalıştırmanız yeterlidir. Komut otomatik olarak Node.js, MariaDB (MySQL) kuracak, güvenli şifrelerinizi üretecek ve servisi aktif edecektir:
+Yönetim panelini kurmak istediğiniz temiz bir **Debian/Ubuntu** veya **RHEL/CentOS/AlmaLinux** sunucusunda aşağıdaki komutları çalıştırarak kurulumu tamamlayabilirsiniz:
 
+**Seçenek A: `wget` ile indirip kurma (Önerilen)**
 ```bash
-curl -sS https://raw.githubusercontent.com/bburakguldogan/dnsadmin/main/install.sh | bash -s -- --role controller --port 5380 --notify-port 53
+wget -O install.sh "https://raw.githubusercontent.com/bburakguldogan/dnsadmin/main/install.sh?v=1"
+chmod +x install.sh
+./install.sh --role controller --port 80 --notify-port 53
+```
+
+**Seçenek B: `curl` ile doğrudan kurma**
+```bash
+curl -sS https://raw.githubusercontent.com/bburakguldogan/dnsadmin/main/install.sh?v=1 | bash -s -- --role controller --port 80 --notify-port 53
 ```
 
 *   **İlk Giriş Şifresi:** Kurulum tamamlandığında, sistem otomatik olarak rastgele 16 karakterli bir şifre üretir ve bunu `/opt/dnsadmin-controller/admin_credentials.txt` dosyasına kaydeder.
@@ -21,11 +29,19 @@ curl -sS https://raw.githubusercontent.com/bburakguldogan/dnsadmin/main/install.
 ---
 
 ### 2. DNS Sunucu Düğümleri Kurulumu (ns1 / ns2 Node Agent)
-DNS sunucusu (ad sunucusu) olarak kullanacağınız makinede aşağıdaki komutu çalıştırarak BIND 9 kurulumunu ve otomatik ajan servisini yapılandırın:
+DNS sunucusu (ad sunucusu) olarak kullanacağınız makinede aşağıdaki adımlarla BIND 9 kurulumunu ve otomatik ajan servisini yapılandırın:
 
+**Seçenek A: `wget` ile indirip kurma (Önerilen)**
 ```bash
-curl -sS https://raw.githubusercontent.com/bburakguldogan/dnsadmin/main/install-node.sh | bash -s -- \
-  --controller-url http://<kontrol-paneli-ip-adresiniz>:5380 \
+wget -O install-node.sh "https://raw.githubusercontent.com/bburakguldogan/dnsadmin/main/install-node.sh?v=1"
+chmod +x install-node.sh
+./install-node.sh --controller-url http://<kontrol-paneli-ip-adresiniz>:80 --token <node-token-from-panel> --ns-name ns1.alanadiniz.com
+```
+
+**Seçenek B: `curl` ile doğrudan kurma**
+```bash
+curl -sS https://raw.githubusercontent.com/bburakguldogan/dnsadmin/main/install-node.sh?v=1 | bash -s -- \
+  --controller-url http://<kontrol-paneli-ip-adresiniz>:80 \
   --token <panelden-aldiginiz-node-token> \
   --ns-name ns1.alanadiniz.com
 ```
@@ -39,23 +55,23 @@ Müşterilerinizin sitelerinde yaptığı DNS değişikliklerinin (ekleme, düze
 
 #### A. cPanel / WHM Sunucuları için:
 ```bash
-curl -sS https://raw.githubusercontent.com/bburakguldogan/dnsadmin/main/install-cpanel.sh | bash -s -- \
-  --controller-url http://<kontrol-paneli-ip-adresiniz>:5380 \
-  --token <panelden-aldiginiz-server-api-key>
+wget -O install-cpanel.sh "https://raw.githubusercontent.com/bburakguldogan/dnsadmin/main/install-cpanel.sh?v=1"
+chmod +x install-cpanel.sh
+./install-cpanel.sh --controller-url http://<kontrol-paneli-ip-adresiniz>:80 --token <panelden-aldiginiz-server-api-key>
 ```
 
 #### B. Plesk Sunucuları için:
 ```bash
-curl -sS https://raw.githubusercontent.com/bburakguldogan/dnsadmin/main/install-plesk.sh | bash -s -- \
-  --controller-url http://<kontrol-paneli-ip-adresiniz>:5380 \
-  --token <panelden-aldiginiz-server-api-key>
+wget -O install-plesk.sh "https://raw.githubusercontent.com/bburakguldogan/dnsadmin/main/install-plesk.sh?v=1"
+chmod +x install-plesk.sh
+./install-plesk.sh --controller-url http://<kontrol-paneli-ip-adresiniz>:80 --token <panelden-aldiginiz-server-api-key>
 ```
 
 #### C. DirectAdmin Sunucuları için:
 ```bash
-curl -sS https://raw.githubusercontent.com/bburakguldogan/dnsadmin/main/install-directadmin.sh | bash -s -- \
-  --controller-url http://<kontrol-paneli-ip-adresiniz>:5380 \
-  --token <panelden-aldiginiz-server-api-key>
+wget -O install-directadmin.sh "https://raw.githubusercontent.com/bburakguldogan/dnsadmin/main/install-directadmin.sh?v=1"
+chmod +x install-directadmin.sh
+./install-directadmin.sh --controller-url http://<kontrol-paneli-ip-adresiniz>:80 --token <panelden-aldiginiz-server-api-key>
 ```
 
 ---
@@ -65,8 +81,16 @@ curl -sS https://raw.githubusercontent.com/bburakguldogan/dnsadmin/main/install-
 ### 1. Central Controller Setup (Master Server)
 Run the following command on a clean Debian/Ubuntu or RHEL/CentOS/AlmaLinux server to install Node.js, MariaDB (MySQL), configure the database, generate random passwords, and start the controller panel:
 
+**Option A: Download via `wget` (Recommended)**
 ```bash
-curl -sS https://raw.githubusercontent.com/bburakguldogan/dnsadmin/main/install.sh | bash -s -- --role controller --port 5380 --notify-port 53
+wget -O install.sh "https://raw.githubusercontent.com/bburakguldogan/dnsadmin/main/install.sh?v=1"
+chmod +x install.sh
+./install.sh --role controller --port 80 --notify-port 53
+```
+
+**Option B: One-click setup via `curl`**
+```bash
+curl -sS https://raw.githubusercontent.com/bburakguldogan/dnsadmin/main/install.sh?v=1 | bash -s -- --role controller --port 80 --notify-port 53
 ```
 
 *   **First Login Credentials:** During setup, a random 16-character administrator password is generated and saved in `/opt/dnsadmin-controller/admin_credentials.txt`.
@@ -77,9 +101,17 @@ curl -sS https://raw.githubusercontent.com/bburakguldogan/dnsadmin/main/install.
 ### 2. DNS Nameserver Node Agent Setup (ns1/ns2)
 Run this installer on your dedicated nameservers. It installs BIND 9, configures directory paths, registers the agent node service, and triggers a 60-second status reporting heartbeat:
 
+**Option A: Download via `wget` (Recommended)**
 ```bash
-curl -sS https://raw.githubusercontent.com/bburakguldogan/dnsadmin/main/install-node.sh | bash -s -- \
-  --controller-url http://<your-controller-ip>:5380 \
+wget -O install-node.sh "https://raw.githubusercontent.com/bburakguldogan/dnsadmin/main/install-node.sh?v=1"
+chmod +x install-node.sh
+./install-node.sh --controller-url http://<your-controller-ip>:80 --token <node-token-from-panel> --ns-name ns1.yourdomain.com
+```
+
+**Option B: One-click setup via `curl`**
+```bash
+curl -sS https://raw.githubusercontent.com/bburakguldogan/dnsadmin/main/install-node.sh?v=1 | bash -s -- \
+  --controller-url http://<your-controller-ip>:80 \
   --token <node-token-from-panel> \
   --ns-name ns1.yourdomain.com
 ```
@@ -92,23 +124,23 @@ To automate real-time updates when zones are added, modified, or removed on your
 
 #### A. cPanel / WHM Integration
 ```bash
-curl -sS https://raw.githubusercontent.com/bburakguldogan/dnsadmin/main/install-cpanel.sh | bash -s -- \
-  --controller-url http://<your-controller-ip>:5380 \
-  --token <server-api-key-from-panel>
+wget -O install-cpanel.sh "https://raw.githubusercontent.com/bburakguldogan/dnsadmin/main/install-cpanel.sh?v=1"
+chmod +x install-cpanel.sh
+./install-cpanel.sh --controller-url http://<your-controller-ip>:80 --token <server-api-key-from-panel>
 ```
 
 #### B. Plesk Integration
 ```bash
-curl -sS https://raw.githubusercontent.com/bburakguldogan/dnsadmin/main/install-plesk.sh | bash -s -- \
-  --controller-url http://<your-controller-ip>:5380 \
-  --token <server-api-key-from-panel>
+wget -O install-plesk.sh "https://raw.githubusercontent.com/bburakguldogan/dnsadmin/main/install-plesk.sh?v=1"
+chmod +x install-plesk.sh
+./install-plesk.sh --controller-url http://<your-controller-ip>:80 --token <server-api-key-from-panel>
 ```
 
 #### C. DirectAdmin Integration
 ```bash
-curl -sS https://raw.githubusercontent.com/bburakguldogan/dnsadmin/main/install-directadmin.sh | bash -s -- \
-  --controller-url http://<your-controller-ip>:5380 \
-  --token <server-api-key-from-panel>
+wget -O install-directadmin.sh "https://raw.githubusercontent.com/bburakguldogan/dnsadmin/main/install-directadmin.sh?v=1"
+chmod +x install-directadmin.sh
+./install-directadmin.sh --controller-url http://<your-controller-ip>:80 --token <server-api-key-from-panel>
 ```
 
 ---
