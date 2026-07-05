@@ -1,5 +1,7 @@
 import express from 'express';
 import path from 'path';
+import fs from 'fs';
+import crypto from 'crypto';
 import { fileURLToPath } from 'url';
 import bcrypt from 'bcryptjs';
 import { initDb, query } from './db.js';
@@ -63,17 +65,23 @@ async function start() {
   try {
     const adminCount = await query.get('SELECT COUNT(*) as count FROM users');
     if (adminCount.count === 0) {
-      const defaultPassword = 'admin'; // Easy default password for local demo/dev
-      const hashedPassword = await bcrypt.hash(defaultPassword, 10);
+      const randomPassword = crypto.randomBytes(8).toString('hex'); // Secure 16-char password
+      const hashedPassword = await bcrypt.hash(randomPassword, 10);
       await query.run(
-        'INSERT INTO users (username, password, role) VALUES (?, ?, ?)',
-        ['admin', hashedPassword, 'admin']
+        'INSERT INTO users (username, password, role, force_password_change) VALUES (?, ?, ?, ?)',
+        ['admin', hashedPassword, 'admin', 1]
       );
+      
+      // Save credentials to local text file in case user misses console output
+      const credsPath = path.join(__dirname, 'admin_credentials.txt');
+      fs.writeFileSync(credsPath, `Username: admin\nPassword: ${randomPassword}\n`, 'utf8');
+
       console.log('==================================================');
       console.log('  DEFAULT ADMIN USER CREATED');
       console.log('  Username: admin');
-      console.log('  Password: admin');
-      console.log('  Please change your password after logging in.');
+      console.log(`  Password: ${randomPassword}`);
+      console.log('  Please log in and change your password.');
+      console.log(`  Credentials file saved to: ${credsPath}`);
       console.log('==================================================');
     }
   } catch (err) {

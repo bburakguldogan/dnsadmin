@@ -45,6 +45,7 @@ export async function initDb() {
       email VARCHAR(255) DEFAULT NULL,
       password VARCHAR(255) NOT NULL,
       role VARCHAR(50) DEFAULT 'admin',
+      force_password_change TINYINT DEFAULT 0,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );
   `);

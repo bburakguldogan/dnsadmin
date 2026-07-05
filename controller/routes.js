@@ -31,6 +31,18 @@ function authenticateToken(req, res, next) {
   jwt.verify(token, JWT_SECRET, (err, user) => {
     if (err) return res.status(403).json({ error: 'Invalid or expired token' });
     req.user = user;
+
+    // Strict routing lock if user has force_password_change active
+    if (user.force_password_change) {
+      const allowedPaths = ['/profile', '/auth/me'];
+      if (!allowedPaths.includes(req.path)) {
+        return res.status(403).json({
+          error: 'Password change required before performing any action',
+          force_password_change: true
+        });
+      }
+    }
+
     next();
   });
 }
@@ -128,10 +140,19 @@ router.post('/auth/login', async (req, res) => {
       return res.status(401).json({ error: 'Invalid username or password' });
     }
 
-    const token = jwt.sign({ id: user.id, username: user.username, role: user.role }, JWT_SECRET, {
-      expiresIn: '7d'
+    const token = jwt.sign(
+      { id: user.id, username: user.username, role: user.role, force_password_change: user.force_password_change },
+      JWT_SECRET,
+      { expiresIn: '7d' }
+    );
+    res.json({
+      token,
+      user: {
+        username: user.username,
+        role: user.role,
+        force_password_change: !!user.force_password_change
+      }
     });
-    res.json({ token, user: { username: user.username, role: user.role } });
   } catch (err) {
     res.status(500).json({ error: 'Internal server error' });
   }
@@ -160,7 +181,7 @@ router.put('/profile', authenticateToken, async (req, res) => {
   try {
     if (password) {
       const hashedPassword = await bcrypt.hash(password, 10);
-      await query.run('UPDATE users SET email = ?, password = ? WHERE id = ?', [email, hashedPassword, req.user.id]);
+      await query.run('UPDATE users SET email = ?, password = ?, force_password_change = 0 WHERE id = ?', [email, hashedPassword, req.user.id]);
     } else {
       await query.run('UPDATE users SET email = ? WHERE id = ?', [email, req.user.id]);
     }

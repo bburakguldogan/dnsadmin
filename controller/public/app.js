@@ -57,19 +57,37 @@ async function apiFetch(endpoint, options = {}) {
 }
 
 // Auth Handlers
-function checkAuth() {
+async function checkAuth() {
   if (state.token) {
-    document.getElementById('login-container').style.display = 'none';
-    document.getElementById('app-container').style.display = 'block';
-    
-    // Default route
-    if (!window.location.hash) {
-      window.location.hash = '#dashboard';
+    try {
+      const data = await apiFetch('/auth/me');
+      state.user = data.user;
+      document.getElementById('user-display').textContent = state.user.username;
+
+      if (state.user.force_password_change) {
+        document.getElementById('login-container').style.display = 'none';
+        document.getElementById('app-container').style.display = 'none';
+        document.getElementById('force-password-container').style.display = 'block';
+        return;
+      }
+
+      document.getElementById('login-container').style.display = 'none';
+      document.getElementById('force-password-container').style.display = 'none';
+      document.getElementById('app-container').style.display = 'block';
+      
+      // Default route
+      if (!window.location.hash) {
+        window.location.hash = '#dashboard';
+      }
+      navigate();
+      fetchStats();
+    } catch (err) {
+      console.warn('Authentication token verification failed, logging out:', err.message);
+      logout();
     }
-    navigate();
-    fetchStats();
   } else {
     document.getElementById('login-container').style.display = 'block';
+    document.getElementById('force-password-container').style.display = 'none';
     document.getElementById('app-container').style.display = 'none';
   }
 }
@@ -79,6 +97,7 @@ function logout() {
   state.user = null;
   localStorage.removeItem('dnsadmin_token');
   document.getElementById('login-container').style.display = 'block';
+  document.getElementById('force-password-container').style.display = 'none';
   document.getElementById('app-container').style.display = 'none';
 }
 
@@ -162,7 +181,7 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
     document.getElementById('user-display').textContent = data.user.username;
     
     showToast('Signed in successfully!', 'success');
-    checkAuth();
+    await checkAuth();
   } catch (err) {
     showToast(err.message, 'error');
   }
@@ -894,6 +913,31 @@ document.getElementById('profile-form').addEventListener('submit', async (e) => 
   }
 });
 
+// Force Password Change Form Submit Handler
+document.getElementById('force-password-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const email = document.getElementById('force-email').value.trim();
+  const password = document.getElementById('force-new-password').value;
+  const confirmPassword = document.getElementById('force-confirm-password').value;
+
+  if (password !== confirmPassword) {
+    showToast('Passwords do not match.', 'error');
+    return;
+  }
+
+  try {
+    await apiFetch('/profile', {
+      method: 'PUT',
+      body: JSON.stringify({ email, password })
+    });
+    
+    showToast('Password updated successfully. Please log in with your new password.', 'success');
+    logout();
+  } catch (err) {
+    showToast(err.message, 'error');
+  }
+});
+
 // Theme Toggle Handler
 function initTheme() {
   const currentTheme = localStorage.getItem('dnsadmin_theme') || 'light';
@@ -914,7 +958,7 @@ document.getElementById('theme-toggle-btn').addEventListener('click', (e) => {
 
 // Initial bootstrapper
 window.addEventListener('hashchange', navigate);
-window.addEventListener('DOMContentLoaded', () => {
+window.addEventListener('DOMContentLoaded', async () => {
   initTheme();
-  checkAuth();
+  await checkAuth();
 });
