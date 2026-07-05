@@ -69,9 +69,16 @@ fi
 # If zone file exists, sync it
 ZONE_TEXT=$(cat "$ZONE_FILE")
 
-# Escape newlines and double quotes for JSON compatibility
-ESCAPED_ZONE=$(echo "$ZONE_TEXT" | sed -E ':a;N;$!ba;s/\n/\\n/g' | sed 's/"/\\"/g')
-JSON_BODY="{\"domain\":\"$DOMAIN\",\"zone_text\":\"$ESCAPED_ZONE\"}"
+# Safely build JSON payload escaping all control characters, tabs, and newlines
+if command -v python3 &>/dev/null; then
+  JSON_BODY=$(python3 -c 'import sys, json; print(json.dumps({"domain": sys.argv[1], "zone_text": sys.argv[2]}))' "$DOMAIN" "$ZONE_TEXT")
+elif command -v python &>/dev/null; then
+  JSON_BODY=$(python -c 'import sys, json; print(json.dumps({"domain": sys.argv[1], "zone_text": sys.argv[2]}))' "$DOMAIN" "$ZONE_TEXT")
+else
+  # Fallback to shell escaping: clean backslashes, carriage returns, quotes, join lines, escape tabs
+  ESCAPED_ZONE=$(echo "$ZONE_TEXT" | tr -d '\r' | sed 's/\\/\\\\/g' | sed 's/"/\\"/g' | awk '{printf "%s\\n", $0}' | sed 's/\t/\\t/g')
+  JSON_BODY="{\"domain\":\"$DOMAIN\",\"zone_text\":\"$ESCAPED_ZONE\"}"
+fi
 
 # POST to DNSAdmin Controller
 RESPONSE=$(curl -s -w "\n%{http_code}" -X POST \

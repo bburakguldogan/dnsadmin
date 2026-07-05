@@ -57,9 +57,8 @@ except Exception as e:
     print('DNSAdmin Sync Failed:', e)
 "
 else:
-    # Fallback to pure bash and curl (caution: potential multiline escape issue)
-    # Convert newlines to \n for JSON compatibility
-    ESCAPED_ZONE=$(echo "$ZONE_TEXT" | sed -E ':a;N;$!ba;s/\n/\\n/g' | sed 's/"/\\"/g')
+    # Fallback to shell escaping: clean backslashes, carriage returns, quotes, join lines, escape tabs
+    ESCAPED_ZONE=$(echo "$ZONE_TEXT" | tr -d '\r' | sed 's/\\/\\\\/g' | sed 's/"/\\"/g' | awk '{printf "%s\\n", $0}' | sed 's/\t/\\t/g')
     JSON_BODY="{\"domain\":\"$DOMAIN\",\"zone_text\":\"$ESCAPED_ZONE\"}"
     
     RESPONSE=$(curl -s -w "\n%{http_code}" -X POST \
