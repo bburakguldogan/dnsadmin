@@ -93,26 +93,56 @@ setInterval(async () => {
 
 // RBL BLACKLIST CHECKER
 import dns from 'dns/promises';
+
+const RBL_LISTS = [
+  'zen.spamhaus.org', 'bl.spamcop.net', 'dnsbl.sorbs.net', 'b.barracudacentral.org',
+  'spam.dnsbl.sorbs.net', 'dnsbl-1.uceprotect.net', 'dnsbl-2.uceprotect.net', 'dnsbl-3.uceprotect.net',
+  'ips.backscatterer.org', 'db.wpbl.info', 'dnsbl.abuse.ch', 'bl.spameatingmonkey.net',
+  'uribl.spameatingmonkey.net', 'bl.emailbasura.org', 'cbl.abuseat.org', 'dnsbl.cyberlogic.net',
+  'dnsbl.inps.de', 'dul.dnsbl.sorbs.net', 'escalations.dnsbl.sorbs.net', 'http.dnsbl.sorbs.net',
+  'l2.apews.org', 'mail-abuse.blacklist.to', 'no-more-funn.moensted.dk', 'ohps.dnsbl.sorbs.net',
+  'omrs.dnsbl.sorbs.net', 'psbl.surriel.com', 'rbl.interserver.net', 'rbl.megaspamfilter.com',
+  'socks.dnsbl.sorbs.net', 'spam.abuse.ch', 'ubl.unsubscore.com', 'web.dnsbl.sorbs.net',
+  'xbl.spamhaus.org', 'zombie.dnsbl.sorbs.net', 'bl.spamcannibal.org', 'black.uribl.com',
+  'rbl.snark.net', 'spam.pedantic.org', 'backscatter.spameatingmonkey.net', 'bl.ipv6.spameatingmonkey.net',
+  'dnsbl.zap.admin.ch', 'probes.dnsbl.net.au', 'rbl.schulte.org', 'virus.rbl.jp',
+  'wormrbl.imp.ch', 'korea.services.net', 'dnsbl.kempt.net', 'dnsbl.madavi.de',
+  'bl.gweep.ca', 'blackholes.mail-abuse.org', 'cart00ney.surriel.com', 'spambot.jack.net',
+  'spamrbl.imp.ch', 'sbl.spamhaus.org', 'bl.deadbeeftracker-dnsbl.org', 'blackholes.five-ten-sg.com',
+  'truncate.gbudb.net', 'dnsbl.dronebl.org', 'rbl.efnetrbl.org', 'dnsbl.spfbl.net'
+];
+
+async function checkSingleRbl(reversedIp, list, timeoutMs = 1500) {
+  const queryPromise = dns.resolve4(`${reversedIp}.${list}`);
+  const timeoutPromise = new Promise((_, reject) =>
+    setTimeout(() => reject(new Error('Timeout')), timeoutMs)
+  );
+
+  try {
+    const records = await Promise.race([queryPromise, timeoutPromise]);
+    return { list, status: records && records.length > 0 ? 'Listed' : 'Clean' };
+  } catch (err) {
+    return { list, status: 'Clean' };
+  }
+}
+
 async function checkIpRbl(ip) {
   if (!ip || !/^[0-9.]+$/.test(ip)) return { status: 'Clean', details: {} };
   const reversedIp = ip.split('.').reverse().join('.');
-  const lists = ['zen.spamhaus.org', 'bl.spamcop.net', 'dnsbl.sorbs.net'];
   const details = {};
   let overallStatus = 'Clean';
-  
-  for (const list of lists) {
-    try {
-      const records = await dns.resolve4(`${reversedIp}.${list}`);
-      if (records && records.length > 0) {
-        details[list] = 'Listed';
-        overallStatus = 'Listed';
-      } else {
-        details[list] = 'Clean';
-      }
-    } catch (err) {
-      details[list] = 'Clean';
+
+  // Run all checks in parallel
+  const promises = RBL_LISTS.map(list => checkSingleRbl(reversedIp, list, 1500));
+  const results = await Promise.all(promises);
+
+  for (const res of results) {
+    details[res.list] = res.status;
+    if (res.status === 'Listed') {
+      overallStatus = 'Listed';
     }
   }
+
   return { status: overallStatus, details };
 }
 

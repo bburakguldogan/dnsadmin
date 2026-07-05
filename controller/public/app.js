@@ -797,8 +797,12 @@ async function fetchLists() {
         console.error('Failed to parse RBL details:', e);
       }
 
-      // Default checked blacklists in our server
-      const checkedLists = ['zen.spamhaus.org', 'bl.spamcop.net', 'dnsbl.sorbs.net'];
+      // Get all checked blacklists dynamically from the saved RBL data
+      const checkedLists = Object.keys(rblData);
+      if (checkedLists.length === 0) {
+        // Fallback default list if no details saved yet
+        checkedLists.push('zen.spamhaus.org', 'bl.spamcop.net', 'dnsbl.sorbs.net');
+      }
       const rowsHtml = checkedLists.map(listHost => {
         const isListed = rblData[listHost] === 'Listed';
         const labelText = isListed ? 'Reported' : 'Not Reported';
