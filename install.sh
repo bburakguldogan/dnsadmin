@@ -9,7 +9,7 @@
 # ==============================================================================
 
 # DEFAULT GIT REPOSITORY (Change this to your actual repository URL)
-DEFAULT_REPO_URL="https://github.com/your-username/dnsadmin.git"
+DEFAULT_REPO_URL="https://github.com/bburakguldogan/dnsadmin.git"
 
 # Ensure script is run as root
 if [ "$EUID" -ne 0 ]; then
