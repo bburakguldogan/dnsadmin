@@ -69,12 +69,12 @@ done
 # Register Event Handlers in Plesk Event Manager
 echo "Registering event handlers in Plesk Event Manager..."
 
-# 1. DNS Zone Created Event
-plesk bin event_handler --create -event "DNS zone created" -priority 50 -user root -command "$HOOK_DEST"
-# 2. DNS Zone Updated Event
-plesk bin event_handler --create -event "DNS zone updated" -priority 50 -user root -command "$HOOK_DEST"
-# 3. DNS Zone Deleted Event
-plesk bin event_handler --create -event "DNS zone deleted" -priority 50 -user root -command "$HOOK_DEST"
+# 1. Domain DNS Zone Updated Event
+plesk bin event_handler --create -event "Domain DNS zone updated" -priority 50 -user root -command "$HOOK_DEST"
+# 2. Subdomain DNS Zone Updated Event
+plesk bin event_handler --create -event "DNS zone of a subdomain updated" -priority 50 -user root -command "$HOOK_DEST"
+# 3. Domain Alias DNS Zone Updated Event
+plesk bin event_handler --create -event "DNS zone of a domain alias updated" -priority 50 -user root -command "$HOOK_DEST"
 
 echo "=================================================="
 echo " DNSAdmin Plesk integration successfully installed!"
