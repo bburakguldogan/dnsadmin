@@ -487,11 +487,13 @@ async function fetchNodes() {
       return `
         <div class="col-span-12 md:col-span-6 xl:col-span-4 bg-surface-container border border-outline-variant rounded-xl overflow-hidden shadow-lg flex flex-col h-full">
           <div class="px-lg py-md border-b border-outline-variant bg-surface-container-low flex items-center justify-between">
-            <h3 class="font-headline-md text-headline-md text-on-surface flex items-center gap-xs flex-wrap">
-              ${node.name}
-              ${node.group_name ? `<span class="text-[10px] bg-primary-fixed-dim text-on-primary-fixed px-sm py-0.5 rounded font-label-mono whitespace-nowrap">${node.group_name}</span>` : ''}
-            </h3>
-            <span class="w-2.5 h-2.5 rounded-full ${isOnline ? 'bg-secondary shadow-[0_0_8px_rgba(78,222,163,0.5)]' : 'bg-outline-variant'}"></span>
+            <div class="flex flex-col gap-xs">
+              <div class="flex items-center gap-sm">
+                <span class="w-2.5 h-2.5 rounded-full ${isOnline ? 'bg-secondary shadow-[0_0_8px_rgba(78,222,163,0.5)] animate-pulse' : 'bg-outline-variant'}"></span>
+                <h3 class="font-headline-md text-headline-md text-on-surface font-semibold leading-tight">${node.name}</h3>
+              </div>
+              ${node.group_name ? `<div class="text-[11px] text-outline font-label-mono uppercase">CLUSTER: <span class="text-primary">${node.group_name}</span></div>` : ''}
+            </div>
           </div>
           <div class="p-lg flex-grow space-y-md">
             <div class="text-on-surface-variant font-body-sm space-y-xs">
@@ -635,10 +637,13 @@ async function fetchServers() {
       return `
         <div class="col-span-12 md:col-span-6 xl:col-span-4 bg-surface-container border border-outline-variant rounded-xl overflow-hidden shadow-lg flex flex-col h-full">
           <div class="px-lg py-md border-b border-outline-variant bg-surface-container-low flex items-center justify-between">
-            <h3 class="font-headline-md text-headline-md text-on-surface flex items-center gap-xs flex-wrap">
-              <span class="mr-xs">${logo}</span> ${server.name}
-              ${server.group_name ? `<span class="text-[10px] bg-primary-fixed-dim text-on-primary-fixed px-sm py-0.5 rounded font-label-mono whitespace-nowrap">${server.group_name}</span>` : ''}
-            </h3>
+            <div class="flex flex-col gap-xs">
+              <div class="flex items-center gap-sm">
+                <span class="text-[20px]">${logo}</span>
+                <h3 class="font-headline-md text-headline-md text-on-surface font-semibold leading-tight">${server.name}</h3>
+              </div>
+              ${server.group_name ? `<div class="text-[11px] text-outline font-label-mono uppercase">CLUSTER: <span class="text-primary">${server.group_name}</span></div>` : ''}
+            </div>
             <span class="px-sm py-0.5 rounded bg-primary-container text-on-primary-container font-label-caps text-label-caps uppercase">${server.type}</span>
           </div>
           <div class="p-lg flex-grow space-y-md">
@@ -839,11 +844,16 @@ async function fetchLists() {
       return `
         <div class="col-span-12 lg:col-span-6 bg-surface-container border border-outline-variant rounded-xl overflow-hidden shadow-lg flex flex-col">
           <div class="px-lg py-md border-b border-outline-variant bg-surface-container-low flex items-center justify-between">
-            <h3 class="font-headline-md text-headline-md text-on-surface flex items-center gap-xs">
-              ${item.name} 
-              <span class="text-[10px] bg-primary-fixed-dim text-on-primary-fixed px-sm py-0.5 rounded font-label-mono">${item.typeLabel}</span>
-              ${item.group_name ? `<span class="text-[10px] bg-secondary-container text-on-secondary px-sm py-0.5 rounded font-label-mono">${item.group_name}</span>` : ''}
-            </h3>
+            <div class="flex flex-col gap-xs">
+              <div class="flex items-center gap-sm">
+                <span class="w-2 h-2 rounded-full ${item.rbl_status === 'Clean' ? 'bg-secondary shadow-[0_0_8px_rgba(78,222,163,0.5)]' : 'bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]'}"></span>
+                <h3 class="font-headline-md text-headline-md text-on-surface font-semibold leading-tight">${item.name}</h3>
+              </div>
+              <div class="flex gap-sm items-center text-[11px] text-outline font-label-mono uppercase">
+                <span>TYPE: <span class="text-primary">${item.typeLabel}</span></span>
+                ${item.group_name ? `<span>| CLUSTER: <span class="text-secondary">${item.group_name}</span></span>` : ''}
+              </div>
+            </div>
             <span class="px-sm py-0.5 rounded font-label-caps text-label-caps uppercase ${item.rbl_status === 'Clean' ? 'bg-secondary-container text-on-secondary-container border border-secondary' : 'bg-error-container text-on-error-container border border-error'}">${badgeText}</span>
           </div>
           <div class="overflow-x-auto max-h-[300px] custom-scrollbar">
