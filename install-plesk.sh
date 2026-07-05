@@ -83,6 +83,74 @@ plesk bin event_handler --create -event "DNS zone of a domain alias updated" -pr
 echo "Setting up 60-second cron heartbeat..."
 (crontab -l 2>/dev/null | grep -F -v "dnsadmin/api/v1/agent/heartbeat"; echo "* * * * * curl -s -X POST -H \"X-DNSAdmin-Token: $TOKEN\" $CONTROLLER_URL/api/v1/agent/heartbeat >/dev/null 2>&1") | crontab -
 
+# 5. Create 10-second DNSAdmin Zone Watcher Service
+echo "Configuring 10-second DNSAdmin Zone Watcher Daemon..."
+WATCHER_SCRIPT="/usr/local/bin/dnsadmin-watcher.sh"
+cat << 'EOF' > "$WATCHER_SCRIPT"
+#!/bin/bash
+HOOK_SCRIPT="/usr/local/bin/dnsadmin-plesk-hook.sh"
+CACHE_DIR="/dev/shm/dnsadmin-cache"
+mkdir -p "$CACHE_DIR"
+
+log() {
+  echo "[DNSAdmin Watcher] $1" >&2
+}
+
+scan_and_sync() {
+  for dir in "/var/named/run-root/var" "/var/named/run-root/var/named" "/var/named/chroot/var" "/var/named/chroot/var/named" "/var/named"; do
+    [ -d "$dir" ] || continue
+    find "$dir" -maxdepth 1 -type f ! -name "named.*" ! -name "*.conf" ! -name "*.key" ! -name "*.ca" ! -name "bind.*" ! -name "*.nzf" 2>/dev/null | while read -r filepath; do
+      filename=$(basename "$filepath")
+      domain="${filename%.db}"
+      if [[ "$domain" != *.* ]]; then
+        continue
+      fi
+      current_md5=$(md5sum "$filepath" | awk '{print $1}')
+      cache_file="$CACHE_DIR/${domain}.md5"
+      if [ -f "$cache_file" ]; then
+        old_md5=$(cat "$cache_file")
+      else
+        old_md5=""
+      fi
+      if [ "$current_md5" != "$old_md5" ]; then
+        log "Detected changes in $domain. Triggering sync..."
+        "$HOOK_SCRIPT" "$domain" >/dev/null 2>&1 &
+        echo "$current_md5" > "$cache_file"
+      fi
+    done
+  done
+}
+
+log "Starting DNSAdmin Zone Watcher Daemon..."
+while true; do
+  scan_and_sync
+  sleep 10
+done
+EOF
+
+chmod +x "$WATCHER_SCRIPT"
+
+# Install Systemd Service
+cat << 'EOF' > /etc/systemd/system/dnsadmin-watcher.service
+[Unit]
+Description=DNSAdmin Zone Watcher Daemon
+After=network.target named.service plesk-bind.service
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/dnsadmin-watcher.sh
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+systemctl daemon-reload
+systemctl enable dnsadmin-watcher &>/dev/null
+systemctl restart dnsadmin-watcher &>/dev/null
+
+
 
 echo "=================================================="
 echo " DNSAdmin Plesk integration successfully installed!"
