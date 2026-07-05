@@ -100,8 +100,11 @@
   <div id="app-container" style="display: none;">
     <!-- STATIC TOP NAVBAR -->
     <nav class="navbar navbar-static-top navbar-fixed-top">
-      <div class="container-fluid">
-        <div class="navbar-header">
+      <div class="container-fluid" style="display: flex; align-items: center; width: 100%;">
+        <div class="navbar-header" style="display: flex; align-items: center; justify-content: space-between; flex: 1;">
+          <button type="button" id="mobile-sidebar-toggle" style="background: transparent; border: none; padding: 10px 15px; color: var(--text-title); font-size: 16px; outline: none;">
+            <span class="glyphicon glyphicon-menu-hamburger"></span>
+          </button>
           <a class="navbar-brand" href="#dashboard">DNSAdmin Panel</a>
         </div>
         <div class="navbar-collapse collapse">

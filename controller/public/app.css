@@ -555,3 +555,37 @@ label {
   line-height: 1.6;
 }
 
+/* ==========================================
+   Responsive Styling Updates (Off-canvas sidebar)
+   ========================================== */
+@media (max-width: 767px) {
+  .sidebar-wrapper {
+    position: fixed;
+    top: 50px;
+    left: -260px; /* Slide out of view */
+    width: 260px;
+    bottom: 0;
+    z-index: 1050;
+    transition: left 0.3s ease;
+  }
+  
+  .sidebar-wrapper.show-mobile-sidebar {
+    left: 0; /* Slide in! */
+  }
+
+  .content-wrapper {
+    padding: 16px !important;
+  }
+
+  #page-title {
+    font-size: 20px !important;
+  }
+}
+
+@media (min-width: 768px) {
+  #mobile-sidebar-toggle {
+    display: none !important;
+  }
+}
+
+

@@ -1239,5 +1239,33 @@ if (toggleBtnSidebar) {
 window.addEventListener('hashchange', navigate);
 window.addEventListener('DOMContentLoaded', async () => {
   initTheme();
+
+  // Mobile Sidebar Toggle event handler
+  const toggleBtn = document.getElementById('mobile-sidebar-toggle');
+  if (toggleBtn) {
+    toggleBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const sidebar = document.querySelector('.sidebar-wrapper');
+      if (sidebar) sidebar.classList.toggle('show-mobile-sidebar');
+    });
+  }
+
+  // Close sidebar on click outside or navigation
+  document.addEventListener('click', (e) => {
+    if (window.innerWidth < 768) {
+      const sidebar = document.querySelector('.sidebar-wrapper');
+      if (sidebar && sidebar.classList.contains('show-mobile-sidebar') && !sidebar.contains(e.target)) {
+        sidebar.classList.remove('show-mobile-sidebar');
+      }
+    }
+  });
+
+  window.addEventListener('hashchange', () => {
+    if (window.innerWidth < 768) {
+      const sidebar = document.querySelector('.sidebar-wrapper');
+      if (sidebar) sidebar.classList.remove('show-mobile-sidebar');
+    }
+  });
+
   await checkAuth();
 });
