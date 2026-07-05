@@ -15,18 +15,24 @@ const pool = mysql.createPool({
 // Emulate SQLite query helper interface with MySQL pool execution
 export const query = {
   async run(sql, params = []) {
-    const [result] = await pool.execute(sql, params);
+    const [result] = params.length > 0 
+      ? await pool.execute(sql, params)
+      : await pool.query(sql);
     return {
       id: result.insertId || null,
       changes: result.affectedRows || 0
     };
   },
   async get(sql, params = []) {
-    const [rows] = await pool.execute(sql, params);
+    const [rows] = params.length > 0
+      ? await pool.execute(sql, params)
+      : await pool.query(sql);
     return rows[0] || null;
   },
   async all(sql, params = []) {
-    const [rows] = await pool.execute(sql, params);
+    const [rows] = params.length > 0
+      ? await pool.execute(sql, params)
+      : await pool.query(sql);
     return rows;
   },
   async exec(sql) {
