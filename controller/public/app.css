@@ -1,9 +1,17 @@
-/* ==============================================================================
-   NetOps DNS Terminal Custom Style Additions
-   ============================================================================== */
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap');
+
+/* Force global premium typography */
+* {
+  font-family: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+code, kbd, pre, .font-label-mono, .text-label-mono, .font-mono {
+  font-family: 'Fira Code', 'JetBrains Mono', monospace !important;
+}
 
 /* Material Symbol configuration */
 .material-symbols-outlined {
+  font-family: 'Material Symbols Outlined' !important;
   font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
   display: inline-block;
   vertical-align: middle;
