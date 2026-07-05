@@ -105,7 +105,7 @@
   </script>
   <link href="app.css" rel="stylesheet"/>
 </head>
-<body class="font-body-md text-body-md overflow-hidden selection:bg-primary selection:text-on-primary">
+<body class="bg-background text-on-background font-body-md text-body-md overflow-hidden selection:bg-primary selection:text-on-primary">
 
   <!-- ==================== LOGIN VIEW ==================== -->
   <div id="login-container" class="flex min-h-screen items-center justify-center bg-background px-md py-xl relative overflow-hidden">
@@ -680,6 +680,10 @@
             </div>
             <div class="max-w-xl bg-surface-container border border-outline-variant rounded-xl p-lg shadow-2xl">
               <form id="profile-form" class="space-y-md">
+                <div>
+                  <label class="block font-label-caps text-label-caps text-outline uppercase mb-xs">Username (Read Only)</label>
+                  <input class="w-full bg-surface-container-lowest border border-outline-variant rounded px-md py-sm font-label-mono text-label-mono text-outline focus:ring-0 outline-none" id="profile-username" readonly type="text"/>
+                </div>
                 <div>
                   <label class="block font-label-caps text-label-caps text-outline uppercase mb-xs">Email Address</label>
                   <input class="w-full bg-surface-container-lowest border border-outline-variant rounded px-md py-sm font-label-mono text-label-mono text-on-surface focus:ring-1 focus:ring-primary outline-none" id="profile-email" required type="email"/>
