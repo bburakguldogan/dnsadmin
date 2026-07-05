@@ -53,9 +53,12 @@ if [ ! -f "$HOOK_DEST" ] || [ ! -s "$HOOK_DEST" ]; then
   exit 1
 fi
 
+# Normalize CONTROLLER_URL (strip trailing slash)
+CONTROLLER_URL="${CONTROLLER_URL%/}"
+
 # Insert configuration variables
 echo "Configuring integration hooks..."
-sed -i "s|CONTROLLER_API=\"[^\"]*\"|CONTROLLER_API=\"$CONTROLLER_URL\"|g" "$HOOK_DEST"
+sed -i "s|CONTROLLER_API=\"[^\"]*\"|CONTROLLER_API=\"$CONTROLLER_URL/api/v1/agent\"|g" "$HOOK_DEST"
 sed -i "s|AGENT_TOKEN=\"[^\"]*\"|AGENT_TOKEN=\"$TOKEN\"|g" "$HOOK_DEST"
 
 chmod +x "$HOOK_DEST"
