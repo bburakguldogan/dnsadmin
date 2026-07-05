@@ -133,7 +133,7 @@ install_nodejs() {
       apt-get install -y nodejs
     elif [ "$PKG_MAN" == "dnf" ] || [ "$PKG_MAN" == "yum" ]; then
       curl -fsSL https://rpm.nodesource.com/setup_20.x | bash -
-      $PKG_MAN install -y nodejs
+      $PKG_MAN install -y nodejs --disableexcludes=all
     else
       echo "Error: Node.js is outdated (< v18). Please upgrade Node.js manually."
       exit 1

@@ -86,7 +86,7 @@ if [ "$NEED_INSTALL" -eq 1 ]; then
     apt-get install -y nodejs
   elif [ "$PKG_MAN" == "dnf" ] || [ "$PKG_MAN" == "yum" ]; then
     curl -fsSL https://rpm.nodesource.com/setup_20.x | bash -
-    $PKG_MAN install -y nodejs
+    $PKG_MAN install -y nodejs --disableexcludes=all
   fi
 fi
 
