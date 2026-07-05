@@ -125,6 +125,11 @@ function navigate() {
     targetMenuId = 'menu-servers';
     title = 'Hosting Servers (Agents)';
     fetchServers();
+  } else if (hash === '#clusters') {
+    targetSectionId = 'page-clusters';
+    targetMenuId = 'menu-clusters';
+    title = 'Server Clusters';
+    fetchClusters();
   } else if (hash === '#zones') {
     targetSectionId = 'page-zones';
     targetMenuId = 'menu-zones';
@@ -193,108 +198,246 @@ document.getElementById('logout-btn').addEventListener('click', logout);
 // Dashboard Page Logic
 // ==========================================
 
+// ==========================================
+// Dashboard Page Logic
+// ==========================================
+
+let zoneCountChart = null;
+let activityChart = null;
+
+function formatLastSeen(dateStr) {
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const seconds = Math.floor(diff / 1000);
+  if (seconds < 10) return 'Just now';
+  if (seconds < 60) return `${seconds} seconds ago`;
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes} minute${minutes > 1 ? 's' : ''} ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours} hour${hours > 1 ? 's' : ''} ago`;
+  return new Date(dateStr).toLocaleDateString();
+}
+
+async function renderCharts(distribution, trend) {
+  const isDark = document.body.classList.contains('dark-theme');
+  const textColor = isDark ? '#8c9ba5' : '#64748b';
+  const gridColor = isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)';
+
+  // Chart 1: Zone count per server (Bar chart)
+  const ctxZone = document.getElementById('chart-zone-count');
+  if (ctxZone) {
+    if (zoneCountChart) zoneCountChart.destroy();
+    
+    const labels = distribution.map(d => d.label);
+    const dataVals = distribution.map(d => d.value);
+    
+    zoneCountChart = new Chart(ctxZone.getContext('2d'), {
+      type: 'bar',
+      data: {
+        labels: labels.length > 0 ? labels : ['No Servers'],
+        datasets: [{
+          label: 'Zones',
+          data: dataVals.length > 0 ? dataVals : [0],
+          backgroundColor: '#3c8dbc',
+          borderRadius: 4
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { display: false }
+        },
+        scales: {
+          y: { 
+            beginAtZero: true, 
+            grid: { color: gridColor },
+            ticks: { color: textColor }
+          },
+          x: { 
+            grid: { display: false },
+            ticks: { color: textColor }
+          }
+        }
+      }
+    });
+  }
+
+  // Chart 2: Zone additions/removals (Line chart)
+  const ctxActivity = document.getElementById('chart-activity');
+  if (ctxActivity) {
+    if (activityChart) activityChart.destroy();
+    
+    const labels = trend.map(t => t.month);
+    const additions = trend.map(t => t.additions);
+    const removals = trend.map(t => t.removals);
+    
+    activityChart = new Chart(ctxActivity.getContext('2d'), {
+      type: 'line',
+      data: {
+        labels: labels.length > 0 ? labels : ['No Data'],
+        datasets: [
+          {
+            label: 'Additions',
+            data: additions.length > 0 ? additions : [0],
+            borderColor: '#10b981',
+            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+            fill: true,
+            tension: 0.3
+          },
+          {
+            label: 'Removals',
+            data: removals.length > 0 ? removals : [0],
+            borderColor: '#ef4444',
+            backgroundColor: 'rgba(239, 68, 68, 0.1)',
+            fill: true,
+            tension: 0.3
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { labels: { color: textColor } }
+        },
+        scales: {
+          y: { 
+            beginAtZero: true, 
+            grid: { color: gridColor },
+            ticks: { color: textColor }
+          },
+          x: { 
+            grid: { display: false },
+            ticks: { color: textColor }
+          }
+        }
+      }
+    });
+  }
+}
+
 async function fetchStats() {
   try {
-    const data = await apiFetch('/stats');
-    document.getElementById('stat-zones').textContent = data.zones;
-    document.getElementById('stat-nodes').textContent = `${data.nodes.online} / ${data.nodes.total}`;
-    document.getElementById('stat-servers').textContent = data.servers;
+    const data = await apiFetch('/dashboard/stats');
+    state.currentDistribution = data.distribution;
+    state.currentTrend = data.trend;
+    
+    // Stats count numbers
+    document.getElementById('dashboard-stat-users').textContent = data.counts.users;
+    document.getElementById('dashboard-stat-servers').textContent = data.counts.servers;
+    document.getElementById('dashboard-stat-zones').textContent = data.counts.zones;
 
-    // Check system health indicator
-    const indicatorDot = document.querySelector('.indicator-dot');
-    const indicatorLabel = document.querySelector('.indicator-label');
-    if (indicatorDot && indicatorLabel) {
-      if (data.nodes.total > 0 && data.nodes.online === 0) {
-        indicatorDot.className = 'indicator-dot error';
-        indicatorLabel.textContent = 'All Nodes Offline';
-        indicatorLabel.style.color = 'var(--danger-color)';
-      } else if (data.nodes.total > 0 && data.nodes.online < data.nodes.total) {
-        indicatorDot.className = 'indicator-dot warning';
-        indicatorLabel.textContent = 'Degraded Performance';
-        indicatorLabel.style.color = 'var(--warning-color)';
+    // Render hosting servers table
+    const servers = await apiFetch('/servers');
+    const serversTbody = document.getElementById('dashboard-servers-table');
+    let rblListedCount = 0;
+    const issueList = [];
+
+    if (servers.length === 0) {
+      serversTbody.innerHTML = `<tr><td colspan="6" class="text-center text-muted" style="padding: 20px;">No hosting servers registered yet.</td></tr>`;
+    } else {
+      serversTbody.innerHTML = servers.map(s => {
+        const lastSeenStr = s.last_sync ? formatLastSeen(s.last_sync) : 'Never';
+        const isOnline = s.status === 'active';
+        const statusDot = isOnline ? '<span class="status-dot status-online"></span>' : '<span class="status-dot status-offline"></span>';
+        if (s.rbl_status !== 'Clean') {
+          rblListedCount++;
+          issueList.push(`Server ${s.name} listed in RBL`);
+        }
+        return `
+          <tr>
+            <td style="font-weight: 600;">${s.name} <span class="version-badge">${s.version || 'v1.0.0'}</span></td>
+            <td>${statusDot} ${lastSeenStr}</td>
+            <td>${s.zone_count || 0}</td>
+            <td>${s.type.toUpperCase()} | named</td>
+            <td><span class="label label-${s.rbl_status === 'Clean' ? 'success' : 'danger'}">${s.rbl_status || 'Clean'}</span></td>
+            <td>${s.cluster_name || 'Nixpal'}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    // Render DNS Nodes table
+    const nodes = await apiFetch('/nodes');
+    const nodesTbody = document.getElementById('dashboard-nodes-table');
+    if (nodes.length === 0) {
+      nodesTbody.innerHTML = `<tr><td colspan="5" class="text-center text-muted" style="padding: 20px;">No DNS nameservers registered yet.</td></tr>`;
+    } else {
+      nodesTbody.innerHTML = nodes.map(n => {
+        const lastSeenStr = n.last_seen ? formatLastSeen(n.last_seen) : 'Never';
+        const isOnline = n.status === 'online';
+        const statusDot = isOnline ? '<span class="status-dot status-online"></span>' : '<span class="status-dot status-offline"></span>';
+        if (!isOnline) {
+          issueList.push(`Node ${n.name} is Offline`);
+        }
+        if (n.rbl_status !== 'Clean') {
+          rblListedCount++;
+          issueList.push(`Node ${n.name} listed in RBL`);
+        }
+        return `
+          <tr>
+            <td style="font-weight: 600;">${n.name} <span class="version-badge">${n.version || 'v1.0.0'}</span></td>
+            <td>${statusDot} ${lastSeenStr}</td>
+            <td>${data.counts.zones || 0}</td>
+            <td><span class="label label-${n.rbl_status === 'Clean' ? 'success' : 'danger'}">${n.rbl_status || 'Clean'}</span></td>
+            <td>${n.cluster_name || 'Nixpal'}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    // RBL status card text
+    const rblStatusText = document.getElementById('dashboard-rbl-status-text');
+    if (rblStatusText) {
+      if (rblListedCount > 0) {
+        rblStatusText.textContent = `Warning: ${rblListedCount} of your server IP(s) are listed in RBL blacklists!`;
+        rblStatusText.style.color = '#ef4444';
       } else {
-        indicatorDot.className = 'indicator-dot online';
-        indicatorLabel.textContent = 'All Systems Operational';
-        indicatorLabel.style.color = 'var(--success-color)';
+        rblStatusText.textContent = 'Your servers are not listed in any RBL.';
+        rblStatusText.style.color = 'var(--text-muted)';
       }
     }
 
-    renderDashboardLogs(data.recentLogs);
-    drawTrafficChart();
+    // Issues card text
+    const issuesText = document.getElementById('dashboard-issues-text');
+    const issuesCard = document.getElementById('dashboard-issues-card');
+    if (issuesText && issuesCard) {
+      if (issueList.length > 0) {
+        issuesCard.style.borderLeft = '4px solid #ef4444';
+        issuesText.innerHTML = issueList.map(i => `⚠️ ${i}`).join('<br>');
+      } else {
+        issuesCard.style.borderLeft = '4px solid #10b981';
+        issuesText.textContent = 'No problems found';
+      }
+    }
+
+    // Render latest logs table
+    const logsTbody = document.getElementById('dashboard-recent-logs');
+    if (logsTbody) {
+      if (data.logs.length === 0) {
+        logsTbody.innerHTML = `<tr><td class="text-center text-muted" style="padding: 20px;">No logs recorded yet.</td></tr>`;
+      } else {
+        logsTbody.innerHTML = data.logs.map(l => {
+          const isSuccess = l.action.includes('success') || l.action === 'create';
+          const time = new Date(l.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+          return `
+            <tr>
+              <td>
+                <span class="label label-${isSuccess ? 'success' : 'danger'}" style="font-size: 9px; text-transform: uppercase;">${l.action}</span>
+              </td>
+              <td style="font-weight: 600;">${l.zone}</td>
+              <td class="text-muted text-right">${time}</td>
+            </tr>
+          `;
+        }).join('');
+      }
+    }
+
+    // Render Charts
+    renderCharts(data.distribution, data.trend);
+
   } catch (err) {
-    console.error(err);
+    console.error('Error fetching dashboard stats:', err.message);
   }
 }
-
-function renderDashboardLogs(logs) {
-  const container = document.getElementById('dashboard-log-list');
-  if (logs.length === 0) {
-    container.innerHTML = '<p class="text-center text-muted" style="padding: 20px;">No sync logs recorded yet</p>';
-    return;
-  }
-
-  container.innerHTML = logs.map(l => {
-    const time = new Date(l.created_at).toLocaleTimeString();
-    const isSuccess = l.action === 'sync_success';
-    return `
-      <a href="#logs" class="list-group-item" style="border:none; border-bottom: 1px solid #ddd; margin-bottom:0;">
-        <h4 class="list-group-item-heading" style="font-size:12px; font-weight:600; display:flex; justify-content:space-between; margin-bottom:4px;">
-          <span>${l.zone}</span>
-          <span class="label label-${isSuccess ? 'success' : 'danger'}">${isSuccess ? 'Success' : 'Failed'}</span>
-        </h4>
-        <p class="list-group-item-text" style="font-size:11px; color:#7f8c8d;">${l.message} - ${time}</p>
-      </a>
-    `;
-  }).join('');
-}
-
-document.getElementById('dashboard-refresh-logs').addEventListener('click', fetchStats);
-
-// Custom SVG Chart drawing logic
-function drawTrafficChart() {
-  const chartPathLine = document.getElementById('chart-path-line');
-  const chartPathFill = document.getElementById('chart-path-fill');
-  if (!chartPathLine) return;
-
-  // Append new random traffic metric to chart data array
-  state.trafficData.shift();
-  state.trafficData.push(Math.floor(Math.random() * 80) + 10);
-
-  const maxVal = 100;
-  const width = 500;
-  const height = 200;
-  const step = width / (state.trafficData.length - 1);
-
-  let points = state.trafficData.map((val, index) => {
-    const x = index * step;
-    const y = height - (val / maxVal) * (height - 20) - 10;
-    return { x, y };
-  });
-
-  // Generate SVG path coordinate line (cubic curve approximation)
-  let lineD = `M ${points[0].x} ${points[0].y}`;
-  for (let i = 0; i < points.length - 1; i++) {
-    const curr = points[i];
-    const next = points[i + 1];
-    const cpX1 = curr.x + step / 2;
-    const cpY1 = curr.y;
-    const cpX2 = next.x - step / 2;
-    const cpY2 = next.y;
-    lineD += ` C ${cpX1} ${cpY1}, ${cpX2} ${cpY2}, ${next.x} ${next.y}`;
-  }
-
-  const fillD = `${lineD} L ${width} ${height} L 0 ${height} Z`;
-
-  chartPathLine.setAttribute('d', lineD);
-  chartPathFill.setAttribute('d', fillD);
-}
-
-// Every 5s, redraw the dashboard graph
-setInterval(() => {
-  if (window.location.hash === '#dashboard' && state.token) {
-    drawTrafficChart();
-  }
-}, 5000);
 
 // ==========================================
 // DNS Nodes Page Logic
@@ -383,8 +526,25 @@ async function fetchNodes() {
   }
 }
 
+async function loadClusterDropdowns() {
+  try {
+    const clusters = await apiFetch('/clusters');
+    const nodeSelect = document.getElementById('node-cluster');
+    const serverSelect = document.getElementById('server-cluster');
+    
+    const optionsHtml = '<option value="">No Cluster Group</option>' + 
+      clusters.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+      
+    if (nodeSelect) nodeSelect.innerHTML = optionsHtml;
+    if (serverSelect) serverSelect.innerHTML = optionsHtml;
+  } catch (err) {
+    console.error('Failed to load cluster dropdown options:', err.message);
+  }
+}
+
 // Add Node Modal Triggers
 document.getElementById('add-node-btn').addEventListener('click', () => {
+  loadClusterDropdowns();
   openModal('modal-add-node');
 });
 
@@ -393,11 +553,12 @@ document.getElementById('add-node-form').addEventListener('submit', async (e) =>
   const name = document.getElementById('node-name').value;
   const ip = document.getElementById('node-ip').value;
   const url = document.getElementById('node-url').value;
+  const cluster_id = document.getElementById('node-cluster').value || null;
 
   try {
     const data = await apiFetch('/nodes', {
       method: 'POST',
-      body: JSON.stringify({ name, ip, url })
+      body: JSON.stringify({ name, ip, url, cluster_id })
     });
     
     closeModal('modal-add-node');
@@ -490,6 +651,7 @@ async function fetchServers() {
 
 // Add Server Modal triggers
 document.getElementById('add-server-btn').addEventListener('click', () => {
+  loadClusterDropdowns();
   openModal('modal-add-server');
 });
 
@@ -498,11 +660,12 @@ document.getElementById('add-server-form').addEventListener('submit', async (e) 
   const name = document.getElementById('server-name').value;
   const ip = document.getElementById('server-ip').value;
   const type = document.getElementById('server-type').value;
+  const cluster_id = document.getElementById('server-cluster').value || null;
 
   try {
     const data = await apiFetch('/servers', {
       method: 'POST',
-      body: JSON.stringify({ name, ip, type })
+      body: JSON.stringify({ name, ip, type, cluster_id })
     });
     
     closeModal('modal-add-server');
@@ -513,6 +676,73 @@ document.getElementById('add-server-form').addEventListener('submit', async (e) 
     openModal('modal-server-token');
     
     fetchServers();
+  } catch (err) {
+    showToast(err.message, 'error');
+  }
+});
+
+// ==========================================
+// Clusters Page Logic
+// ==========================================
+
+async function fetchClusters() {
+  try {
+    const list = await apiFetch('/clusters');
+    const tbody = document.getElementById('clusters-table-body');
+    if (list.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="4" class="text-center text-muted" style="padding: 20px;">No clusters registered yet. Create one to group your servers!</td></tr>`;
+      return;
+    }
+    tbody.innerHTML = list.map(c => {
+      const date = new Date(c.created_at).toLocaleString();
+      return `
+        <tr>
+          <td>${c.id}</td>
+          <td style="font-weight: 600;">${c.name}</td>
+          <td>${date}</td>
+          <td class="text-right">
+            <button class="btn btn-danger btn-xs delete-cluster-btn" data-id="${c.id}">Delete</button>
+          </td>
+        </tr>
+      `;
+    }).join('');
+
+    // Attach delete actions
+    document.querySelectorAll('.delete-cluster-btn').forEach(btn => {
+      btn.addEventListener('click', async (e) => {
+        if (confirm('Are you sure you want to delete this cluster?')) {
+          try {
+            await apiFetch(`/clusters/${e.target.dataset.id}`, { method: 'DELETE' });
+            showToast('Cluster deleted successfully');
+            fetchClusters();
+          } catch (err) {
+            showToast(err.message, 'error');
+          }
+        }
+      });
+    });
+  } catch (err) {
+    showToast(err.message, 'error');
+  }
+}
+
+// Add Cluster Modal triggers
+document.getElementById('add-cluster-btn').addEventListener('click', () => {
+  openModal('modal-add-cluster');
+});
+
+document.getElementById('add-cluster-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const name = document.getElementById('cluster-name').value;
+  try {
+    await apiFetch('/clusters', {
+      method: 'POST',
+      body: JSON.stringify({ name })
+    });
+    closeModal('modal-add-cluster');
+    document.getElementById('add-cluster-form').reset();
+    showToast('Cluster created successfully');
+    fetchClusters();
   } catch (err) {
     showToast(err.message, 'error');
   }
@@ -938,7 +1168,7 @@ document.getElementById('force-password-form').addEventListener('submit', async 
   }
 });
 
-// Theme Toggle Handler
+// Theme Toggle Handlers
 function initTheme() {
   const currentTheme = localStorage.getItem('dnsadmin_theme') || 'light';
   if (currentTheme === 'dark') {
@@ -948,13 +1178,22 @@ function initTheme() {
   }
 }
 
-document.getElementById('theme-toggle-btn').addEventListener('click', (e) => {
-  e.preventDefault();
+function toggleTheme(e) {
+  if (e) e.preventDefault();
   document.body.classList.toggle('dark-theme');
   const theme = document.body.classList.contains('dark-theme') ? 'dark' : 'light';
   localStorage.setItem('dnsadmin_theme', theme);
   showToast(`Switched to ${theme} mode.`);
-});
+  if (state.currentDistribution && state.currentTrend) {
+    renderCharts(state.currentDistribution, state.currentTrend);
+  }
+}
+
+document.getElementById('theme-toggle-btn').addEventListener('click', toggleTheme);
+const toggleBtnSidebar = document.getElementById('theme-toggle-btn-sidebar');
+if (toggleBtnSidebar) {
+  toggleBtnSidebar.addEventListener('click', toggleTheme);
+}
 
 // Initial bootstrapper
 window.addEventListener('hashchange', navigate);

@@ -51,6 +51,14 @@ export async function initDb() {
   `);
 
   await query.exec(`
+    CREATE TABLE IF NOT EXISTS clusters (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      name VARCHAR(100) UNIQUE NOT NULL,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+  `);
+
+  await query.exec(`
     CREATE TABLE IF NOT EXISTS nodes (
       id INT AUTO_INCREMENT PRIMARY KEY,
       name VARCHAR(150) UNIQUE NOT NULL,
@@ -61,7 +69,11 @@ export async function initDb() {
       last_seen DATETIME DEFAULT NULL,
       cpu_usage FLOAT DEFAULT 0,
       ram_usage FLOAT DEFAULT 0,
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+      cluster_id INT DEFAULT NULL,
+      version VARCHAR(50) DEFAULT 'v1.0.0',
+      rbl_status VARCHAR(50) DEFAULT 'Clean',
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (cluster_id) REFERENCES clusters(id) ON DELETE SET NULL
     );
   `);
 
@@ -74,7 +86,11 @@ export async function initDb() {
       type VARCHAR(50) NOT NULL,
       status VARCHAR(50) DEFAULT 'active',
       last_sync DATETIME DEFAULT NULL,
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+      cluster_id INT DEFAULT NULL,
+      version VARCHAR(50) DEFAULT 'v1.0.0',
+      rbl_status VARCHAR(50) DEFAULT 'Clean',
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (cluster_id) REFERENCES clusters(id) ON DELETE SET NULL
     );
   `);
 
@@ -86,7 +102,9 @@ export async function initDb() {
       ttl INT DEFAULT 3600,
       status VARCHAR(50) DEFAULT 'active',
       last_sync DATETIME DEFAULT NULL,
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+      server_id INT DEFAULT NULL,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (server_id) REFERENCES servers(id) ON DELETE SET NULL
     );
   `);
 
@@ -116,6 +134,40 @@ export async function initDb() {
       FOREIGN KEY (node_id) REFERENCES nodes(id) ON DELETE SET NULL
     );
   `);
+
+  // Migration helper for existing installations
+  try {
+    await query.exec("ALTER TABLE nodes ADD COLUMN cluster_id INT DEFAULT NULL;");
+  } catch (err) {}
+  try {
+    await query.exec("ALTER TABLE nodes ADD COLUMN version VARCHAR(50) DEFAULT 'v1.0.0';");
+  } catch (err) {}
+  try {
+    await query.exec("ALTER TABLE nodes ADD COLUMN rbl_status VARCHAR(50) DEFAULT 'Clean';");
+  } catch (err) {}
+  try {
+    await query.exec("ALTER TABLE nodes ADD FOREIGN KEY (cluster_id) REFERENCES clusters(id) ON DELETE SET NULL;");
+  } catch (err) {}
+
+  try {
+    await query.exec("ALTER TABLE servers ADD COLUMN cluster_id INT DEFAULT NULL;");
+  } catch (err) {}
+  try {
+    await query.exec("ALTER TABLE servers ADD COLUMN version VARCHAR(50) DEFAULT 'v1.0.0';");
+  } catch (err) {}
+  try {
+    await query.exec("ALTER TABLE servers ADD COLUMN rbl_status VARCHAR(50) DEFAULT 'Clean';");
+  } catch (err) {}
+  try {
+    await query.exec("ALTER TABLE servers ADD FOREIGN KEY (cluster_id) REFERENCES clusters(id) ON DELETE SET NULL;");
+  } catch (err) {}
+
+  try {
+    await query.exec("ALTER TABLE zones ADD COLUMN server_id INT DEFAULT NULL;");
+  } catch (err) {}
+  try {
+    await query.exec("ALTER TABLE zones ADD FOREIGN KEY (server_id) REFERENCES servers(id) ON DELETE SET NULL;");
+  } catch (err) {}
 
   // Index creation
   try {

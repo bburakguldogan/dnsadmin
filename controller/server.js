@@ -56,6 +56,50 @@ setInterval(async () => {
   }
 }, 30000);
 
+// RBL BLACKLIST CHECKER
+import dns from 'dns/promises';
+async function checkIpRbl(ip) {
+  if (!ip || !/^[0-9.]+$/.test(ip)) return 'Clean';
+  const reversedIp = ip.split('.').reverse().join('.');
+  const lists = ['zen.spamhaus.org', 'bl.spamcop.net', 'dnsbl.sorbs.net'];
+  for (const list of lists) {
+    try {
+      const records = await dns.resolve4(`${reversedIp}.${list}`);
+      if (records && records.length > 0) {
+        return 'Listed';
+      }
+    } catch (err) {
+      // ENOTFOUND is expected for clean IPs
+    }
+  }
+  return 'Clean';
+}
+
+async function runRblChecks() {
+  console.log('[RBL Checker] Starting RBL blacklist sweep for servers and nodes...');
+  try {
+    const nodes = await query.all('SELECT id, ip FROM nodes');
+    for (const node of nodes) {
+      if (node.ip) {
+        const status = await checkIpRbl(node.ip);
+        await query.run('UPDATE nodes SET rbl_status = ? WHERE id = ?', [status, node.id]);
+      }
+    }
+    const servers = await query.all('SELECT id, ip FROM servers');
+    for (const server of servers) {
+      if (server.ip) {
+        const status = await checkIpRbl(server.ip);
+        await query.run('UPDATE servers SET rbl_status = ? WHERE id = ?', [status, server.id]);
+      }
+    }
+    console.log('[RBL Checker] Sweep completed successfully.');
+  } catch (err) {
+    console.error('[RBL Checker] Sweep failed:', err.message);
+  }
+}
+// Run RBL checks every 12 hours
+setInterval(runRblChecks, 12 * 60 * 60 * 1000);
+
 // Initialize DB and Start Server
 async function start() {
   console.log('Initializing DNSAdmin database...');
@@ -98,6 +142,8 @@ async function start() {
   const bindHost = process.env.HOST || '0.0.0.0';
   app.listen(PORT, bindHost, () => {
     console.log(`DNSAdmin Controller is running on http://${bindHost}:${PORT}`);
+    // Run initial RBL checks on boot
+    runRblChecks().catch(console.error);
   });
 }
 

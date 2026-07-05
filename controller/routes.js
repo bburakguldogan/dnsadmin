@@ -404,12 +404,96 @@ router.delete('/zones/:domain', authenticateToken, async (req, res) => {
 });
 
 // ==========================================
+// Cluster APIs
+// ==========================================
+router.get('/clusters', authenticateToken, async (req, res) => {
+  try {
+    const list = await query.all('SELECT * FROM clusters ORDER BY name ASC');
+    res.json(list);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.post('/clusters', authenticateToken, async (req, res) => {
+  const { name } = req.body;
+  if (!name) return res.status(400).json({ error: 'Name is required' });
+  try {
+    const result = await query.run('INSERT INTO clusters (name) VALUES (?)', [name]);
+    res.json({ id: result.id, name });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.delete('/clusters/:id', authenticateToken, async (req, res) => {
+  try {
+    await query.run('DELETE FROM clusters WHERE id = ?', [req.params.id]);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ==========================================
+// Dashboard Statistics API
+// ==========================================
+router.get('/dashboard/stats', authenticateToken, async (req, res) => {
+  try {
+    const userCount = await query.get('SELECT COUNT(*) as count FROM users');
+    const serverCount = await query.get('SELECT COUNT(*) as count FROM servers');
+    const zoneCount = await query.get('SELECT COUNT(*) as count FROM zones');
+
+    const zoneDistribution = await query.all(`
+      SELECT s.name as label, COUNT(z.id) as value 
+      FROM servers s 
+      LEFT JOIN zones z ON z.server_id = s.id 
+      GROUP BY s.id
+    `);
+
+    const activityTrend = await query.all(`
+      SELECT DATE_FORMAT(created_at, '%Y-%m') as month,
+             SUM(CASE WHEN action IN ('sync_success', 'create') THEN 1 ELSE 0 END) as additions,
+             SUM(CASE WHEN action = 'delete' THEN 1 ELSE 0 END) as removals
+      FROM sync_logs 
+      WHERE created_at >= NOW() - INTERVAL 6 MONTH 
+      GROUP BY month 
+      ORDER BY month ASC
+    `);
+
+    const latestLogs = await query.all(`
+      SELECT action, zone, created_at 
+      FROM sync_logs 
+      ORDER BY created_at DESC 
+      LIMIT 12
+    `);
+
+    res.json({
+      counts: {
+        users: userCount.count,
+        servers: serverCount.count,
+        zones: zoneCount.count
+      },
+      distribution: zoneDistribution,
+      trend: activityTrend,
+      logs: latestLogs
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ==========================================
 // DNS Node Management Routes
 // ==========================================
 
 router.get('/nodes', authenticateToken, async (req, res) => {
   try {
-    const nodes = await query.all('SELECT * FROM nodes');
+    const nodes = await query.all(`
+      SELECT n.*, c.name as cluster_name 
+      FROM nodes n 
+      LEFT JOIN clusters c ON n.cluster_id = c.id
+    `);
     res.json(nodes);
   } catch (err) {
     res.status(500).json({ error: 'Database error' });
@@ -417,16 +501,15 @@ router.get('/nodes', authenticateToken, async (req, res) => {
 });
 
 router.post('/nodes', authenticateToken, async (req, res) => {
-  const { name, ip, url } = req.body;
+  const { name, ip, url, cluster_id } = req.body;
   if (!name || !url) return res.status(400).json({ error: 'Name and URL are required' });
 
-  // Generate a random node token
   const token = 'node_' + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
 
   try {
     const result = await query.run(
-      'INSERT INTO nodes (name, ip, url, token, status) VALUES (?, ?, ?, ?, "offline")',
-      [name, ip || '', url, token]
+      'INSERT INTO nodes (name, ip, url, token, status, cluster_id) VALUES (?, ?, ?, ?, "offline", ?)',
+      [name, ip || '', url, token, cluster_id || null]
     );
     res.json({ id: result.id, name, url, token });
   } catch (err) {
@@ -449,7 +532,12 @@ router.delete('/nodes/:id', authenticateToken, async (req, res) => {
 
 router.get('/servers', authenticateToken, async (req, res) => {
   try {
-    const servers = await query.all('SELECT * FROM servers');
+    const servers = await query.all(`
+      SELECT s.*, c.name as cluster_name,
+             (SELECT COUNT(*) FROM zones WHERE server_id = s.id) as zone_count
+      FROM servers s 
+      LEFT JOIN clusters c ON s.cluster_id = c.id
+    `);
     res.json(servers);
   } catch (err) {
     res.status(500).json({ error: 'Database error' });
@@ -457,16 +545,15 @@ router.get('/servers', authenticateToken, async (req, res) => {
 });
 
 router.post('/servers', authenticateToken, async (req, res) => {
-  const { name, ip, type } = req.body;
+  const { name, ip, type, cluster_id } = req.body;
   if (!name || !type) return res.status(400).json({ error: 'Name and Type are required' });
 
-  // Generate unique API Key
   const token = 'agent_' + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
 
   try {
     const result = await query.run(
-      'INSERT INTO servers (name, ip, token, type, status) VALUES (?, ?, ?, ?, "active")',
-      [name, ip || '', token, type]
+      'INSERT INTO servers (name, ip, token, type, status, cluster_id) VALUES (?, ?, ?, ?, "active", ?)',
+      [name, ip || '', token, type, cluster_id || null]
     );
     res.json({ id: result.id, name, token });
   } catch (err) {
@@ -529,18 +616,19 @@ router.post('/agent/sync-zone', authenticateAgent, async (req, res) => {
 
     if (zone) {
       zoneId = zone.id;
-      // Increment serial
       serial = parseInt(`${today}01`);
       if (String(zone.serial).startsWith(today)) {
         serial = zone.serial + 1;
       }
-      await query.run('UPDATE zones SET serial = ?, last_sync = NOW() WHERE id = ?', [serial, zoneId]);
-      // Delete old records
+      await query.run(
+        'UPDATE zones SET serial = ?, last_sync = NOW(), server_id = ? WHERE id = ?',
+        [serial, req.server.id, zoneId]
+      );
       await query.run('DELETE FROM records WHERE zone_id = ?', [zoneId]);
     } else {
       const result = await query.run(
-        'INSERT INTO zones (domain, serial, last_sync) VALUES (?, ?, NOW())',
-        [domain, serial]
+        'INSERT INTO zones (domain, serial, server_id, last_sync) VALUES (?, ?, ?, NOW())',
+        [domain, serial, req.server.id]
       );
       zoneId = result.id;
     }
@@ -596,15 +684,15 @@ router.post('/node/heartbeat', async (req, res) => {
   const token = req.headers['x-dnsadmin-token'];
   if (!token) return res.status(401).json({ error: 'Node token required' });
 
-  const { name, cpu, memory } = req.body;
+  const { name, cpu, memory, version } = req.body;
 
   try {
     const node = await query.get('SELECT id FROM nodes WHERE token = ?', [token]);
     if (!node) return res.status(403).json({ error: 'Invalid node token' });
 
     await query.run(
-      'UPDATE nodes SET status = "online", cpu_usage = ?, ram_usage = ?, last_seen = NOW() WHERE id = ?',
-      [cpu || 0, memory || 0, node.id]
+      'UPDATE nodes SET status = "online", cpu_usage = ?, ram_usage = ?, version = ?, last_seen = NOW() WHERE id = ?',
+      [cpu || 0, memory || 0, version || 'v1.0.0', node.id]
     );
 
     res.json({ success: true });

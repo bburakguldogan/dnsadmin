@@ -5,42 +5,42 @@
 
 :root {
   /* Default Light Theme variables */
-  --body-bg: #ecf0f5;
-  --content-bg: #ecf0f5;
+  --body-bg: #f4f6fa;
+  --content-bg: #f4f6fa;
   --box-bg: #ffffff;
-  --box-border: #d2d6de;
-  --box-header-border: #f4f4f4;
-  --text-main: #333333;
-  --text-muted: #777777;
-  --text-title: #444444;
-  --table-header-bg: #fafafa;
-  --table-border: #f4f4f4;
-  --well-bg: #f9f9f9;
+  --box-border: #e2e8f0;
+  --box-header-border: #f1f5f9;
+  --text-main: #1e293b;
+  --text-muted: #64748b;
+  --text-title: #0f172a;
+  --table-header-bg: #f8fafc;
+  --table-border: #f1f5f9;
+  --well-bg: #f8fafc;
   --input-bg: #ffffff;
-  --input-border: #d2d6de;
+  --input-border: #cbd5e1;
   --modal-bg: #ffffff;
-  --modal-border: #d2d6de;
+  --modal-border: #e2e8f0;
   --modal-header-bg: #3c8dbc;
 }
 
 body.dark-theme {
-  /* Dark Theme variables */
-  --body-bg: #1a2226;
-  --content-bg: #1e282c;
-  --box-bg: #222d32;
-  --box-border: #151d20;
-  --box-header-border: #2c383e;
+  /* Dark Theme variables - Matching ZoneCloud Specification */
+  --body-bg: #121620;
+  --content-bg: #121620;
+  --box-bg: #1a1e2a;
+  --box-border: #242936;
+  --box-header-border: #242936;
   --text-main: #ffffff;
-  --text-muted: #b8c7ce;
+  --text-muted: #8c9ba5;
   --text-title: #ffffff;
-  --table-header-bg: #1a2226;
-  --table-border: #2c383e;
-  --well-bg: #1a2226;
-  --input-bg: #222d32;
-  --input-border: #303d44;
-  --modal-bg: #222d32;
-  --modal-border: #151d20;
-  --modal-header-bg: #222d32;
+  --table-header-bg: #151924;
+  --table-border: #242936;
+  --well-bg: #151924;
+  --input-bg: #151924;
+  --input-border: #242936;
+  --modal-bg: #1a1e2a;
+  --modal-border: #242936;
+  --modal-header-bg: #1a1e2a;
 }
 
 body {
@@ -63,8 +63,8 @@ body {
     padding: 0;
     overflow-x: hidden;
     overflow-y: auto; /* Scrollable sidebar if menu is long */
-    background-color: #222d32;
-    border-right: 1px solid #1a2226;
+    background-color: #151924;
+    border-right: 1px solid var(--box-border);
   }
 }
 
@@ -427,4 +427,160 @@ body {
   background-color: var(--input-bg) !important;
   border-color: var(--input-border) !important;
   color: var(--text-main) !important;
+}
+
+/* ==========================================
+   ZoneCloud Dashboard Styling Overrides
+   ========================================== */
+
+/* Status Dots with pulsing glow animations */
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 6px;
+  vertical-align: middle;
+}
+.status-online {
+  background-color: #10b981;
+  box-shadow: 0 0 8px #10b981;
+  animation: pulse-green 2s infinite;
+}
+.status-offline {
+  background-color: #9ca3af;
+}
+@keyframes pulse-green {
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+  }
+  70% {
+    transform: scale(1);
+    box-shadow: 0 0 0 6px rgba(16, 185, 129, 0);
+  }
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+  }
+}
+
+/* Sidebar Custom Overrides matching ZoneCloud specs */
+.sidebar-logo {
+  padding: 20px 15px;
+  text-align: center;
+  border-bottom: 1px solid var(--box-border);
+}
+.sidebar-logo img {
+  max-height: 40px;
+  margin-bottom: 5px;
+}
+.sidebar-logo h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 0.5px;
+}
+
+/* Table overrides to make it look flat and modern */
+.table {
+  color: var(--text-main);
+  background-color: var(--box-bg);
+}
+.table > thead > tr > th {
+  border-bottom: 2px solid var(--box-border) !important;
+  color: var(--text-muted);
+  font-weight: 600;
+  font-size: 12px;
+  text-transform: uppercase;
+  background-color: var(--table-header-bg);
+}
+.table > tbody > tr > td {
+  border-top: 1px solid var(--table-border) !important;
+  font-size: 13px;
+  vertical-align: middle;
+}
+
+/* Version badge next to names */
+.version-badge {
+  background-color: #242936;
+  color: #8c9ba5;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 4px;
+  margin-left: 6px;
+  border: 1px solid #303545;
+}
+
+/* RBL and Issues alert panels matching ZoneCloud dashboard design */
+.dashboard-card-info {
+  background-color: var(--box-bg);
+  border: 1px solid var(--box-border);
+  border-radius: 8px;
+  padding: 24px;
+  margin-bottom: 24px;
+  min-height: 180px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.dashboard-card-info h4 {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-main);
+  margin-top: 0;
+  margin-bottom: 15px;
+  text-align: center;
+}
+
+.dashboard-card-info p {
+  font-size: 13px;
+  color: var(--text-muted);
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.dashboard-card-info .btn-action {
+  display: block;
+  width: max-content;
+  margin: 0 auto;
+  font-weight: 600;
+  font-size: 13px;
+  color: #3c8dbc;
+  border: 1px solid #3c8dbc;
+  background: transparent;
+  padding: 6px 16px;
+  border-radius: 20px;
+  transition: all 0.2s;
+  text-decoration: none;
+}
+
+.dashboard-card-info .btn-action:hover {
+  background-color: #3c8dbc;
+  color: #fff;
+}
+
+/* Mini Statistics widget numbers */
+.stats-badge-list {
+  list-group-item: none;
+}
+.stats-badge-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--table-border);
+}
+.stats-badge-item:last-child {
+  border-bottom: none;
+}
+.stats-badge-label {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+.stats-badge-val {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-main);
 }

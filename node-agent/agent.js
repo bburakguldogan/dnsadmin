@@ -23,6 +23,15 @@ const USE_SSL = process.env.USE_SSL === 'true';
 const SSL_CERT_PATH = process.env.SSL_CERT_PATH || '';
 const SSL_KEY_PATH = process.env.SSL_KEY_PATH || '';
 
+// Load Agent Version from package.json
+let AGENT_VERSION = 'v1.0.0';
+try {
+  const packageJson = JSON.parse(fs.readFileSync(new URL('./package.json', import.meta.url), 'utf8'));
+  AGENT_VERSION = `v${packageJson.version || '1.0.0'}`;
+} catch (err) {
+  // Ignore fallback
+}
+
 // Ensure zones directory exists
 if (!fs.existsSync(ZONES_DIR)) {
   fs.mkdirSync(ZONES_DIR, { recursive: true });
@@ -176,7 +185,8 @@ async function sendHeartbeat() {
       body: JSON.stringify({
         name: NODE_NAME,
         cpu,
-        memory
+        memory,
+        version: AGENT_VERSION
       }),
       signal: AbortSignal.timeout(4000)
     });
