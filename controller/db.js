@@ -169,6 +169,21 @@ export async function initDb() {
     await query.exec("ALTER TABLE zones ADD FOREIGN KEY (server_id) REFERENCES servers(id) ON DELETE SET NULL;");
   } catch (err) {}
 
+  // New migrations for grouping and detailed RBL checklist status
+  try {
+    await query.exec("ALTER TABLE nodes ADD COLUMN group_name VARCHAR(100) DEFAULT NULL;");
+  } catch (err) {}
+  try {
+    await query.exec("ALTER TABLE nodes ADD COLUMN rbl_details TEXT DEFAULT NULL;");
+  } catch (err) {}
+
+  try {
+    await query.exec("ALTER TABLE servers ADD COLUMN group_name VARCHAR(100) DEFAULT NULL;");
+  } catch (err) {}
+  try {
+    await query.exec("ALTER TABLE servers ADD COLUMN rbl_details TEXT DEFAULT NULL;");
+  } catch (err) {}
+
   // Index creation
   try {
     await query.exec(`CREATE INDEX idx_records_zone_id ON records(zone_id);`);

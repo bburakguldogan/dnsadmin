@@ -151,9 +151,6 @@
             <li class="sidebar-menu-item" id="menu-servers">
               <a href="#servers"><span class="glyphicon glyphicon-tasks" style="margin-right: 8px;"></span> Servers</a>
             </li>
-            <li class="sidebar-menu-item" id="menu-clusters">
-              <a href="#clusters"><span class="glyphicon glyphicon-th-list" style="margin-right: 8px;"></span> Clusters</a>
-            </li>
             <li class="sidebar-menu-item" id="menu-nodes">
               <a href="#nodes"><span class="glyphicon glyphicon-hdd" style="margin-right: 8px;"></span> Nodes</a>
             </li>
@@ -161,7 +158,7 @@
               <a href="#zones"><span class="glyphicon glyphicon-globe" style="margin-right: 8px;"></span> Zones</a>
             </li>
             <li class="sidebar-menu-item" id="menu-lists">
-              <a href="#logs"><span class="glyphicon glyphicon-tasks" style="margin-right: 8px;"></span> Lists</a>
+              <a href="#lists"><span class="glyphicon glyphicon-tasks" style="margin-right: 8px;"></span> Lists</a>
             </li>
             <li class="sidebar-menu-item" id="menu-logs">
               <a href="#logs"><span class="glyphicon glyphicon-list-alt" style="margin-right: 8px;"></span> Logs</a>
@@ -353,35 +350,10 @@
             </div>
           </section>
 
-          <!-- CLUSTERS PAGE VIEW -->
-          <section id="page-clusters" class="page-section" style="display: none;">
-            <div class="row" style="margin-bottom: 24px;">
-              <div class="col-md-12 text-right">
-                <button id="add-cluster-btn" class="btn btn-primary" style="background-color:#3c8dbc; border-color:#367fa9; font-weight:600;">
-                  <span class="glyphicon glyphicon-plus"></span> Create New Cluster
-                </button>
-              </div>
-            </div>
-            <div class="row">
-              <div class="col-md-12">
-                <div class="box box-primary" style="border-radius: 8px; overflow: hidden; margin-bottom: 24px;">
-                  <div class="box-body" style="padding: 0;">
-                    <table class="table" style="margin-bottom: 0;">
-                      <thead>
-                        <tr>
-                          <th>ID</th>
-                          <th>Cluster Name</th>
-                          <th>Created At</th>
-                          <th class="text-right">Actions</th>
-                        </tr>
-                      </thead>
-                      <tbody id="clusters-table-body">
-                        <!-- Dynamic clusters -->
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              </div>
+          <!-- RBL LISTS PAGE VIEW -->
+          <section id="page-lists" class="page-section" style="display: none;">
+            <div class="row" id="rbl-reports-grid">
+              <!-- Dynamic RBL reports -->
             </div>
           </section>
 
@@ -627,8 +599,8 @@
   <div id="modal-add-node" class="modal fade" role="dialog" tabindex="-1">
     <div class="modal-dialog">
       <div class="modal-content">
-        <div class="modal-header" style="background-color:#3c8dbc; color:#fff; border-top-left-radius: 4px; border-top-right-radius: 4px;">
-          <button type="button" class="close" data-dismiss="modal" style="color:#fff; opacity:0.8;">&times;</button>
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
           <h4 class="modal-title" style="font-weight:600;">Add Nameserver Node</h4>
         </div>
         <form id="add-node-form">
@@ -646,15 +618,13 @@
               <input type="url" class="form-control" id="node-url" placeholder="e.g. http://198.51.100.1:5300" required>
             </div>
             <div class="form-group">
-              <label>Cluster Group</label>
-              <select class="form-control" id="node-cluster">
-                <option value="">No Cluster Group</option>
-              </select>
+              <label>Cluster Group Name</label>
+              <input type="text" class="form-control" id="node-group" placeholder="e.g. Nixpal Cluster">
             </div>
           </div>
-          <div class="modal-footer" style="background-color:#fafafa;">
+          <div class="modal-footer">
             <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-            <button type="submit" class="btn btn-primary" style="background-color:#3c8dbc; border-color:#367fa9;">Create Node</button>
+            <button type="submit" class="btn btn-primary">Create Node</button>
           </div>
         </form>
       </div>
@@ -665,8 +635,8 @@
   <div id="modal-add-server" class="modal fade" role="dialog" tabindex="-1">
     <div class="modal-dialog">
       <div class="modal-content">
-        <div class="modal-header" style="background-color:#3c8dbc; color:#fff; border-top-left-radius: 4px; border-top-right-radius: 4px;">
-          <button type="button" class="close" data-dismiss="modal" style="color:#fff; opacity:0.8;">&times;</button>
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
           <h4 class="modal-title" style="font-weight:600;">Register Web Hosting Server</h4>
         </div>
         <form id="add-server-form">
@@ -689,39 +659,13 @@
               </select>
             </div>
             <div class="form-group">
-              <label>Cluster Group</label>
-              <select class="form-control" id="server-cluster">
-                <option value="">No Cluster Group</option>
-              </select>
+              <label>Cluster Group Name</label>
+              <input type="text" class="form-control" id="server-group" placeholder="e.g. Production Cluster">
             </div>
           </div>
-          <div class="modal-footer" style="background-color:#fafafa;">
+          <div class="modal-footer">
             <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-            <button type="submit" class="btn btn-primary" style="background-color:#3c8dbc; border-color:#367fa9;">Register Server</button>
-          </div>
-        </form>
-      </div>
-    </div>
-  </div>
-
-  <!-- Add Cluster Modal -->
-  <div id="modal-add-cluster" class="modal fade" role="dialog" tabindex="-1">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header" style="background-color:#3c8dbc; color:#fff; border-top-left-radius: 4px; border-top-right-radius: 4px;">
-          <button type="button" class="close" data-dismiss="modal" style="color:#fff; opacity:0.8;">&times;</button>
-          <h4 class="modal-title" style="font-weight:600;">Create New Cluster</h4>
-        </div>
-        <form id="add-cluster-form">
-          <div class="modal-body">
-            <div class="form-group">
-              <label>Cluster Name</label>
-              <input type="text" class="form-control" id="cluster-name" placeholder="e.g. Production Cluster" required>
-            </div>
-          </div>
-          <div class="modal-footer" style="background-color:#fafafa;">
-            <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-            <button type="submit" class="btn btn-primary" style="background-color:#3c8dbc; border-color:#367fa9;">Create Cluster</button>
+            <button type="submit" class="btn btn-primary">Register Server</button>
           </div>
         </form>
       </div>

@@ -489,11 +489,7 @@ router.get('/dashboard/stats', authenticateToken, async (req, res) => {
 
 router.get('/nodes', authenticateToken, async (req, res) => {
   try {
-    const nodes = await query.all(`
-      SELECT n.*, c.name as cluster_name 
-      FROM nodes n 
-      LEFT JOIN clusters c ON n.cluster_id = c.id
-    `);
+    const nodes = await query.all('SELECT * FROM nodes');
     res.json(nodes);
   } catch (err) {
     res.status(500).json({ error: 'Database error' });
@@ -501,15 +497,15 @@ router.get('/nodes', authenticateToken, async (req, res) => {
 });
 
 router.post('/nodes', authenticateToken, async (req, res) => {
-  const { name, ip, url, cluster_id } = req.body;
+  const { name, ip, url, group_name } = req.body;
   if (!name || !url) return res.status(400).json({ error: 'Name and URL are required' });
 
   const token = 'node_' + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
 
   try {
     const result = await query.run(
-      'INSERT INTO nodes (name, ip, url, token, status, cluster_id) VALUES (?, ?, ?, ?, "offline", ?)',
-      [name, ip || '', url, token, cluster_id || null]
+      'INSERT INTO nodes (name, ip, url, token, status, group_name) VALUES (?, ?, ?, ?, "offline", ?)',
+      [name, ip || '', url, token, group_name || null]
     );
     res.json({ id: result.id, name, url, token });
   } catch (err) {
@@ -533,10 +529,9 @@ router.delete('/nodes/:id', authenticateToken, async (req, res) => {
 router.get('/servers', authenticateToken, async (req, res) => {
   try {
     const servers = await query.all(`
-      SELECT s.*, c.name as cluster_name,
+      SELECT s.*,
              (SELECT COUNT(*) FROM zones WHERE server_id = s.id) as zone_count
-      FROM servers s 
-      LEFT JOIN clusters c ON s.cluster_id = c.id
+      FROM servers s
     `);
     res.json(servers);
   } catch (err) {
@@ -545,15 +540,15 @@ router.get('/servers', authenticateToken, async (req, res) => {
 });
 
 router.post('/servers', authenticateToken, async (req, res) => {
-  const { name, ip, type, cluster_id } = req.body;
+  const { name, ip, type, group_name } = req.body;
   if (!name || !type) return res.status(400).json({ error: 'Name and Type are required' });
 
   const token = 'agent_' + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
 
   try {
     const result = await query.run(
-      'INSERT INTO servers (name, ip, token, type, status, cluster_id) VALUES (?, ?, ?, ?, "active", ?)',
-      [name, ip || '', token, type, cluster_id || null]
+      'INSERT INTO servers (name, ip, token, type, status, group_name) VALUES (?, ?, ?, ?, "active", ?)',
+      [name, ip || '', token, type, group_name || null]
     );
     res.json({ id: result.id, name, token });
   } catch (err) {

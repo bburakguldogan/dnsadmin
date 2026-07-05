@@ -59,20 +59,26 @@ setInterval(async () => {
 // RBL BLACKLIST CHECKER
 import dns from 'dns/promises';
 async function checkIpRbl(ip) {
-  if (!ip || !/^[0-9.]+$/.test(ip)) return 'Clean';
+  if (!ip || !/^[0-9.]+$/.test(ip)) return { status: 'Clean', details: {} };
   const reversedIp = ip.split('.').reverse().join('.');
   const lists = ['zen.spamhaus.org', 'bl.spamcop.net', 'dnsbl.sorbs.net'];
+  const details = {};
+  let overallStatus = 'Clean';
+  
   for (const list of lists) {
     try {
       const records = await dns.resolve4(`${reversedIp}.${list}`);
       if (records && records.length > 0) {
-        return 'Listed';
+        details[list] = 'Listed';
+        overallStatus = 'Listed';
+      } else {
+        details[list] = 'Clean';
       }
     } catch (err) {
-      // ENOTFOUND is expected for clean IPs
+      details[list] = 'Clean';
     }
   }
-  return 'Clean';
+  return { status: overallStatus, details };
 }
 
 async function runRblChecks() {
@@ -81,15 +87,15 @@ async function runRblChecks() {
     const nodes = await query.all('SELECT id, ip FROM nodes');
     for (const node of nodes) {
       if (node.ip) {
-        const status = await checkIpRbl(node.ip);
-        await query.run('UPDATE nodes SET rbl_status = ? WHERE id = ?', [status, node.id]);
+        const { status, details } = await checkIpRbl(node.ip);
+        await query.run('UPDATE nodes SET rbl_status = ?, rbl_details = ? WHERE id = ?', [status, JSON.stringify(details), node.id]);
       }
     }
     const servers = await query.all('SELECT id, ip FROM servers');
     for (const server of servers) {
       if (server.ip) {
-        const status = await checkIpRbl(server.ip);
-        await query.run('UPDATE servers SET rbl_status = ? WHERE id = ?', [status, server.id]);
+        const { status, details } = await checkIpRbl(server.ip);
+        await query.run('UPDATE servers SET rbl_status = ?, rbl_details = ? WHERE id = ?', [status, JSON.stringify(details), server.id]);
       }
     }
     console.log('[RBL Checker] Sweep completed successfully.');

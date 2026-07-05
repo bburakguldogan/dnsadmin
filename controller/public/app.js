@@ -125,11 +125,11 @@ function navigate() {
     targetMenuId = 'menu-servers';
     title = 'Hosting Servers (Agents)';
     fetchServers();
-  } else if (hash === '#clusters') {
-    targetSectionId = 'page-clusters';
-    targetMenuId = 'menu-clusters';
-    title = 'Server Clusters';
-    fetchClusters();
+  } else if (hash === '#lists') {
+    targetSectionId = 'page-lists';
+    targetMenuId = 'menu-lists';
+    title = 'RBL Blacklist Reports';
+    fetchLists();
   } else if (hash === '#zones') {
     targetSectionId = 'page-zones';
     targetMenuId = 'menu-zones';
@@ -486,7 +486,10 @@ async function fetchNodes() {
         <div class="col-md-4 col-sm-6">
           <div class="box box-primary">
             <div class="box-header">
-              <h3 class="box-title">${node.name}</h3>
+              <h3 class="box-title">
+                ${node.name}
+                ${node.group_name ? `<span class="version-badge" style="background-color: var(--primary-accent); color: #fff; border-color: transparent;">${node.group_name}</span>` : ''}
+              </h3>
               <span class="status-dot ${statusClass}"></span>
             </div>
             <div class="box-body">
@@ -545,25 +548,8 @@ async function fetchNodes() {
   }
 }
 
-async function loadClusterDropdowns() {
-  try {
-    const clusters = await apiFetch('/clusters');
-    const nodeSelect = document.getElementById('node-cluster');
-    const serverSelect = document.getElementById('server-cluster');
-    
-    const optionsHtml = '<option value="">No Cluster Group</option>' + 
-      clusters.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
-      
-    if (nodeSelect) nodeSelect.innerHTML = optionsHtml;
-    if (serverSelect) serverSelect.innerHTML = optionsHtml;
-  } catch (err) {
-    console.error('Failed to load cluster dropdown options:', err.message);
-  }
-}
-
 // Add Node Modal Triggers
 document.getElementById('add-node-btn').addEventListener('click', () => {
-  loadClusterDropdowns();
   openModal('modal-add-node');
 });
 
@@ -572,12 +558,12 @@ document.getElementById('add-node-form').addEventListener('submit', async (e) =>
   const name = document.getElementById('node-name').value;
   const ip = document.getElementById('node-ip').value;
   const url = document.getElementById('node-url').value;
-  const cluster_id = document.getElementById('node-cluster').value || null;
+  const group_name = document.getElementById('node-group').value || null;
 
   try {
     const data = await apiFetch('/nodes', {
       method: 'POST',
-      body: JSON.stringify({ name, ip, url, cluster_id })
+      body: JSON.stringify({ name, ip, url, group_name })
     });
     
     closeModal('modal-add-node');
@@ -620,7 +606,10 @@ async function fetchServers() {
         <div class="col-md-4 col-sm-6">
           <div class="box box-primary">
             <div class="box-header">
-              <h3 class="box-title">${logo} ${server.name}</h3>
+              <h3 class="box-title">
+                ${logo} ${server.name}
+                ${server.group_name ? `<span class="version-badge" style="background-color: var(--primary-accent); color: #fff; border-color: transparent;">${server.group_name}</span>` : ''}
+              </h3>
               <span class="label label-primary" style="text-transform:uppercase">${server.type}</span>
             </div>
             <div class="box-body">
@@ -670,7 +659,6 @@ async function fetchServers() {
 
 // Add Server Modal triggers
 document.getElementById('add-server-btn').addEventListener('click', () => {
-  loadClusterDropdowns();
   openModal('modal-add-server');
 });
 
@@ -679,12 +667,12 @@ document.getElementById('add-server-form').addEventListener('submit', async (e) 
   const name = document.getElementById('server-name').value;
   const ip = document.getElementById('server-ip').value;
   const type = document.getElementById('server-type').value;
-  const cluster_id = document.getElementById('server-cluster').value || null;
+  const group_name = document.getElementById('server-group').value || null;
 
   try {
     const data = await apiFetch('/servers', {
       method: 'POST',
-      body: JSON.stringify({ name, ip, type, cluster_id })
+      body: JSON.stringify({ name, ip, type, group_name })
     });
     
     closeModal('modal-add-server');
@@ -701,71 +689,93 @@ document.getElementById('add-server-form').addEventListener('submit', async (e) 
 });
 
 // ==========================================
-// Clusters Page Logic
+// RBL Lists Page Logic
 // ==========================================
 
-async function fetchClusters() {
+async function fetchLists() {
   try {
-    const list = await apiFetch('/clusters');
-    const tbody = document.getElementById('clusters-table-body');
-    if (list.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="4" class="text-center text-muted" style="padding: 20px;">No clusters registered yet. Create one to group your servers!</td></tr>`;
+    const grid = document.getElementById('rbl-reports-grid');
+    if (!grid) return;
+    grid.innerHTML = '<div class="col-md-12 text-center text-muted" style="padding:40px;">Loading blacklist report data...</div>';
+
+    // Fetch servers and nodes
+    const [servers, nodes] = await Promise.all([
+      apiFetch('/servers'),
+      apiFetch('/nodes')
+    ]);
+
+    const items = [
+      ...servers.map(s => ({ ...s, typeLabel: 'Hosting Server' })),
+      ...nodes.map(n => ({ ...n, typeLabel: 'Nameserver Node' }))
+    ];
+
+    if (items.length === 0) {
+      grid.innerHTML = '<div class="col-md-12 text-center text-muted" style="padding:40px;">No registered servers or nodes found.</div>';
       return;
     }
-    tbody.innerHTML = list.map(c => {
-      const date = new Date(c.created_at).toLocaleString();
+
+    grid.innerHTML = items.map(item => {
+      let rblData = {};
+      try {
+        if (item.rbl_details) {
+          rblData = typeof item.rbl_details === 'string' ? JSON.parse(item.rbl_details) : item.rbl_details;
+        }
+      } catch (e) {
+        console.error('Failed to parse RBL details:', e);
+      }
+
+      // Default checked blacklists in our server
+      const checkedLists = ['zen.spamhaus.org', 'bl.spamcop.net', 'dnsbl.sorbs.net'];
+      const rowsHtml = checkedLists.map(listHost => {
+        const isListed = rblData[listHost] === 'Listed';
+        const labelText = isListed ? 'Reported' : 'Not Reported';
+        const color = isListed ? '#ef4444' : '#10b981';
+        return `
+          <tr>
+            <td style="font-weight: 500;">${listHost}</td>
+            <td class="text-right" style="color: ${color}; font-weight: 600;">
+              ${labelText}
+            </td>
+          </tr>
+        `;
+      }).join('');
+
+      const badgeClass = item.rbl_status === 'Clean' ? 'success' : 'danger';
+      const badgeText = item.rbl_status || 'Clean';
+
       return `
-        <tr>
-          <td>${c.id}</td>
-          <td style="font-weight: 600;">${c.name}</td>
-          <td>${date}</td>
-          <td class="text-right">
-            <button class="btn btn-danger btn-xs delete-cluster-btn" data-id="${c.id}">Delete</button>
-          </td>
-        </tr>
+        <div class="col-md-6" style="margin-bottom: 24px;">
+          <div class="box" style="margin-bottom: 0;">
+            <div class="box-header">
+              <h3 class="box-title">
+                ${item.name} 
+                <span class="version-badge">${item.typeLabel}</span>
+                ${item.group_name ? `<span class="version-badge" style="background-color: var(--primary-accent); color: #fff; border-color: transparent;">${item.group_name}</span>` : ''}
+              </h3>
+              <span class="label label-${badgeClass}">${badgeText}</span>
+            </div>
+            <div class="box-body" style="padding: 0;">
+              <table class="table" style="margin-bottom:0;">
+                <thead>
+                  <tr>
+                    <th>RBL Hostname</th>
+                    <th class="text-right">Blacklist Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${rowsHtml}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
       `;
     }).join('');
 
-    // Attach delete actions
-    document.querySelectorAll('.delete-cluster-btn').forEach(btn => {
-      btn.addEventListener('click', async (e) => {
-        if (confirm('Are you sure you want to delete this cluster?')) {
-          try {
-            await apiFetch(`/clusters/${e.target.dataset.id}`, { method: 'DELETE' });
-            showToast('Cluster deleted successfully');
-            fetchClusters();
-          } catch (err) {
-            showToast(err.message, 'error');
-          }
-        }
-      });
-    });
   } catch (err) {
-    showToast(err.message, 'error');
+    showToast('Failed to load RBL reports: ' + err.message, 'error');
   }
 }
-
-// Add Cluster Modal triggers
-document.getElementById('add-cluster-btn').addEventListener('click', () => {
-  openModal('modal-add-cluster');
-});
-
-document.getElementById('add-cluster-form').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const name = document.getElementById('cluster-name').value;
-  try {
-    await apiFetch('/clusters', {
-      method: 'POST',
-      body: JSON.stringify({ name })
-    });
-    closeModal('modal-add-cluster');
-    document.getElementById('add-cluster-form').reset();
-    showToast('Cluster created successfully');
-    fetchClusters();
-  } catch (err) {
-    showToast(err.message, 'error');
-  }
-});
 
 // ==========================================
 // DNS Zones Page Logic
