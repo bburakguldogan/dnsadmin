@@ -301,7 +301,13 @@ router.post('/zones', authenticateToken, async (req, res) => {
 
     // Determine primary nameserver for SOA (MNAME)
     let primaryNs = `ns1.${domain}.`;
-    if (nodes && nodes.length > 0) {
+    if (req.headers.host) {
+      const hostPart = req.headers.host.split(':')[0];
+      if (!/^[0-9.]+$/.test(hostPart)) {
+        primaryNs = hostPart.endsWith('.') ? hostPart : hostPart + '.';
+      }
+    }
+    if (primaryNs.startsWith('ns1.') && nodes && nodes.length > 0) {
       primaryNs = nodes[0].name;
       if (!primaryNs.endsWith('.')) primaryNs += '.';
     }
