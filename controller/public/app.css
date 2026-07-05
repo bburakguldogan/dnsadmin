@@ -617,4 +617,54 @@ label {
   }
 }
 
+/* ==========================================
+   Premium Flex Grid Layouts (Prevents Skewed/Misaligned Cards)
+   ========================================== */
+.row-flex {
+  display: flex !important;
+  flex-wrap: wrap !important;
+}
+
+.row-flex > [class*="col-"] {
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+.row-flex .box,
+.row-flex .dashboard-card-info {
+  display: flex !important;
+  flex-direction: column !important;
+  flex: 1 1 auto !important;
+  height: calc(100% - 24px) !important;
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.row-flex .box-body {
+  flex: 1 1 auto !important;
+}
+
+.row-flex .box-footer {
+  margin-top: auto;
+}
+
+/* Premium Card Hover Interaction */
+.box:hover,
+.dashboard-card-info:hover {
+  transform: translateY(-3px) !important;
+  box-shadow: 0 12px 30px rgba(31, 41, 55, 0.08) !important;
+}
+
+body.dark-theme .box:hover,
+body.dark-theme .dashboard-card-info:hover {
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Smooth status badges transitions */
+.label,
+.btn,
+.sidebar-menu-item a {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+
 
