@@ -46,7 +46,7 @@ HOOK_DEST="/usr/local/bin/dnsadmin-cpanel-hook.sh"
 RAW_BASE_URL="https://raw.githubusercontent.com/bburakguldogan/dnsadmin/main"
 
 echo "Downloading cPanel integration hook..."
-curl -sS -o "$HOOK_DEST" "$RAW_BASE_URL/integrations/cpanel-hook.sh?v=\$(date +%s)"
+curl -sS -o "$HOOK_DEST" "$RAW_BASE_URL/integrations/cpanel-hook.sh?v=$(date +%s)"
 
 if [ ! -f "$HOOK_DEST" ] || [ ! -s "$HOOK_DEST" ]; then
   echo "Error: Failed to download cPanel hook script."
