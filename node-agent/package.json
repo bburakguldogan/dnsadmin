@@ -1,0 +1,13 @@
+{
+  "name": "dnsadmin-node-agent",
+  "version": "1.0.0",
+  "description": "DNSAdmin Nameserver Node Agent for BIND/PowerDNS sync",
+  "main": "agent.js",
+  "type": "module",
+  "scripts": {
+    "start": "node agent.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2"
+  }
+}

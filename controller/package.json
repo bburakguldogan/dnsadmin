@@ -1,0 +1,17 @@
+{
+  "name": "dnsadmin-controller",
+  "version": "1.0.0",
+  "description": "Central DNSAdmin Controller API & Web Dashboard",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "express": "^4.19.2",
+    "jsonwebtoken": "^9.0.2",
+    "mysql2": "^3.11.0"
+  }
+}
