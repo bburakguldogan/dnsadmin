@@ -3,6 +3,8 @@ import fs from 'fs';
 import path from 'path';
 import os from 'os';
 import { exec } from 'child_process';
+import http from 'http';
+import https from 'https';
 
 const app = express();
 app.use(express.json({ limit: '10mb' }));
@@ -15,6 +17,11 @@ const NODE_NAME = process.env.NODE_NAME || os.hostname();
 const ZONES_DIR = path.resolve(process.env.ZONES_DIR || './zones');
 const NAMED_CONF_PATH = path.resolve(process.env.NAMED_CONF_PATH || './dnsadmin.zones');
 const RELOAD_CMD = process.env.RELOAD_CMD || 'echo "DNS records reloaded successfully"';
+
+// SSL Settings
+const USE_SSL = process.env.USE_SSL === 'true';
+const SSL_CERT_PATH = process.env.SSL_CERT_PATH || '';
+const SSL_KEY_PATH = process.env.SSL_KEY_PATH || '';
 
 // Ensure zones directory exists
 if (!fs.existsSync(ZONES_DIR)) {
@@ -183,8 +190,7 @@ async function sendHeartbeat() {
 }
 
 // Start Server
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`DNSAdmin Node Agent running on port ${PORT}`);
+const boot = () => {
   console.log(`Managed BIND Conf: ${NAMED_CONF_PATH}`);
   console.log(`Zones directory: ${ZONES_DIR}`);
 
@@ -194,4 +200,31 @@ app.listen(PORT, '0.0.0.0', () => {
   // Trigger immediate heartbeat and repeat every 60 seconds
   sendHeartbeat();
   setInterval(sendHeartbeat, 60000);
-});
+};
+
+if (USE_SSL && fs.existsSync(SSL_CERT_PATH) && fs.existsSync(SSL_KEY_PATH)) {
+  try {
+    const sslOptions = {
+      key: fs.readFileSync(SSL_KEY_PATH),
+      cert: fs.readFileSync(SSL_CERT_PATH)
+    };
+    https.createServer(sslOptions, app).listen(PORT, '0.0.0.0', () => {
+      console.log(`DNSAdmin Node Agent running on HTTPS port ${PORT}`);
+      boot();
+    });
+  } catch (err) {
+    console.error(`[Agent] Failed to start HTTPS server: ${err.message}. Falling back to HTTP...`);
+    http.createServer(app).listen(PORT, '0.0.0.0', () => {
+      console.log(`DNSAdmin Node Agent running on HTTP port ${PORT}`);
+      boot();
+    });
+  }
+} else {
+  if (USE_SSL) {
+    console.warn('[Agent] SSL enabled but cert/key files are missing or unreadable. Falling back to HTTP...');
+  }
+  http.createServer(app).listen(PORT, '0.0.0.0', () => {
+    console.log(`DNSAdmin Node Agent running on HTTP port ${PORT}`);
+    boot();
+  });
+}

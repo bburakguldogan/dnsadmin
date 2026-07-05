@@ -29,6 +29,8 @@ show_help() {
   echo "  --port <port>            Custom port (optional)"
   echo "  --notify-port <port>     UDP DNS NOTIFY listener port (default: 53, optional)"
   echo "  --ns-name <nameserver>   Nameserver Hostname (e.g. ns1.domain.com, required for node)"
+  echo "  --domain <domain>        Custom domain for the controller panel (e.g. panel.domain.com, optional)"
+  echo "  --ssl                    Flag to request Let's Encrypt SSL certificate (requires --domain or --ns-name)"
   echo "  -h, --help               Show this help menu"
   echo ""
   echo "Examples:"
@@ -49,6 +51,8 @@ TOKEN=""
 PORT=""
 NOTIFY_PORT=""
 NS_NAME=""
+DOMAIN=""
+WANT_SSL=0
 REPO_URL="$DEFAULT_REPO_URL"
 
 while [[ $# -gt 0 ]]; do
@@ -81,6 +85,14 @@ while [[ $# -gt 0 ]]; do
       NS_NAME="$2"
       shift 2
       ;;
+    --domain)
+      DOMAIN="$2"
+      shift 2
+      ;;
+    --ssl)
+      WANT_SSL=1
+      shift
+      ;;
     -h|--help)
       show_help
       exit 0
@@ -93,12 +105,6 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-if [ -z "$ROLE" ]; then
-  echo "Error: --role option is required."
-  show_help
-  exit 1
-fi
-
 # Detect package manager
 if command -v apt-get &>/dev/null; then
   PKG_MAN="apt"
@@ -108,6 +114,132 @@ elif command -v yum &>/dev/null; then
   PKG_MAN="yum"
 else
   PKG_MAN="unknown"
+fi
+
+# Detect TTY (interactive mode)
+IS_INTERACTIVE=0
+if [ -t 0 ]; then
+  IS_INTERACTIVE=1
+fi
+
+# 1. Interactive Role Selection
+if [ -z "$ROLE" ]; then
+  if [ "$IS_INTERACTIVE" -eq 1 ]; then
+    echo "=================================================="
+    echo " Welcome to DNSAdmin Installer!"
+    echo "=================================================="
+    echo "Please select the installation role:"
+    echo "1) Central Controller (Web Management Panel)"
+    echo "2) DNS Nameserver Node Agent (ns1/ns2 BIND9 Agent)"
+    echo "3) cPanel Hook Integration"
+    echo "4) Plesk Hook Integration"
+    echo "5) DirectAdmin Hook Integration"
+    read -p "Enter choice (1-5): " role_choice
+    case $role_choice in
+      1) ROLE="controller" ;;
+      2) ROLE="node" ;;
+      3) ROLE="cpanel" ;;
+      4) ROLE="plesk" ;;
+      5) ROLE="directadmin" ;;
+      *) echo "Invalid choice. Exiting."; exit 1 ;;
+    esac
+  else
+    echo "Error: --role option is required in non-interactive mode."
+    show_help
+    exit 1
+  fi
+fi
+
+# 2. Interactive variables gathering depending on role
+if [ "$ROLE" == "controller" ]; then
+  # Gather port
+  if [ -z "$PORT" ]; then
+    if [ "$IS_INTERACTIVE" -eq 1 ]; then
+      read -p "Enter port for the Controller Panel [default: 5380]: " user_port
+      PORT=${user_port:-5380}
+    else
+      PORT=5380
+    fi
+  fi
+  # Gather UDP notify port
+  if [ -z "$NOTIFY_PORT" ]; then
+    if [ "$IS_INTERACTIVE" -eq 1 ]; then
+      read -p "Enter UDP DNS NOTIFY listener port [default: 53]: " user_nport
+      NOTIFY_PORT=${user_nport:-53}
+    else
+      NOTIFY_PORT=53
+    fi
+  fi
+  # Gather domain and SSL settings
+  if [ -z "$DOMAIN" ] && [ "$IS_INTERACTIVE" -eq 1 ]; then
+    read -p "Enter domain/subdomain for the panel (e.g. panel.yourdomain.com) [optional, press Enter to skip]: " DOMAIN
+    if [ -n "$DOMAIN" ]; then
+      read -p "Would you like to install Let's Encrypt SSL certificate for $DOMAIN? (y/n) [default: n]: " get_ssl
+      if [[ "$get_ssl" =~ ^[Yy]$ ]]; then
+        WANT_SSL=1
+      else
+        WANT_SSL=0
+      fi
+    fi
+  fi
+
+elif [ "$ROLE" == "node" ]; then
+  # Gather Controller URL
+  if [ -z "$CONTROLLER_URL" ]; then
+    if [ "$IS_INTERACTIVE" -eq 1 ]; then
+      read -p "Enter Central Controller URL (e.g. http://1.2.3.4:5380 or https://panel.yourdomain.com): " CONTROLLER_URL
+    else
+      echo "Error: --controller-url is required for node agent role."
+      exit 1
+    fi
+  fi
+  # Gather Node Token
+  if [ -z "$TOKEN" ]; then
+    if [ "$IS_INTERACTIVE" -eq 1 ]; then
+      read -p "Enter Node Token (API Key from the dashboard): " TOKEN
+    else
+      echo "Error: --token is required for node agent role."
+      exit 1
+    fi
+  fi
+  # Gather nameserver domain name
+  if [ -z "$NS_NAME" ]; then
+    if [ "$IS_INTERACTIVE" -eq 1 ]; then
+      read -p "Enter Nameserver Hostname (e.g. ns1.yourdomain.com): " NS_NAME
+    else
+      echo "Error: --ns-name is required for node agent role."
+      exit 1
+    fi
+  fi
+  # Gather SSL choice for the Node Agent
+  if [ -z "$WANT_SSL" ] && [ "$IS_INTERACTIVE" -eq 1 ]; then
+    read -p "Would you like to configure SSL (HTTPS) for this Node Agent? (y/n) [default: n]: " get_ssl
+    if [[ "$get_ssl" =~ ^[Yy]$ ]]; then
+      WANT_SSL=1
+    else
+      WANT_SSL=0
+    fi
+  fi
+
+elif [[ "$ROLE" =~ ^(cpanel|plesk|directadmin)$ ]]; then
+  # Gather Controller URL
+  if [ -z "$CONTROLLER_URL" ]; then
+    if [ "$IS_INTERACTIVE" -eq 1 ]; then
+      read -p "Enter Central Controller URL (e.g. http://1.2.3.4:5380): " CONTROLLER_URL
+    else
+      echo "Error: --controller-url is required for hook setups."
+      exit 1
+    fi
+  fi
+  # Gather Server API Key
+  if [ -z "$TOKEN" ]; then
+    if [ "$IS_INTERACTIVE" -eq 1 ]; then
+      read -p "Enter Server API Key (from the dashboard): " TOKEN
+    else
+      echo "Error: --token is required for hook setups."
+      exit 1
+    fi
+  fi
 fi
 
 install_nodejs() {
@@ -258,6 +390,15 @@ if [ "$ROLE" == "controller" ]; then
     fi
   done
 
+  NODE_BIND_PORT="$PORT"
+  HOST_ENV="Environment=HOST=0.0.0.0"
+  if [ -n "$DOMAIN" ] && [ "$WANT_SSL" -eq 1 ]; then
+    HOST_ENV="Environment=HOST=127.0.0.1"
+    if [ "$PORT" == "80" ] || [ "$PORT" == "443" ]; then
+      NODE_BIND_PORT="5380"
+    fi
+  fi
+
   # Create systemd service
   echo "Creating systemd service daemon..."
   cat <<EOF > /etc/systemd/system/dnsadmin-controller.service
@@ -269,7 +410,7 @@ After=network.target $DB_SERVICE.service
 Type=simple
 User=root
 WorkingDirectory=$INSTALL_DIR
-Environment=PORT=$CTRL_PORT
+Environment=PORT=$NODE_BIND_PORT
 Environment=NOTIFY_PORT=$CTRL_NOTIFY_PORT
 Environment=JWT_SECRET=dnsadmin-sec-$(openssl rand -hex 16 2>/dev/null || echo "fallback-sec-123")
 Environment=MYSQL_HOST=127.0.0.1
@@ -277,6 +418,7 @@ Environment=MYSQL_PORT=3306
 Environment=MYSQL_USER=dnsadmin
 Environment=MYSQL_PASSWORD=$DB_PASS
 Environment=MYSQL_DATABASE=dnsadmin
+$HOST_ENV
 ExecStart=$NODE_PATH server.js
 Restart=on-failure
 
@@ -302,9 +444,82 @@ EOF
     ADMIN_PASS=$(grep "Password:" "$INSTALL_DIR/admin_credentials.txt" | cut -d' ' -f2)
   fi
 
+  # Configure Nginx and SSL if domain is provided and SSL is enabled
+  FINAL_URL="http://$SERVER_IP:$PORT"
+  if [ -n "$DOMAIN" ]; then
+    if [ "$WANT_SSL" -eq 1 ]; then
+      echo "Installing Nginx and Certbot for SSL..."
+      if [ "$PKG_MAN" == "apt" ]; then
+        apt-get update
+        apt-get install -y nginx certbot python3-certbot-nginx
+      else
+        $PKG_MAN install -y epel-release
+        $PKG_MAN install -y nginx certbot python3-certbot-nginx --disableexcludes=all
+      fi
+
+      # Open firewall ports
+      if command -v firewall-cmd &>/dev/null; then
+        firewall-cmd --zone=public --add-service=http --permanent
+        firewall-cmd --zone=public --add-service=https --permanent
+        firewall-cmd --reload &>/dev/null
+      fi
+      if command -v ufw &>/dev/null; then
+        ufw allow 80/tcp &>/dev/null
+        ufw allow 443/tcp &>/dev/null
+      fi
+
+      # Enable Nginx
+      systemctl enable nginx &>/dev/null
+      systemctl start nginx &>/dev/null
+
+      # Disable conflicting Apache
+      systemctl stop apache2 2>/dev/null || systemctl stop httpd 2>/dev/null
+      systemctl disable apache2 2>/dev/null || systemctl disable httpd 2>/dev/null
+
+      # Write Nginx configuration block
+      echo "Creating Nginx configuration for $DOMAIN..."
+      if [ "$PKG_MAN" == "apt" ]; then
+        NGINX_CONF_PATH="/etc/nginx/sites-available/dnsadmin"
+        ln -sf "$NGINX_CONF_PATH" "/etc/nginx/sites-enabled/dnsadmin"
+        rm -f /etc/nginx/sites-enabled/default
+      else
+        NGINX_CONF_PATH="/etc/nginx/conf.d/dnsadmin.conf"
+      fi
+
+      cat <<EOF > "$NGINX_CONF_PATH"
+server {
+    listen 80;
+    server_name $DOMAIN;
+
+    location / {
+        proxy_pass http://127.0.0.1:$NODE_BIND_PORT;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
+    }
+}
+EOF
+      nginx -t &>/dev/null
+      systemctl restart nginx
+
+      # Request Let's Encrypt SSL Cert
+      echo "Requesting Let's Encrypt SSL certificate via Certbot..."
+      if certbot --nginx -d "$DOMAIN" --non-interactive --agree-tos --register-unsafely-without-email; then
+        echo "SSL certificate successfully obtained and configured in Nginx!"
+        FINAL_URL="https://$DOMAIN"
+      else
+        echo "Warning: Certbot SSL request failed. Falling back to HTTP..."
+        FINAL_URL="http://$DOMAIN"
+      fi
+    else
+      FINAL_URL="http://$DOMAIN:$PORT"
+    fi
+  fi
+
   echo "=================================================="
   echo " DNSAdmin Controller successfully installed!"
-  echo " Web URL: http://$SERVER_IP:$CTRL_PORT"
+  echo " Web URL: $FINAL_URL"
   echo " UDP DNS NOTIFY port: $CTRL_NOTIFY_PORT"
   echo " Admin Username: admin"
   echo " Admin Password: $ADMIN_PASS"
@@ -389,6 +604,43 @@ elif [ "$ROLE" == "node" ]; then
     fi
   done
 
+  # Check if agent should run with HTTPS
+  USE_SSL_VAR="false"
+  SSL_CERT_VAR=""
+  SSL_KEY_VAR=""
+  if [ "$WANT_SSL" -eq 1 ] && [ -n "$NS_NAME" ]; then
+    echo "Installing Certbot for standalone SSL..."
+    if [ "$PKG_MAN" == "apt" ]; then
+      apt-get update
+      apt-get install -y certbot
+    else
+      $PKG_MAN install -y epel-release
+      $PKG_MAN install -y certbot --disableexcludes=all
+    fi
+
+    # Open firewall port for standalone HTTP verification
+    if command -v firewall-cmd &>/dev/null; then
+      firewall-cmd --zone=public --add-port=80/tcp --permanent
+      firewall-cmd --reload &>/dev/null
+    fi
+    if command -v ufw &>/dev/null; then
+      ufw allow 80/tcp &>/dev/null
+    fi
+
+    # Stop any conflicting HTTP services to free port 80 for standalone verification
+    systemctl stop apache2 2>/dev/null || systemctl stop httpd 2>/dev/null || systemctl stop nginx 2>/dev/null
+
+    echo "Requesting Let's Encrypt standalone certificate for $NS_NAME..."
+    if certbot certonly --standalone -d "$NS_NAME" --non-interactive --agree-tos --register-unsafely-without-email; then
+      echo "SSL certificate successfully obtained for $NS_NAME!"
+      USE_SSL_VAR="true"
+      SSL_CERT_VAR="/etc/letsencrypt/live/$NS_NAME/fullchain.pem"
+      SSL_KEY_VAR="/etc/letsencrypt/live/$NS_NAME/privkey.pem"
+    else
+      echo "Warning: Standalone SSL request failed. Falling back to HTTP..."
+    fi
+  fi
+
   # Create systemd service
   cat <<EOF > /etc/systemd/system/dnsadmin-node-agent.service
 [Unit]
@@ -406,6 +658,9 @@ Environment=NODE_NAME=$NS_NAME
 Environment=ZONES_DIR=$ZONES_DIR
 Environment=NAMED_CONF_PATH=$NAMED_CONF
 Environment=RELOAD_CMD="systemctl reload $BIND_SERVICE"
+Environment=USE_SSL=$USE_SSL_VAR
+Environment=SSL_CERT_PATH=$SSL_CERT_VAR
+Environment=SSL_KEY_PATH=$SSL_KEY_VAR
 ExecStart=$NODE_PATH agent.js
 Restart=on-failure
 

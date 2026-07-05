@@ -95,8 +95,9 @@ async function start() {
     console.error(`Failed to start DNS NOTIFY listener on UDP port ${NOTIFY_PORT}:`, err.message);
   }
 
-  app.listen(PORT, '0.0.0.0', () => {
-    console.log(`DNSAdmin Controller is running on http://localhost:${PORT}`);
+  const bindHost = process.env.HOST || '0.0.0.0';
+  app.listen(PORT, bindHost, () => {
+    console.log(`DNSAdmin Controller is running on http://${bindHost}:${PORT}`);
   });
 }
 
