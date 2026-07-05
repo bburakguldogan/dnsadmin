@@ -766,6 +766,15 @@ router.post('/agent/delete-zone', authenticateAgent, async (req, res) => {
   }
 });
 
+router.post('/agent/heartbeat', authenticateAgent, async (req, res) => {
+  try {
+    await query.run('UPDATE servers SET last_sync = NOW() WHERE id = ?', [req.server.id]);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // ==========================================
 // Node Agent Callback / Heartbeat Route
 // ==========================================

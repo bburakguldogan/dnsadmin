@@ -35,6 +35,9 @@ fi
 
 log "Processing domain: $DOMAIN"
 
+# Allow WHM/cPanel hooks a small window to fully commit zone records to disk
+sleep 2
+
 # Locate zone file in standard cPanel paths
 ZONE_FILE=""
 for path in "/var/named/${DOMAIN}.db" "/var/named/chroot/var/named/${DOMAIN}.db" "/var/named/${DOMAIN}"; do

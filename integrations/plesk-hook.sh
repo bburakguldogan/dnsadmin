@@ -31,6 +31,9 @@ fi
 
 log "Processing zone $DOMAIN triggered by Plesk..."
 
+# Allow Plesk Event Manager a small window to fully commit BIND zone records to disk
+sleep 2
+
 # Locate BIND zone file in Plesk
 ZONE_FILE=""
 for path in "/var/named/run-root/var/${DOMAIN}" \

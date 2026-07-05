@@ -71,6 +71,10 @@ echo "Registering Standardized Hooks in WHM..."
 # Register the hook
 /usr/local/cpanel/bin/manage_hooks add --manual --category System --event Zone --stage post --hook "$HOOK_DEST"
 
+# Setup 60-second cron job for server heartbeat ping
+echo "Setting up 60-second cron heartbeat..."
+(crontab -l 2>/dev/null | grep -F -v "dnsadmin/api/v1/agent/heartbeat"; echo "* * * * * curl -s -X POST -H \"X-DNSAdmin-Token: $TOKEN\" $CONTROLLER_URL/api/v1/agent/heartbeat >/dev/null 2>&1") | crontab -
+
 echo "=================================================="
 echo " DNSAdmin cPanel integration successfully installed!"
 echo " Hook path: $HOOK_DEST"

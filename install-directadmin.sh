@@ -68,6 +68,10 @@ echo "Configuring permissions..."
 chown diradmin:diradmin "$WRITE_HOOK" "$DELETE_HOOK"
 chmod 700 "$WRITE_HOOK" "$DELETE_HOOK"
 
+# Setup 60-second cron job for server heartbeat ping
+echo "Setting up 60-second cron heartbeat..."
+(crontab -l 2>/dev/null | grep -F -v "dnsadmin/api/v1/agent/heartbeat"; echo "* * * * * curl -s -X POST -H \"X-DNSAdmin-Token: $TOKEN\" $CONTROLLER_URL/api/v1/agent/heartbeat >/dev/null 2>&1") | crontab -
+
 echo "=================================================="
 echo " DNSAdmin DirectAdmin integration successfully installed!"
 echo " Write hook path: $WRITE_HOOK"

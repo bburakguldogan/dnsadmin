@@ -79,6 +79,11 @@ plesk bin event_handler --create -event "DNS zone of a subdomain updated" -prior
 # 3. Domain Alias DNS Zone Updated Event
 plesk bin event_handler --create -event "DNS zone of a domain alias updated" -priority 50 -user root -command "$HOOK_DEST"
 
+# 4. Setup 60-second cron job for server heartbeat ping
+echo "Setting up 60-second cron heartbeat..."
+(crontab -l 2>/dev/null | grep -F -v "dnsadmin/api/v1/agent/heartbeat"; echo "* * * * * curl -s -X POST -H \"X-DNSAdmin-Token: $TOKEN\" $CONTROLLER_URL/api/v1/agent/heartbeat >/dev/null 2>&1") | crontab -
+
+
 echo "=================================================="
 echo " DNSAdmin Plesk integration successfully installed!"
 echo " Handler path: $HOOK_DEST"
