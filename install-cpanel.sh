@@ -47,6 +47,7 @@ RAW_BASE_URL="https://raw.githubusercontent.com/bburakguldogan/dnsadmin/main"
 
 echo "Downloading cPanel integration hook..."
 curl -sS -o "$HOOK_DEST" "$RAW_BASE_URL/integrations/cpanel-hook.sh?v=$(date +%s)"
+curl -sS -o "/usr/local/bin/dnsadmin-cpanel-sync-all.sh" "$RAW_BASE_URL/integrations/cpanel-sync-all.sh?v=$(date +%s)"
 
 if [ ! -f "$HOOK_DEST" ] || [ ! -s "$HOOK_DEST" ]; then
   echo "Error: Failed to download cPanel hook script."
@@ -61,7 +62,7 @@ echo "Configuring integration hooks..."
 sed -i "s|CONTROLLER_API=\"[^\"]*\"|CONTROLLER_API=\"$CONTROLLER_URL/api/v1/agent\"|g" "$HOOK_DEST"
 sed -i "s|AGENT_TOKEN=\"[^\"]*\"|AGENT_TOKEN=\"$TOKEN\"|g" "$HOOK_DEST"
 
-chmod +x "$HOOK_DEST"
+chmod +x "$HOOK_DEST" "/usr/local/bin/dnsadmin-cpanel-sync-all.sh"
 
 # Register WHM Standardized Hooks
 echo "Registering Standardized Hooks in WHM..."
