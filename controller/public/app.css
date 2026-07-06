@@ -1,5 +1,20 @@
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap');
 
+/* CSS variables for inline JavaScript color mapping fallbacks */
+:root {
+  --text-muted: #8b90a0;
+  --text-dim: #8b90a0;
+  --text-light: #dae2fd;
+  --text-primary: #dae2fd;
+  --font-mono: 'Fira Code', 'JetBrains Mono', monospace;
+}
+html:not(.dark) {
+  --text-muted: #64748b;
+  --text-dim: #64748b;
+  --text-light: #0b1326;
+  --text-primary: #0b1326;
+}
+
 /* Force global premium typography */
 * {
   font-family: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
