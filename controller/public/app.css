@@ -79,6 +79,48 @@ canvas {
   border-radius: 8px;
 }
 
+/* Premium button hover glows */
+.btn-glow {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+.btn-glow:hover {
+  box-shadow: 0 0 15px rgba(173, 198, 255, 0.3) !important;
+  transform: translateY(-1px);
+  filter: brightness(1.1);
+}
+.btn-glow-danger {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+.btn-glow-danger:hover {
+  box-shadow: 0 0 15px rgba(239, 68, 68, 0.3) !important;
+  transform: translateY(-1px);
+  filter: brightness(1.1);
+}
+
+/* Premium table row hover state */
+table tbody tr {
+  transition: background-color 0.2s ease-in-out !important;
+}
+table tbody tr:hover {
+  background-color: rgba(30, 41, 59, 0.4) !important;
+}
+
+/* Cyber cards border glow and styling */
+.cyber-card {
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.3s ease !important;
+}
+.cyber-card:hover {
+  border-color: rgba(173, 198, 255, 0.3) !important;
+}
+
+/* Custom focus ring glows on inputs */
+input:focus, select:focus, textarea:focus {
+  border-color: rgba(173, 198, 255, 0.6) !important;
+  box-shadow: 0 0 12px rgba(173, 198, 255, 0.2) !important;
+}
+
 /* Color helper mappings to resolve Bootstrap text color class fallbacks */
 .text-muted {
   color: #8b90a0 !important; /* maps to outline color */

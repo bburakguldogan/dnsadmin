@@ -295,32 +295,47 @@
 
             <!-- Bento Stats Panel -->
             <div class="grid grid-cols-12 gap-lg">
-              <div class="col-span-12 md:col-span-4 bg-surface-container border border-outline-variant rounded-xl p-lg flex flex-col justify-between">
-                <div>
+              <div class="col-span-12 md:col-span-4 bg-surface-container border border-outline-variant rounded-xl p-lg flex flex-col justify-between cyber-card relative">
+                <div class="absolute right-0 bottom-0 opacity-[0.03] pointer-events-none text-primary">
+                  <svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M0 15H120M0 45H120M0 75H120M0 105H120M15 0V120M45 0V120M75 0V120M105 0V120" stroke="currentColor" stroke-width="1.5"/>
+                  </svg>
+                </div>
+                <div class="relative z-10">
                   <h3 class="font-label-caps text-label-caps text-on-surface-variant mb-md uppercase">System Users</h3>
                   <div class="flex items-baseline gap-sm">
                     <span class="font-display-lg text-display-lg text-primary" id="dashboard-stat-users">0</span>
                   </div>
                 </div>
-                <div class="pt-md border-t border-outline-variant mt-md text-body-sm text-outline">Authoritative cluster nodes</div>
+                <div class="pt-md border-t border-outline-variant mt-md text-body-sm text-outline relative z-10">Authoritative cluster nodes</div>
               </div>
-              <div class="col-span-12 md:col-span-4 bg-surface-container border border-outline-variant rounded-xl p-lg flex flex-col justify-between">
-                <div>
+              <div class="col-span-12 md:col-span-4 bg-surface-container border border-outline-variant rounded-xl p-lg flex flex-col justify-between cyber-card relative">
+                <div class="absolute right-0 bottom-0 opacity-[0.03] pointer-events-none text-secondary">
+                  <svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M0 15H120M0 45H120M0 75H120M0 105H120M15 0V120M45 0V120M75 0V120M105 0V120" stroke="currentColor" stroke-width="1.5"/>
+                  </svg>
+                </div>
+                <div class="relative z-10">
                   <h3 class="font-label-caps text-label-caps text-on-surface-variant mb-md uppercase">Hosting Servers</h3>
                   <div class="flex items-baseline gap-sm">
                     <span class="font-display-lg text-display-lg text-secondary" id="dashboard-stat-servers">0</span>
                   </div>
                 </div>
-                <div class="pt-md border-t border-outline-variant mt-md text-body-sm text-outline">Active integrated hosting agents</div>
+                <div class="pt-md border-t border-outline-variant mt-md text-body-sm text-outline relative z-10">Active integrated hosting agents</div>
               </div>
-              <div class="col-span-12 md:col-span-4 bg-surface-container border border-outline-variant rounded-xl p-lg flex flex-col justify-between">
-                <div>
+              <div class="col-span-12 md:col-span-4 bg-surface-container border border-outline-variant rounded-xl p-lg flex flex-col justify-between cyber-card relative">
+                <div class="absolute right-0 bottom-0 opacity-[0.03] pointer-events-none text-tertiary">
+                  <svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M0 15H120M0 45H120M0 75H120M0 105H120M15 0V120M45 0V120M75 0V120M105 0V120" stroke="currentColor" stroke-width="1.5"/>
+                  </svg>
+                </div>
+                <div class="relative z-10">
                   <h3 class="font-label-caps text-label-caps text-on-surface-variant mb-md uppercase">Managed Zones</h3>
                   <div class="flex items-baseline gap-sm">
                     <span class="font-display-lg text-display-lg text-tertiary" id="dashboard-stat-zones">0</span>
                   </div>
                 </div>
-                <div class="pt-md border-t border-outline-variant mt-md text-body-sm text-outline">DNS zone files served</div>
+                <div class="pt-md border-t border-outline-variant mt-md text-body-sm text-outline relative z-10">DNS zone files served</div>
               </div>
             </div>
 

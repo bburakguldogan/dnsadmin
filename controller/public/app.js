@@ -485,7 +485,7 @@ async function fetchNodes() {
       const isOnline = node.status === 'online';
       const lastSeen = node.last_seen ? new Date(node.last_seen).toLocaleTimeString() : 'Never';
       return `
-        <div class="col-span-12 md:col-span-6 xl:col-span-4 bg-surface-container border border-outline-variant rounded-xl overflow-hidden shadow-lg flex flex-col h-full">
+        <div class="col-span-12 md:col-span-6 xl:col-span-4 bg-surface-container border border-outline-variant rounded-xl overflow-hidden shadow-lg flex flex-col h-full cyber-card">
           <div class="px-lg py-md border-b border-outline-variant bg-surface-container-low flex items-center justify-between">
             <div class="flex flex-col gap-xs">
               <div class="flex items-center gap-sm">
@@ -635,7 +635,7 @@ async function fetchServers() {
       const lastSync = server.last_sync ? new Date(server.last_sync).toLocaleString() : 'Never';
       const logo = server.type === 'cpanel' ? '🔴' : server.type === 'plesk' ? '🔵' : server.type === 'directadmin' ? '🟡' : '🟢';
       return `
-        <div class="col-span-12 md:col-span-6 xl:col-span-4 bg-surface-container border border-outline-variant rounded-xl overflow-hidden shadow-lg flex flex-col h-full">
+        <div class="col-span-12 md:col-span-6 xl:col-span-4 bg-surface-container border border-outline-variant rounded-xl overflow-hidden shadow-lg flex flex-col h-full cyber-card">
           <div class="px-lg py-md border-b border-outline-variant bg-surface-container-low flex items-center justify-between">
             <div class="flex flex-col gap-xs">
               <div class="flex items-center gap-sm">
@@ -842,7 +842,7 @@ async function fetchLists() {
       const badgeText = item.rbl_status || 'Clean';
 
       return `
-        <div class="col-span-12 lg:col-span-6 bg-surface-container border border-outline-variant rounded-xl overflow-hidden shadow-lg flex flex-col">
+        <div class="col-span-12 lg:col-span-6 bg-surface-container border border-outline-variant rounded-xl overflow-hidden shadow-lg flex flex-col cyber-card">
           <div class="px-lg py-md border-b border-outline-variant bg-surface-container-low flex items-center justify-between">
             <div class="flex flex-col gap-xs">
               <div class="flex items-center gap-sm">
