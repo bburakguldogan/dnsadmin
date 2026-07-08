@@ -690,8 +690,8 @@ router.post('/agent/sync-zone', authenticateAgent, async (req, res) => {
   }
 
   // Reject template and default BIND zones
-  const invalidZones = ['PROTO.localhost.rev', 'PROTO.localhost', 'localhost.rev', 'localhost', 'localhost.localdomain'];
-  if (invalidZones.includes(domain) || domain.startsWith('PROTO.')) {
+  const invalidZones = ['PROTO.localhost.rev', 'PROTO.localhost', 'localhost.rev', 'localhost', 'localhost.localdomain', 'managed-keys.bind'];
+  if (invalidZones.includes(domain) || domain.startsWith('PROTO.') || domain.includes('bind')) {
     return res.json({ success: true, message: `Ignored sync for template/default zone: ${domain}` });
   }
 

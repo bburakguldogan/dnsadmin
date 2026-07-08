@@ -31,7 +31,7 @@ for dir in "/var/named" "/var/named/chroot/var/named"; do
     fi
     
     # Exclude default/template zones
-    if [[ "$domain" == PROTO.* || "$domain" == localhost* || "$domain" == named.* ]]; then
+    if [[ "$domain" == PROTO.* || "$domain" == localhost* || "$domain" == named.* || "$domain" == *bind* ]]; then
       continue
     fi
     

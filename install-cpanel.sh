@@ -98,7 +98,7 @@ scan_and_sync() {
       if [[ "$domain" != *.* ]]; then
         continue
       fi
-      if [[ "$domain" == PROTO.* || "$domain" == localhost* || "$domain" == named.* ]]; then
+      if [[ "$domain" == PROTO.* || "$domain" == localhost* || "$domain" == named.* || "$domain" == *bind* ]]; then
         continue
       fi
       current_md5=$(md5sum "$filepath" | awk '{print $1}')

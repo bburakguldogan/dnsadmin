@@ -205,7 +205,7 @@ export async function initDb() {
 
   // Automatically purge legacy/template BIND zones that might have been synced by mistake
   try {
-    const invalidZones = ['PROTO.localhost.rev', 'PROTO.localhost', 'localhost.rev', 'localhost', 'localhost.localdomain'];
+    const invalidZones = ['PROTO.localhost.rev', 'PROTO.localhost', 'localhost.rev', 'localhost', 'localhost.localdomain', 'managed-keys.bind'];
     for (const domain of invalidZones) {
       const zone = await query.get('SELECT id FROM zones WHERE domain = ?', [domain]);
       if (zone) {
