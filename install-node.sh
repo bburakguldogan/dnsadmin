@@ -193,9 +193,9 @@ if [ -f "$NAMED_LOCAL" ]; then
   # Enable BIND to listen on all interfaces and permit public queries (AlmaLinux/CentOS/RHEL)
   if [ "$NAMED_LOCAL" == "/etc/named.conf" ]; then
     echo "Updating BIND named.conf interface and query settings..."
-    sed -i 's/listen-on port 53 {[^;]*};/listen-on port 53 { any; };/g' "$NAMED_LOCAL"
-    sed -i 's/listen-on-v6 port 53 {[^;]*};/listen-on-v6 port 53 { any; };/g' "$NAMED_LOCAL"
-    sed -i 's/allow-query\s*{\s*localhost;\s*};/allow-query { any; };/g' "$NAMED_LOCAL"
+    sed -i 's/listen-on\s\+port\s\+53\s\+{[^}]*};/listen-on port 53 { any; };/gi' "$NAMED_LOCAL"
+    sed -i 's/listen-on-v6\s\+port\s\+53\s\+{[^}]*};/listen-on-v6 port 53 { any; };/gi' "$NAMED_LOCAL"
+    sed -i 's/allow-query\s\+{[^}]*};/allow-query { any; };/gi' "$NAMED_LOCAL"
   fi
 else
   echo "Warning: BIND local config file not found at $NAMED_LOCAL. Please include \"$NAMED_CONF\" manually."
