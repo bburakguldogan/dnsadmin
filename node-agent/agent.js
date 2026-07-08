@@ -11,7 +11,7 @@ app.use(express.json({ limit: '10mb' }));
 
 // Configuration from Environment Variables
 const PORT = process.env.PORT || 5300;
-const TOKEN = process.env.DNSADMIN_TOKEN || 'test-node-token-123';
+const TOKEN = (process.env.DNSADMIN_TOKEN || 'test-node-token-123').trim();
 const CONTROLLER_URL = process.env.DNSADMIN_CONTROLLER_URL || 'http://localhost:5380';
 const NODE_NAME = process.env.NODE_NAME || os.hostname();
 const ZONES_DIR = path.resolve(process.env.ZONES_DIR || './zones');
@@ -40,7 +40,7 @@ if (!fs.existsSync(ZONES_DIR)) {
 // Token Verification Middleware
 function verifyToken(req, res, next) {
   const token = req.headers['x-dnsadmin-token'];
-  if (!token || token !== TOKEN) {
+  if (!token || token.trim() !== TOKEN) {
     return res.status(401).json({ error: 'Unauthorized: Invalid token' });
   }
   next();

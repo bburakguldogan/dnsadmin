@@ -85,7 +85,7 @@ export async function pushZoneToSingleNode(domain, node, isDelete = false) {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'X-DNSAdmin-Token': node.token
+        'X-DNSAdmin-Token': node.token ? node.token.trim() : ''
       },
       body: JSON.stringify({
         domain,
