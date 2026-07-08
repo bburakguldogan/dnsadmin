@@ -187,14 +187,26 @@ if [ -f "$NAMED_LOCAL" ]; then
   
   if ! grep -q "$NAMED_CONF" "$NAMED_LOCAL"; then
     echo "Adding inclusion statement to $NAMED_LOCAL..."
-    if [ "$PKG_MAN" == "apt" ]; then
-      echo "include \"$NAMED_CONF\";" >> "$NAMED_LOCAL"
-    else
-      echo "include \"$NAMED_CONF\";" >> "$NAMED_LOCAL"
-    fi
+    echo "include \"$NAMED_CONF\";" >> "$NAMED_LOCAL"
+  fi
+
+  # Enable BIND to listen on all interfaces and permit public queries (AlmaLinux/CentOS/RHEL)
+  if [ "$NAMED_LOCAL" == "/etc/named.conf" ]; then
+    echo "Updating BIND named.conf interface and query settings..."
+    sed -i 's/listen-on port 53 {[^;]*};/listen-on port 53 { any; };/g' "$NAMED_LOCAL"
+    sed -i 's/listen-on-v6 port 53 {[^;]*};/listen-on-v6 port 53 { any; };/g' "$NAMED_LOCAL"
+    sed -i 's/allow-query\s*{\s*localhost;\s*};/allow-query { any; };/g' "$NAMED_LOCAL"
   fi
 else
   echo "Warning: BIND local config file not found at $NAMED_LOCAL. Please include \"$NAMED_CONF\" manually."
+fi
+
+# Enable public query permission block for Debian/Ubuntu BIND config options
+if [ -f "/etc/bind/named.conf.options" ]; then
+  if ! grep -q "allow-query" "/etc/bind/named.conf.options"; then
+    echo "Updating BIND named.conf.options query settings..."
+    sed -i '/options {/a \        allow-query { any; };' "/etc/bind/named.conf.options"
+  fi
 fi
 
 # Set directory permissions for BIND
