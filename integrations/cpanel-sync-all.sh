@@ -30,6 +30,11 @@ for dir in "/var/named" "/var/named/chroot/var/named"; do
       continue
     fi
     
+    # Exclude default/template zones
+    if [[ "$domain" == PROTO.* || "$domain" == localhost* || "$domain" == named.* ]]; then
+      continue
+    fi
+    
     log "Syncing domain: $domain..."
     "$HOOK_SCRIPT" "$domain"
   done

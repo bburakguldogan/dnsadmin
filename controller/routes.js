@@ -689,6 +689,12 @@ router.post('/agent/sync-zone', authenticateAgent, async (req, res) => {
     return res.status(400).json({ error: 'domain and zone_text are required' });
   }
 
+  // Reject template and default BIND zones
+  const invalidZones = ['PROTO.localhost.rev', 'PROTO.localhost', 'localhost.rev', 'localhost', 'localhost.localdomain'];
+  if (invalidZones.includes(domain) || domain.startsWith('PROTO.')) {
+    return res.json({ success: true, message: `Ignored sync for template/default zone: ${domain}` });
+  }
+
   try {
     const parsedRecords = parseZoneFile(zone_text, domain);
     if (parsedRecords.length === 0) {

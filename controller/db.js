@@ -202,6 +202,21 @@ export async function initDb() {
   } catch (err) {
     // Index already exists, safe to ignore
   }
+
+  // Automatically purge legacy/template BIND zones that might have been synced by mistake
+  try {
+    const invalidZones = ['PROTO.localhost.rev', 'PROTO.localhost', 'localhost.rev', 'localhost', 'localhost.localdomain'];
+    for (const domain of invalidZones) {
+      const zone = await query.get('SELECT id FROM zones WHERE domain = ?', [domain]);
+      if (zone) {
+        await query.run('DELETE FROM records WHERE zone_id = ?', [zone.id]);
+        await query.run('DELETE FROM zones WHERE id = ?', [zone.id]);
+        console.log(`[DB Init] Automatically purged template zone: ${domain}`);
+      }
+    }
+  } catch (err) {
+    console.error('[DB Init] Failed to clean template zones:', err.message);
+  }
 }
 
 export default pool;

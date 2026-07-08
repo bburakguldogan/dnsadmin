@@ -106,6 +106,9 @@ scan_and_sync() {
       if [[ "$domain" != *.* ]]; then
         continue
       fi
+      if [[ "$domain" == PROTO.* || "$domain" == localhost* || "$domain" == named.* ]]; then
+        continue
+      fi
       current_md5=$(md5sum "$filepath" | awk '{print $1}')
       cache_file="$CACHE_DIR/${domain}.md5"
       if [ -f "$cache_file" ]; then
