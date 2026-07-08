@@ -150,6 +150,12 @@ if ! command -v named &>/dev/null; then
 fi
 
 # 3. Create directories and download agent source files
+echo "Purging old agent directories and zone files to perform a clean install..."
+if [ -d "$ZONES_DIR" ]; then
+  rm -f "$ZONES_DIR"/*
+fi
+rm -f "$INSTALL_DIR/dnsadmin.zones"
+
 echo "Downloading Node Agent codebase..."
 mkdir -p "$ZONES_DIR"
 cd "$INSTALL_DIR" || exit 1
@@ -176,12 +182,14 @@ else
 fi
 
 if [ -f "$NAMED_LOCAL" ]; then
+  # Clean up duplicate include entries from previous installations
+  sed -i '\/opt\/dnsadmin-node\/dnsadmin.zones/d' "$NAMED_LOCAL"
+  
   if ! grep -q "$NAMED_CONF" "$NAMED_LOCAL"; then
     echo "Adding inclusion statement to $NAMED_LOCAL..."
     if [ "$PKG_MAN" == "apt" ]; then
       echo "include \"$NAMED_CONF\";" >> "$NAMED_LOCAL"
     else
-      # RHEL BIND places settings inside main options wrapper, append at end of named.conf
       echo "include \"$NAMED_CONF\";" >> "$NAMED_LOCAL"
     fi
   fi
