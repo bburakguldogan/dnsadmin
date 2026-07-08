@@ -199,6 +199,19 @@ else
 fi
 chmod 770 "$ZONES_DIR"
 
+# Apply SELinux security context if SELinux is enabled (crucial for RHEL/CentOS/AlmaLinux)
+if command -v getenforce &>/dev/null; then
+  SELINUX_STATUS=$(getenforce)
+  if [ "$SELINUX_STATUS" == "Enforcing" ] || [ "$SELINUX_STATUS" == "Permissive" ]; then
+    echo "SELinux detected ($SELINUX_STATUS). Applying BIND zone contexts to $INSTALL_DIR..."
+    chcon -R -t named_zone_t "$INSTALL_DIR" &>/dev/null
+    if command -v semanage &>/dev/null; then
+      semanage fcontext -a -t named_zone_t "$INSTALL_DIR(/.*)?" &>/dev/null
+      restorecon -R "$INSTALL_DIR" &>/dev/null
+    fi
+  fi
+fi
+
 # 5. Create Systemd Service Unit
 echo "Creating systemd daemon service..."
 
