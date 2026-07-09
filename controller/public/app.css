@@ -2,35 +2,32 @@
 
 /* CSS variables for inline JavaScript color mapping fallbacks */
 :root {
-  --text-muted: #8b90a0;
-  --text-dim: #8b90a0;
-  --text-light: #dae2fd;
-  --text-primary: #dae2fd;
+  --text-muted: #9ca3af;
+  --text-dim: #6b7280;
+  --text-light: #f9fafb;
+  --text-primary: #818cf8;
   --font-mono: 'Fira Code', 'JetBrains Mono', monospace;
 }
 html:not(.dark) {
-  --text-muted: #64748b;
-  --text-dim: #64748b;
-  --text-light: #0b1326;
-  --text-primary: #0b1326;
+  --text-muted: #4b5563;
+  --text-dim: #9ca3af;
+  --text-light: #070a13;
+  --text-primary: #6366f1;
 }
 
-/* Force global premium typography */
+/* Force global premium typography and ink-black backgrounds */
 * {
   font-family: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  box-sizing: border-box;
+}
+
+body {
+  background-color: #070a13 !important;
+  color: #f9fafb !important;
 }
 
 code, kbd, pre, .font-label-mono, .text-label-mono, .font-mono {
   font-family: 'Fira Code', 'JetBrains Mono', monospace !important;
-}
-
-/* Material Symbol configuration */
-.material-symbols-outlined {
-  font-family: 'Material Symbols Outlined' !important;
-  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-  display: inline-block;
-  vertical-align: middle;
-  line-height: 1;
 }
 
 /* Custom terminal scrollbars */
@@ -39,21 +36,18 @@ code, kbd, pre, .font-label-mono, .text-label-mono, .font-mono {
   height: 6px;
 }
 .custom-scrollbar::-webkit-scrollbar-track {
-  background: #0b1326;
+  background: #030408;
 }
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #2d3449;
+  background: #1f2937;
   border-radius: 10px;
 }
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: #414755;
+  background: #374151;
 }
 
 /* Pulse status glowing */
-.glow-pulse {
-  animation: pulse-glow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-}
-.status-pulse {
+.glow-pulse, .status-pulse {
   animation: pulse-glow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
@@ -68,16 +62,10 @@ code, kbd, pre, .font-label-mono, .text-label-mono, .font-mono {
   }
 }
 
-/* Scanline grid pattern overlay */
-.scanline {
-  background: linear-gradient(to bottom, transparent 50%, rgba(78, 222, 163, 0.02) 50%);
-  background-size: 100% 4px;
-}
-
 /* Glass panel blur fallback helper */
 .glass-panel {
-  background: rgba(23, 31, 51, 0.85);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(17, 24, 39, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 /* Fix chart sizes on dashboard view */
@@ -86,124 +74,217 @@ canvas {
   height: 100% !important;
 }
 
-/* Sidebar Active state customization override */
+/* Sidebar premium redesign styling */
+.sidebar-menu-item {
+  border-radius: 12px !important;
+  margin: 4px 16px !important;
+  padding: 10px 16px !important;
+  font-weight: 500 !important;
+  border-left: none !important;
+  color: #9ca3af !important;
+  transition: all 0.2s ease-in-out !important;
+}
+.sidebar-menu-item:hover {
+  background-color: rgba(255, 255, 255, 0.03) !important;
+  color: #f9fafb !important;
+}
 .sidebar-menu-item.active {
-  background-color: #2d3449 !important;
-  color: #adc6ff !important;
-  border-left: 3px solid #adc6ff;
-  border-radius: 8px;
+  background-color: rgba(99, 102, 241, 0.1) !important;
+  color: #818cf8 !important;
+  border-radius: 12px !important;
+}
+.sidebar-menu-item.active .material-symbols-outlined {
+  color: #6366f1 !important;
 }
 
-/* Premium button hover glows */
-.btn-glow {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+/* Action button premium designs */
+button.bg-primary, .btn-glow {
+  background-color: #6366f1 !important;
+  color: #ffffff !important;
+  font-weight: 600 !important;
+  border-radius: 8px !important;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  border: none !important;
 }
-.btn-glow:hover {
-  box-shadow: 0 0 15px rgba(173, 198, 255, 0.3) !important;
+button.bg-primary:hover, .btn-glow:hover {
+  background-color: #4f46e5 !important;
+  box-shadow: 0 0 20px rgba(99, 102, 241, 0.4) !important;
   transform: translateY(-1px);
-  filter: brightness(1.1);
 }
+button.bg-primary:active, .btn-glow:active {
+  transform: translateY(0);
+}
+
+button.bg-secondary {
+  background-color: #10b981 !important;
+  color: #ffffff !important;
+  font-weight: 600 !important;
+  border-radius: 8px !important;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  border: none !important;
+}
+button.bg-secondary:hover {
+  background-color: #059669 !important;
+  box-shadow: 0 0 20px rgba(16, 185, 129, 0.4) !important;
+  transform: translateY(-1px);
+}
+
 .btn-glow-danger {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  background-color: #ef4444 !important;
+  color: #ffffff !important;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 .btn-glow-danger:hover {
-  box-shadow: 0 0 15px rgba(239, 68, 68, 0.3) !important;
+  box-shadow: 0 0 20px rgba(239, 68, 68, 0.4) !important;
   transform: translateY(-1px);
   filter: brightness(1.1);
 }
 
-/* Premium table row hover state */
+/* Table styling premium overrides */
+table {
+  border-collapse: separate !important;
+  border-spacing: 0 !important;
+  width: 100% !important;
+}
+table th {
+  font-size: 11px !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
+  color: #9ca3af !important;
+  font-weight: 600 !important;
+  border-bottom: 1px solid #1f2937 !important;
+  background-color: #0b0f19 !important;
+  padding: 14px 18px !important;
+}
+table td {
+  border-bottom: 1px solid rgba(31, 41, 55, 0.4) !important;
+  color: #f3f4f6 !important;
+  font-size: 14px !important;
+  padding: 14px 18px !important;
+  vertical-align: middle;
+}
 table tbody tr {
-  transition: background-color 0.2s ease-in-out !important;
+  transition: background-color 0.15s ease-in-out !important;
 }
 table tbody tr:hover {
-  background-color: rgba(30, 41, 59, 0.4) !important;
+  background-color: rgba(99, 102, 241, 0.02) !important;
 }
 
-/* Cyber cards border glow and styling */
-.cyber-card {
+/* Modern Card Layouts */
+.cyber-card, .bg-surface-container.border.border-outline-variant {
+  border: 1px solid #1f2937 !important;
+  background-color: #0b0f19 !important;
+  border-radius: 16px !important;
   position: relative;
   overflow: hidden;
-  transition: border-color 0.3s ease !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 .cyber-card:hover {
-  border-color: rgba(173, 198, 255, 0.3) !important;
+  border-color: rgba(99, 102, 241, 0.3) !important;
+  box-shadow: 0 12px 30px -10px rgba(99, 102, 241, 0.15) !important;
+  transform: translateY(-2px);
 }
 
-/* Custom focus ring glows on inputs */
+/* Input Fields Premium Redesign */
+input, select, textarea {
+  background-color: #030408 !important;
+  border: 1px solid #1f2937 !important;
+  border-radius: 8px !important;
+  color: #f9fafb !important;
+  padding: 10px 14px !important;
+  transition: all 0.2s ease-in-out !important;
+}
 input:focus, select:focus, textarea:focus {
-  border-color: rgba(173, 198, 255, 0.6) !important;
-  box-shadow: 0 0 12px rgba(173, 198, 255, 0.2) !important;
+  border-color: #6366f1 !important;
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2) !important;
+  outline: none !important;
 }
 
-/* Color helper mappings to resolve Bootstrap text color class fallbacks */
-.text-muted {
-  color: #8b90a0 !important; /* maps to outline color */
-}
-.text-secondary {
-  color: #c1c6d7 !important; /* maps to on-surface-variant */
-}
-.text-light {
-  color: #dae2fd !important;
-}
-.text-dark {
-  color: #0b1326 !important;
-}
-.bg-light {
-  background-color: #131b2e !important; /* maps to surface-container-low */
-}
-
-/* Badge label styles */
+/* Badge Label Styles */
 .label {
   display: inline-block;
-  padding: 3px 8px !important;
+  padding: 4px 10px !important;
   font-size: 10px !important;
   font-weight: 700 !important;
   line-height: 1 !important;
   text-align: center;
   white-space: nowrap;
   vertical-align: baseline;
-  border-radius: 4px;
+  border-radius: 6px;
   text-transform: uppercase;
   font-family: 'Inter', sans-serif;
   border: 1px solid transparent;
 }
 .label-success {
-  background-color: rgba(78, 222, 163, 0.15) !important;
-  color: #4edea3 !important;
-  border-color: rgba(78, 222, 163, 0.3) !important;
+  background-color: rgba(16, 185, 129, 0.1) !important;
+  color: #34d399 !important;
+  border-color: rgba(16, 185, 129, 0.2) !important;
 }
 .label-danger {
-  background-color: rgba(239, 68, 68, 0.15) !important;
+  background-color: rgba(239, 68, 68, 0.1) !important;
   color: #f87171 !important;
-  border-color: rgba(239, 68, 68, 0.3) !important;
+  border-color: rgba(239, 68, 68, 0.2) !important;
 }
 .label-info {
-  background-color: rgba(75, 142, 255, 0.15) !important;
-  color: #adc6ff !important;
-  border-color: rgba(75, 142, 255, 0.3) !important;
+  background-color: rgba(99, 102, 241, 0.1) !important;
+  color: #818cf8 !important;
+  border-color: rgba(99, 102, 241, 0.2) !important;
 }
 .label-warning {
-  background-color: rgba(245, 158, 11, 0.15) !important;
+  background-color: rgba(245, 158, 11, 0.1) !important;
   color: #fbbf24 !important;
-  border-color: rgba(245, 158, 11, 0.3) !important;
+  border-color: rgba(245, 158, 11, 0.2) !important;
 }
 
-/* Global table cell padding styling to prevent squishing */
-table td {
-  padding: 12px 16px !important;
-  vertical-align: middle;
-  color: #dae2fd;
+/* Helper Class Redefines */
+.text-muted {
+  color: #9ca3af !important;
 }
-table th {
-  padding: 12px 16px !important;
-  vertical-align: middle;
+.text-secondary {
+  color: #6b7280 !important;
+}
+.text-light {
+  color: #f9fafb !important;
+}
+.text-dark {
+  color: #070a13 !important;
+}
+.bg-light {
+  background-color: #0b0f19 !important;
+}
+
+/* Modal Redesign Overlay and Frames */
+div[id^="modal-"] {
+  backdrop-filter: blur(6px);
+  background-color: rgba(3, 4, 8, 0.7) !important;
+  transition: all 0.3s ease;
+}
+div[id^="modal-"] > div {
+  background-color: #0b0f19 !important;
+  border: 1px solid #1f2937 !important;
+  border-radius: 16px !important;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5) !important;
 }
 
 /* Light mode overrides */
-html:not(.dark) table td {
-  color: #0b1326 !important;
-}
 html:not(.dark) body {
-  color: #0b1326 !important;
+  background-color: #f9fafb !important;
+  color: #070a13 !important;
+}
+html:not(.dark) table th {
+  background-color: #f3f4f6 !important;
+  border-bottom: 1px solid #d1d5db !important;
+}
+html:not(.dark) table td {
+  color: #1f2937 !important;
+  border-bottom: 1px solid #e5e7eb !important;
+}
+html:not(.dark) .cyber-card {
+  background-color: #ffffff !important;
+  border-color: #e5e7eb !important;
+}
+html:not(.dark) input, html:not(.dark) select, html:not(.dark) textarea {
+  background-color: #ffffff !important;
+  border-color: #d1d5db !important;
+  color: #070a13 !important;
 }
