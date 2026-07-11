@@ -8,6 +8,8 @@ import { initDb, query } from './db.js';
 import routes, { pushZoneToSingleNode } from './routes.js';
 import { startNotifyListener } from './notify_listener.js';
 
+import { isLicenseValid, licenseError, licenseDetails, licenseMiddleware, checkLicense } from './license.js';
+
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
 const PORT = process.env.PORT || 5380;
@@ -30,12 +32,43 @@ app.use((req, res, next) => {
 // Serve static dashboard files
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Public License API Endpoints
+app.get('/api/v1/public/license', (req, res) => {
+  res.json({
+    valid: isLicenseValid,
+    error: licenseError,
+    details: licenseDetails
+  });
+});
+
+app.post('/api/v1/public/license/update', (req, res) => {
+  const { license_key } = req.body;
+  if (!license_key) {
+    return res.status(400).json({ error: 'License key is required' });
+  }
+  try {
+    fs.writeFileSync(path.join(__dirname, 'license.key'), license_key.trim(), 'utf8');
+    checkLicense();
+    setTimeout(() => {
+      res.json({
+        success: isLicenseValid,
+        error: licenseError
+      });
+    }, 800);
+  } catch (err) {
+    res.status(500).json({ error: `Failed to save license key: ${err.message}` });
+  }
+});
+
 // API Routes
-app.use('/api/v1', routes);
+app.use('/api/v1', licenseMiddleware, routes);
 
 // Fallback to SPA for any UI route
 app.get('*', (req, res, next) => {
   if (req.path.startsWith('/api')) return next();
+  if (!isLicenseValid) {
+    return res.sendFile(path.join(__dirname, 'public', 'license-warning.html'));
+  }
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 

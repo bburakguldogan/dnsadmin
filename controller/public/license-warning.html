@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>DNSadmin | License Required</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+  <style>
+    * {
+      font-family: 'Outfit', sans-serif;
+    }
+    body {
+      background-color: #070a13;
+      color: #f9fafb;
+    }
+    .cyber-card {
+      border: 1px solid #1f2937;
+      background-color: #0b0f19;
+      border-radius: 16px;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .cyber-card:hover {
+      border-color: rgba(239, 68, 68, 0.3);
+      box-shadow: 0 12px 30px -10px rgba(239, 68, 68, 0.15);
+    }
+  </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-6 relative overflow-hidden">
+  <!-- Decorative background glow -->
+  <div class="absolute inset-0 z-0 opacity-20 pointer-events-none">
+    <div class="absolute top-1/4 left-1/4 w-96 h-96 bg-red-500/10 rounded-full blur-[120px]"></div>
+    <div class="absolute bottom-1/4 right-1/4 w-96 h-96 bg-red-600/10 rounded-full blur-[120px]"></div>
+  </div>
+
+  <div class="max-w-md w-full z-10">
+    <!-- Logo branding -->
+    <div class="flex flex-col items-center mb-8">
+      <div class="w-16 h-16 bg-red-950/40 border border-red-500/30 rounded-2xl flex items-center justify-center text-red-400 mb-4 shadow-lg shadow-red-500/5">
+        <span class="material-symbols-outlined text-[36px]" style="font-variation-settings: 'FILL' 1;">gavel</span>
+      </div>
+      <h1 class="text-2xl font-bold tracking-tight">DNSadmin</h1>
+      <p class="text-gray-400 text-sm mt-1">License Verification Required</p>
+    </div>
+
+    <!-- Warning Card -->
+    <div class="cyber-card p-6 shadow-2xl">
+      <div class="flex items-center gap-3 text-red-400 mb-4">
+        <span class="material-symbols-outlined text-[28px]">warning</span>
+        <h2 class="text-lg font-semibold">License Activation Required</h2>
+      </div>
+
+      <div class="bg-red-950/20 border border-red-500/10 rounded-lg p-4 mb-6">
+        <p id="error-message" class="text-red-300 text-sm leading-relaxed">
+          Retrieving licensing status...
+        </p>
+      </div>
+
+      <!-- License Key input field -->
+      <div class="space-y-4">
+        <div>
+          <label class="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-2">Paste License Key</label>
+          <textarea id="license-key" rows="6" class="w-full bg-[#030408] border border-gray-800 rounded-lg px-4 py-3 text-sm text-gray-300 focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500 transition-all placeholder-gray-600" placeholder="Paste the content of your license.key here..."></textarea>
+        </div>
+
+        <button onclick="activateLicense()" class="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-3 px-4 rounded-lg shadow-lg hover:shadow-red-600/20 active:translate-y-0 -translate-y-[1px] transition-all flex items-center justify-center gap-2 cursor-pointer">
+          <span class="material-symbols-outlined text-[20px]">vpn_key</span>
+          Activate System
+        </button>
+      </div>
+    </div>
+
+    <div class="text-center mt-6">
+      <p class="text-gray-500 text-xs">
+        Need assistance? Please contact support at <span class="text-gray-400">support@guldogan.dev</span>
+      </p>
+    </div>
+  </div>
+
+  <script>
+    // Fetch initial status on load
+    async function loadStatus() {
+      try {
+        const response = await fetch('/api/v1/public/license');
+        const data = await response.json();
+        
+        const messageEl = document.getElementById('error-message');
+        if (data.valid) {
+          // If valid, reload page to access app
+          window.location.reload();
+        } else {
+          messageEl.textContent = data.error || 'A valid license is required to operate this server.';
+        }
+      } catch (err) {
+        document.getElementById('error-message').textContent = 'Failed to load license status from controller.';
+      }
+    }
+
+    async function activateLicense() {
+      const keyVal = document.getElementById('license-key').value.trim();
+      if (!keyVal) {
+        alert('Please paste a valid license key.');
+        return;
+      }
+
+      try {
+        const response = await fetch('/api/v1/public/license/update', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ license_key: keyVal })
+        });
+        
+        const data = await response.json();
+        if (data.success) {
+          alert('License activated successfully! Unlocking system...');
+          window.location.href = '/';
+        } else {
+          alert('Activation failed: ' + (data.error || 'Invalid license key.'));
+        }
+      } catch (err) {
+        alert('Communication error: ' + err.message);
+      }
+    }
+
+    loadStatus();
+  </script>
+</body>
+</html>
