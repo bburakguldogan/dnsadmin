@@ -122,5 +122,91 @@ The controller and agent daemons read configuration overrides from the following
 
 ---
 
+## Licensing & Code Obfuscation (Lisanslama ve Kod Şifreleme)
+
+To protect the intellectual property of DNSAdmin, a hybrid licensing system is integrated. The licensing logic uses Node.js Express middleware calling an obfuscated local PHP verification script, which queries a central licensing server database.
+
+### 1. Central Licensing Server Setup (Yönetici Lisans Sunucusu)
+Upload the files in `licensing_server/` to your central hosting (e.g., `https://licensing.yourcompany.com`):
+*   `index.php`: The Admin Web Control Panel. Configure your secure admin password via the `$adminPassword` variable at the top.
+*   `check.php`: The client verification endpoint. Connects to `database.db` (SQLite) automatically.
+*   `api.php`: The WHMCS-compatible provisioning API. Authenticates requests via the `$apiKey` defined at the top.
+
+#### Administrative CLI Commands (`admin.php`):
+Run these commands on your licensing server to manage keys programmatically:
+```bash
+# Add or update a license (IP and expiry date)
+php admin.php add 185.123.45.67 2027-12-31
+
+# Suspend a license
+php admin.php suspend 185.123.45.67
+
+# Reactivate a suspended license
+php admin.php resume 185.123.45.67
+
+# Delete a license
+php admin.php delete 185.123.45.67
+
+# List all licenses
+php admin.php list
+```
+
+#### WHMCS API Integration:
+Provide the API URL and your secure `$apiKey` in your provisioning modules:
+*   **Create/Update:** `https://licensedomain.com/api.php?api_key=KEY&action=create&ip=IP&expires=YYYY-MM-DD`
+*   **Suspend:** `https://licensedomain.com/api.php?api_key=KEY&action=suspend&ip=IP`
+*   **Unsuspend:** `https://licensedomain.com/api.php?api_key=KEY&action=unsuspend&ip=IP`
+*   **Terminate:** `https://licensedomain.com/api.php?api_key=KEY&action=terminate&ip=IP`
+*   **Status:** `https://licensedomain.com/api.php?api_key=KEY&action=status&ip=IP`
+
+---
+
+### 2. Client Code Obfuscation (İstemci Kod Şifreleme)
+To prevent customers from reverse-engineering the licensing logic or modifying the Node.js middleware:
+
+#### A. Obfuscating the PHP License Verifier
+The client-side verifier script `license_check.src.php` contains the shared cryptographical secret key and queries your central license server URL. To encrypt this file:
+```bash
+# Squeezes code, obfuscates variables, base64 encodes and eval-packs license_check.php:
+node controller/obfuscator.js
+```
+
+#### B. Obfuscating the Node.js Controller Backend (Production Build)
+To compile and encrypt the entire Node.js Express server:
+```bash
+# Creates a 'dist/' folder containing fully obfuscated production JS files:
+node controller/build.js
+```
+*   **Important:** Müşterilerinize panel dağıtımı yaparken, orijinal kodlar yerine yalnızca **`controller/dist/`** klasörünün içindekileri teslim edeceksiniz.
+
+---
+
+## Sürüm Notları ve Güncellemeler (Changelog & Update Guide)
+
+Bu bölüm, sisteme eklenen yeni özellikleri ve bunların sunucularınızda nasıl çalıştırılacağını listeler.
+
+### [Sürüm 1.1.0] - 2026-07-11
+#### Eklenen Özellikler:
+*   **Kişiselleştirilmiş Lisans Portalı:** SQLite veritabanı altyapılı, şık koyu temalı web yönetim paneli eklendi (`licensing_server/index.php`).
+*   **WHMCS Entegrasyon API'si:** Dış faturalandırma ve otomasyon sistemlerine uyumlu JSON API entegrasyonu sağlandı (`licensing_server/api.php`).
+*   **Node.js & PHP Kod Şifreleyicileri:** Açık kaynak koruması sağlayan otomatik obfuscator build araçları eklendi (`build.js`, `obfuscator.js`).
+*   **Yeni Cyber Dark Arayüzü:** Vercel-style, koyu slate temalı premium görsel tasarım uygulandı.
+
+#### Kurulum ve Çalıştırma Notları:
+1.  **Güncellemeleri Çekin:**
+    ```bash
+    git pull
+    ```
+2.  **Müşteri Korumalı Paketi Derleyin (Build):**
+    ```bash
+    node controller/build.js
+    ```
+3.  **Obfuscated Sunucuyu Başlatın:**
+    ```bash
+    node controller/dist/server.js
+    ```
+
+---
+
 ## License
 Private repository properties. Created and maintained by `@bburakguldogan`.
